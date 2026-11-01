@@ -115,8 +115,18 @@
   gap: var(--space-4);
   margin-bottom: var(--space-8);
 }
+.org-heading > div {
+  flex: 1;
+  min-width: 0;
+}
 .org-heading h1 {
   margin: 0 0 6px;
+  overflow-wrap: anywhere;
+}
+/* Its name, renamed in place, shows whole: a long one wraps instead of being cut. */
+.org-heading .chat-title {
+  overflow: visible;
+  white-space: normal;
   overflow-wrap: anywhere;
 }
 .org-heading p {
