@@ -7,10 +7,14 @@
   import SettingsTabs from '#lib/settings/SettingsTabs.svelte';
   import { settingsSections } from '#lib/settings/sections.ts';
   import { useWorkspace } from '#lib/workspace.svelte.ts';
+  import { useAuthentication } from '#lib/auth/auth.svelte.ts';
   import '@crewstead/ui/settings-tabs.css';
   const workspace = useWorkspace();
+  const auth = useAuthentication();
   // Tabs depend on which modules the hub runs, so wait for the catalog before choosing one.
-  const tabs = $derived(workspace.catalog ? settingsSections(workspace.catalog.modules) : []);
+  const tabs = $derived(
+    workspace.catalog ? settingsSections(workspace.catalog.modules, auth.user?.owner) : [],
+  );
   const active = $derived(
     tabs.find((tab) => tab.id === page.url.searchParams.get('tab'))?.id ?? 'models',
   );

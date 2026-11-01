@@ -14,8 +14,20 @@ const core: SettingsTab[] = [
   { id: 'accounts', label: 'Accounts', order: 40, load: () => import('./AccountSettings.svelte') },
 ];
 
-export function settingsSections(modules: ModuleInfo[] | undefined): SettingsTab[] {
-  return [...core, ...activeModules(modules).flatMap((module) => module.tabs ?? [])].sort(
-    (a, b) => a.order - b.order,
-  );
+// Only the hub's owner manages its accounts.
+const owners: SettingsTab[] = [
+  {
+    id: 'hub-accounts',
+    label: 'Hub accounts',
+    order: 35,
+    load: () => import('./HubAccounts.svelte'),
+  },
+];
+
+export function settingsSections(modules: ModuleInfo[] | undefined, owner = false): SettingsTab[] {
+  return [
+    ...core,
+    ...(owner ? owners : []),
+    ...activeModules(modules).flatMap((module) => module.tabs ?? []),
+  ].sort((a, b) => a.order - b.order);
 }

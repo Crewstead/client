@@ -24,6 +24,8 @@ interface User {
   login: string;
   /** The hub's owner asked this account for a new password; nothing else opens until then. */
   mustChangePassword?: boolean;
+  /** The hub's owner (its first account), who manages the other accounts. */
+  owner?: boolean;
 }
 interface Profile {
   user: User;

@@ -1,0 +1,29 @@
+/* Settings → Hub accounts: the one-time password just issued. */
+.issued-password {
+  margin-bottom: 12px;
+  padding: 14px 16px;
+  border-color: var(--amber);
+}
+.issued-password p {
+  margin: 0 0 10px;
+  font-size: var(--text-sm);
+}
+.issued-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.issued-line code {
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--bg);
+  font-size: var(--text-base);
+  user-select: all;
+}
+.issued-line .button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
