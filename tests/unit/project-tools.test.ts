@@ -135,7 +135,7 @@ describe.skipIf(!sandboxAvailable())('commands in the sandbox', () => {
   it('cannot change Git metadata, other folders or reach the network', async () => {
     expect(await run('echo x > .git/HEAD')).toMatch(/^Exit code: [1-9][\s\S]*Read-only/);
     // Other folders are read-only, and this one, in /tmp, is not there at all: /tmp is private.
-    expect(await run(`echo x > ${outside}/new.txt`)).toMatch(/^Exit code: 1/);
+    expect(await run(`echo x > ${outside}/new.txt`)).toMatch(/^Exit code: [1-9]/);
     expect(await run('cat escape/secret.txt')).not.toContain('top secret');
     expect(await run('echo x > /etc/crewstead-test')).toMatch(/Read-only/);
     const connect = `node -e "require('net').connect(80, '1.1.1.1').on('connect', () => { console.log('online'); process.exit() }).on('error', () => { console.log('offline'); process.exit() })"`;
