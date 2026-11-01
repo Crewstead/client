@@ -1,0 +1,214 @@
+/* Personal and workspace models grouped by connected provider, and the connect dialog. */
+.provider-group + .provider-group {
+  border-top: 1px solid var(--line-subtle);
+}
+.provider-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 12px var(--space-4);
+  background: var(--surface-raised);
+  font-size: var(--text-sm);
+}
+.provider-groups {
+  overflow: hidden;
+}
+.provider-group > ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.provider-group > ul > li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 44px;
+  padding: 8px var(--space-4) 8px 58px;
+  border-top: 1px solid var(--line-subtle);
+  font-size: var(--text-sm);
+}
+.provider-group .row-name {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.provider-empty {
+  color: var(--muted);
+}
+.provider-empty a,
+.manage-link {
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.manage-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  text-decoration: none;
+  padding: 4px 6px;
+  border-radius: 6px;
+}
+.manage-link:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+.dialog-content.wide-dialog {
+  width: min(560px, calc(100vw - 32px));
+  /* Let the provider list hang over the dialog edge instead of scrolling the whole dialog. */
+  overflow: visible;
+}
+.wide-dialog .option-picker.wide .option-list {
+  max-height: min(460px, 60dvh);
+}
+.wide-dialog .option-list label {
+  padding: 6px 10px;
+}
+.dialog-fields {
+  margin-top: var(--space-4);
+}
+.choose-search {
+  width: 100%;
+  min-height: 36px;
+  margin-top: var(--space-4);
+  padding: 6px 10px;
+}
+.choose-list {
+  list-style: none;
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  max-height: min(340px, 45dvh);
+  overflow-y: auto;
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--radius);
+}
+.choose-list > li + li {
+  border-top: 1px solid var(--line-subtle);
+}
+.choose-list > li.provider-empty {
+  padding: var(--space-3);
+  font-size: var(--text-sm);
+}
+.choose-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 10px var(--space-3);
+  cursor: pointer;
+  font-size: var(--text-sm);
+}
+.choose-row:hover {
+  background: var(--surface-hover);
+}
+.choose-row input {
+  width: 16px;
+  height: 16px;
+  min-height: 16px;
+  accent-color: var(--accent);
+  flex-shrink: 0;
+}
+.choose-prices {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-3) var(--space-3) 41px;
+  font-size: var(--text-xs);
+  color: var(--muted);
+}
+.choose-prices input {
+  width: 84px;
+  min-height: 30px;
+  padding: 4px 8px;
+}
+@media (max-width: 560px) {
+  .provider-head {
+    flex-wrap: wrap;
+  }
+  /* Name and Manage share the first line; spend gets its own line beneath. */
+  .provider-head .manage-link {
+    order: 2;
+  }
+  .provider-head > .row-meta {
+    order: 3;
+    flex-basis: 100%;
+    justify-content: flex-start;
+    padding-left: 42px;
+  }
+  .provider-group > ul > li {
+    padding-left: var(--space-4);
+  }
+}
+.dialog-actions .dialog-switch {
+  margin-right: auto;
+}
+.connected-note {
+  margin: 0 0 var(--space-6);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  font-size: var(--text-sm);
+}
+.key-usage > .muted-text {
+  margin: 0;
+}
+.connect-note {
+  padding: var(--space-3);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--muted);
+}
+.status-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+.status-dot.online {
+  background: #4ade80;
+}
+/* Working, with something to know (some search engines refusing, or still starting). */
+.status-dot.warning {
+  background: #fbbf24;
+}
+.status-dot.failed {
+  background: var(--danger);
+}
+.connect-steps {
+  display: grid;
+  gap: var(--space-4);
+  margin: var(--space-4) 0;
+  padding-left: 20px;
+  font-size: var(--text-sm);
+}
+.connect-steps li {
+  display: grid;
+  gap: 8px;
+}
+.copy-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 6px 6px 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-raised);
+}
+.copy-line code {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  white-space: nowrap;
+  font-size: 12.5px;
+}
+/* Personal models: the list hides when nothing is in it, and the note shows only then. */
+.provider-groups:not(:has(.provider-group)) {
+  display: none;
+}
+.provider-groups:has(.provider-group) + .empty-note {
+  display: none;
+}

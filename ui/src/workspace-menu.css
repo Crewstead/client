@@ -1,0 +1,114 @@
+.workspace-trigger {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 40px;
+  padding: 0 8px 0 var(--sidebar-inset);
+  margin-bottom: 8px;
+  border-radius: 8px;
+  text-align: left;
+  color: var(--text);
+}
+.workspace-trigger:hover,
+.workspace-trigger[aria-expanded='true'] {
+  background: #ffffff08;
+}
+.workspace-trigger > svg {
+  color: var(--faint);
+  flex-shrink: 0;
+}
+.workspace-mark {
+  display: grid;
+  place-items: center;
+  flex: 0 0 25px;
+  width: 25px;
+  height: 25px;
+  border-radius: 7px;
+  background: var(--surface);
+  color: #d0d2dd;
+  font-size: 12px;
+  font-weight: 600;
+}
+.workspace-mark.small {
+  flex-basis: 22px;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  font-size: 11px;
+  background: #30323c;
+}
+.workspace-mark.ghost {
+  background: transparent;
+  border: 1px dashed var(--line);
+  color: var(--muted);
+}
+.workspace-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.35px;
+}
+.workspace-popover {
+  position: fixed;
+  right: auto;
+  bottom: auto;
+  margin: 0;
+  max-width: calc(100vw - 16px);
+  padding: 5px;
+  background: #25272f;
+  color: var(--text);
+  border: 1px solid #3b3e49;
+  border-radius: 11px;
+  box-shadow: 0 12px 32px #0006;
+}
+.workspace-heading {
+  margin: 0;
+  padding: 6px 10px 4px;
+  font-size: var(--text-xs);
+  color: var(--muted);
+}
+.workspace-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 38px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: var(--text-sm);
+  color: var(--text);
+  text-align: left;
+}
+.workspace-option:hover {
+  background: #ffffff08;
+}
+.workspace-option > svg {
+  color: var(--text);
+  flex-shrink: 0;
+}
+.workspace-option-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.workspace-option-text > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.workspace-option-text small {
+  color: var(--faint);
+  font-size: var(--text-xs);
+}
+.workspace-divider {
+  height: 1px;
+  background: var(--line);
+  margin: 4px;
+}

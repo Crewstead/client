@@ -1,0 +1,80 @@
+.saved-accounts {
+  margin-top: 24px;
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+}
+.saved-accounts h2 {
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--muted);
+  margin: 0 0 8px;
+}
+.saved-accounts ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.saved-accounts li {
+  display: flex;
+  align-items: center;
+  border-radius: 6px;
+}
+.saved-accounts li:hover {
+  background: var(--surface-hover);
+}
+.saved-account {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+  padding: 8px;
+  text-align: left;
+}
+.saved-account-avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--surface-hover);
+  font-size: var(--text-xs);
+}
+.saved-account-name {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.saved-account-name strong {
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+.saved-account-name > span {
+  font-size: var(--text-xs);
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.forget-account {
+  display: grid;
+  place-items: center;
+  flex: 0 0 28px;
+  height: 28px;
+  margin-right: 4px;
+  border-radius: 5px;
+  color: var(--muted);
+}
+.forget-account:hover {
+  background: var(--line);
+  color: var(--text);
+}
+.account-popover .saved-accounts {
+  margin: 0 4px;
+  padding-top: 10px;
+}
+.account-popover .saved-accounts h2 {
+  padding: 0 6px;
+}

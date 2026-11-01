@@ -1,0 +1,191 @@
+/* Files in chats: the composer's tray, pictures and files in messages, and the picture viewer. */
+.attachment-tray {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 12px 12px 0;
+  list-style: none;
+}
+.attachment-chip {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 240px;
+  min-height: 48px;
+  padding: 6px 30px 6px 6px;
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  text-align: left;
+}
+.attachment-chip > img,
+.attachment-icon {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  object-fit: cover;
+}
+.attachment-icon {
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  background: var(--surface-hover);
+}
+.attachment-chip[data-state='uploading'] > img {
+  opacity: 0.55;
+}
+.attachment-chip[data-state='failed'] {
+  border-color: color-mix(in srgb, var(--danger) 45%, var(--line));
+}
+.attachment-text {
+  display: grid;
+  min-width: 0;
+}
+.attachment-name {
+  overflow: hidden;
+  font-size: var(--text-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.attachment-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.attachment-chip[data-state='failed'] .attachment-note {
+  color: var(--danger);
+}
+.attachment-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  color: var(--muted);
+  border-radius: 50%;
+}
+.attachment-remove:hover {
+  color: var(--text);
+  background: var(--surface-hover);
+}
+.spin {
+  animation: attachment-spin 0.9s linear infinite;
+}
+@keyframes attachment-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.composer.dragging {
+  border-color: var(--accent);
+  border-style: dashed;
+}
+.composer-attach {
+  width: 28px;
+  height: 28px;
+  margin-left: -6px;
+}
+
+/* In messages and under tool lines. */
+.attachments {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.attachments[data-align='end'] {
+  align-items: flex-end;
+  max-width: 85%;
+}
+.attachment-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.attachments[data-align='end'] .attachment-images {
+  justify-content: flex-end;
+}
+.attachment-image {
+  display: block;
+  padding: 0;
+  overflow: hidden;
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  cursor: zoom-in;
+}
+.attachment-image img,
+.attachment-placeholder {
+  display: block;
+  min-width: 64px;
+  min-height: 64px;
+  max-width: min(320px, 100%);
+  max-height: 220px;
+  object-fit: contain;
+  background: var(--surface);
+}
+.attachment-placeholder {
+  width: 160px;
+  height: 100px;
+}
+.attachment-placeholder.missing {
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+.attachment-chip.file {
+  padding-right: 12px;
+  cursor: pointer;
+}
+.attachment-chip.file:hover {
+  background: var(--surface-hover);
+}
+.tool-line-files {
+  margin: 2px 0 12px 21px;
+}
+.tool-line-files .attachment-image img {
+  max-width: min(480px, 100%);
+  max-height: 300px;
+}
+
+.image-viewer {
+  max-width: 94vw;
+  max-height: 94vh;
+  padding: 0;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.image-viewer::backdrop {
+  background: rgb(0 0 0 / 72%);
+}
+.image-viewer header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 6px 6px 14px;
+  border-bottom: 1px solid var(--line-subtle);
+}
+.image-viewer-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--text-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.image-viewer img {
+  display: block;
+  max-width: calc(94vw - 2px);
+  max-height: calc(94vh - 48px);
+  object-fit: contain;
+}

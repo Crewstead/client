@@ -1,0 +1,162 @@
+/* Scheduled tasks: a compact list (a chat's side panel, Settings) and the dialog that sets one up. */
+.task-list {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.task-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 4px 0;
+}
+.task-row[data-enabled='false'] .task-title {
+  color: var(--muted);
+}
+.task-text {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  flex: 1;
+  gap: 2px;
+  min-width: 0;
+}
+/* One fixed line, so pausing (the Paused label) never changes the row's height. */
+.task-title {
+  height: 20px;
+  line-height: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+.task-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.task-title .pill {
+  flex-shrink: 0;
+  padding: 0 6px;
+  font-size: 10.5px;
+  font-weight: 500;
+  line-height: 16px;
+}
+/* One line, whatever the task's state, so pausing or resuming never changes a row's height. */
+.task-meta {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 2px 14px;
+  color: var(--muted);
+  font-size: var(--text-xs);
+  line-height: 1.45;
+}
+.task-schedule,
+.task-chat {
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+.task-chat {
+  color: var(--muted);
+  text-decoration: none;
+}
+.task-chat:hover {
+  color: var(--text);
+  text-decoration: underline;
+}
+.task-prompt {
+  overflow: hidden;
+  color: var(--faint);
+  font-size: var(--text-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.task-text small.task-problem {
+  color: var(--amber);
+  font-size: var(--text-xs);
+}
+/* In Settings: rows of the shared bordered card. */
+.task-cards {
+  gap: 0;
+}
+.task-cards .task-row {
+  gap: 8px;
+  padding: 12px var(--space-4);
+}
+.task-cards .task-row + .task-row {
+  border-top: 1px solid var(--line-subtle);
+}
+.task-cards .task-text {
+  gap: 4px;
+  margin-right: 12px;
+}
+.task-row .icon-button {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+}
+
+.task-dialog {
+  width: min(520px, calc(100vw - 32px));
+}
+.task-dialog select {
+  width: 100%;
+  color: var(--text);
+}
+.task-when {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0 12px;
+}
+.task-days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.task-day {
+  min-width: 44px;
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-size: var(--text-xs);
+  cursor: pointer;
+}
+.task-day[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--text);
+}
+.task-zone {
+  margin: 0 0 12px;
+  color: var(--faint);
+  font-size: var(--text-xs);
+}
+/* The narrow side panel: the schedule on one line, without its icon, so rows keep their height. */
+.task-list:not(.task-cards) .task-schedule svg {
+  display: none;
+}
+
+.task-schedule-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.task-cards .task-schedule {
+  flex-shrink: 0;
+}
+.task-chat-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

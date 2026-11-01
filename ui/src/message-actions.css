@@ -1,0 +1,106 @@
+/* Actions under prompts and answers: copy, edit, retry, versions, fork. Quiet until hovered. */
+.message-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: -4px;
+}
+.message-action-buttons {
+  display: inline-flex;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+.message-action-buttons .icon-button,
+.version-switch .icon-button {
+  width: 28px;
+  height: 28px;
+}
+.message-action-buttons .icon-button:disabled,
+.version-switch .icon-button:disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+.user-message:hover .message-action-buttons,
+.message-actions:focus-within .message-action-buttons,
+.turn-footer:hover .message-action-buttons,
+.turn-footer:focus-within .message-action-buttons,
+.turn-footer.latest .message-action-buttons {
+  opacity: 1;
+}
+/* Where nothing hovers (phones), the actions always show. */
+@media (hover: none) {
+  .message-action-buttons {
+    opacity: 1;
+  }
+}
+.version-switch {
+  display: inline-flex;
+  align-items: center;
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.version-switch > span {
+  min-width: 34px;
+  text-align: center;
+}
+.turn-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+  margin: -16px 0 24px;
+}
+.turn-footer .worked {
+  margin: 0;
+}
+/* Editing a prompt: the bubble becomes a box with its own buttons. */
+.prompt-editor {
+  display: grid;
+  gap: 10px;
+  width: min(100%, 640px);
+  padding: 12px 14px;
+  background: var(--surface-raised);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+.prompt-editor textarea {
+  width: 100%;
+  min-height: 24px;
+  padding: 0;
+  color: var(--text);
+  font-size: var(--text-reading);
+  line-height: 1.6;
+  background: transparent;
+  border: 0;
+  outline: none;
+  resize: none;
+}
+.prompt-editor-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+/* A message opened from search: outlined for a moment where it is. */
+.found-item {
+  border-radius: 12px;
+  outline: 2px solid transparent;
+  outline-offset: 4px;
+  animation: found-item 2.4s ease-out;
+}
+.user-message .found-item {
+  outline-offset: 2px;
+}
+@keyframes found-item {
+  0%,
+  50% {
+    outline-color: var(--amber);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .found-item {
+    animation: none;
+    outline-color: var(--amber);
+  }
+}

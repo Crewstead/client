@@ -1,0 +1,97 @@
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 13px;
+  margin-bottom: 28px;
+}
+.settings-intro {
+  color: var(--muted);
+  font-size: 14px;
+  margin: 12px 0 0;
+}
+.settings-section {
+  padding: 24px 0;
+  border-top: 1px solid var(--line-subtle);
+}
+.settings-section h2 {
+  font-size: 14px;
+  margin: 0 0 24px;
+  font-weight: 600;
+}
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.setting-row strong {
+  font-weight: 500;
+  font-size: 14px;
+}
+.setting-row p {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 6px 0 0;
+}
+.setting-row input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  min-height: 18px;
+  flex-shrink: 0;
+  accent-color: var(--accent);
+}
+.model-list {
+  list-style: none;
+  padding: 0;
+  margin: 24px 0 0;
+}
+.model-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+  font-size: 13px;
+}
+.model-list li span:last-child {
+  color: var(--muted);
+}
+.settings-section > .muted-text {
+  margin-top: 20px;
+}
+
+.archived-chats ul {
+  list-style: none;
+  padding: 12px 0 0;
+  margin: 0;
+}
+.archived-chats li {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 6px 0;
+}
+.archived-chats li a {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+.archived-chats .section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.archived-chats .section-heading h2 {
+  margin: 0;
+}
+.archived-chats li .icon-button + .icon-button {
+  margin-left: -12px;
+}
+.icon-button.danger-icon:hover:not(:disabled) {
+  color: var(--danger);
+}

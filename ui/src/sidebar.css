@@ -1,0 +1,257 @@
+.sidebar {
+  --sidebar-inset: 10px;
+  --sidebar-row-height: 36px;
+  /* Never so wide that the page beside it (and the details panel) leave the conversation under 440px. */
+  --sidebar-width: clamp(
+    200px,
+    var(--sidebar-size, 256px),
+    calc(100vw - 440px - var(--panel-room, 0px))
+  );
+  width: var(--sidebar-width);
+  flex-shrink: 0;
+  background: var(--sidebar);
+  border-right: 1px solid var(--line-subtle);
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  position: sticky;
+  top: 0;
+  /* Above the page beside it, so its resize handle's outer half still takes the pointer. */
+  z-index: 3;
+  height: 100dvh;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 40px;
+  padding: 0 var(--sidebar-inset);
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.35px;
+}
+.brand-symbol {
+  display: grid;
+  place-items: center;
+  width: 25px;
+  height: 25px;
+  border-radius: 7px;
+  background: var(--surface);
+  color: #d0d2dd;
+}
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 34px;
+  margin: 0 0 12px;
+  padding: 0 var(--sidebar-inset);
+  color: var(--nav-text);
+  border-radius: 7px;
+  font-size: var(--text-sm);
+}
+.sidebar-link:hover,
+.sidebar-link.active {
+  color: var(--text);
+  background: var(--surface);
+}
+.sessions-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 32px;
+  padding: 0 4px 0 var(--sidebar-inset);
+  margin-bottom: 6px;
+}
+.sessions-heading h2 {
+  margin: 0;
+  font-size: var(--text-xs);
+  line-height: 20px;
+  font-weight: 500;
+  letter-spacing: 0.05px;
+  color: var(--muted);
+}
+.new-session {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  color: var(--muted);
+}
+.new-session:hover {
+  background: var(--surface);
+  color: var(--text);
+}
+.sidebar-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 2px 8px;
+  padding: 0 8px;
+  color: var(--faint);
+  border: 1px solid var(--line-subtle);
+  border-radius: 7px;
+}
+.sidebar-search:focus-within {
+  border-color: var(--line);
+}
+.sidebar-search input {
+  min-width: 0;
+  width: 100%;
+  min-height: 32px;
+  border: 0;
+  padding: 6px 0;
+  background: transparent;
+  font-size: var(--text-xs);
+  outline: none;
+}
+.sidebar-search input::placeholder {
+  color: var(--faint);
+}
+.session-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+.sidebar-footer {
+  margin-top: 12px;
+  padding-top: 10px;
+}
+.mobile-header,
+.nav-scrim {
+  display: none;
+}
+@media (max-width: 700px) {
+  .mobile-header {
+    display: flex;
+    height: 52px;
+    align-items: center;
+    gap: 12px;
+    padding: 0 12px;
+    border-bottom: 1px solid var(--line-subtle);
+    font-size: var(--text-sm);
+    font-weight: 500;
+  }
+  .sidebar {
+    display: none;
+    position: fixed;
+    z-index: 21;
+    --sidebar-width: 272px;
+    left: 0;
+  }
+  .sidebar.open {
+    display: flex;
+  }
+  .nav-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: #0009;
+    z-index: 20;
+    width: 100%;
+    height: 100%;
+  }
+}
+/* The chat tree: computers as captions, places as rows that fold, chats indented under a guide line. */
+.computer-chats {
+  margin-bottom: 6px;
+}
+.computer-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 10px 0 2px;
+  padding: 0 10px;
+  color: var(--faint);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+.place-group {
+  border-radius: 8px;
+  transition:
+    background 0.12s,
+    box-shadow 0.12s;
+}
+.place-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 30px;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: var(--text-sm);
+  text-align: left;
+  cursor: pointer;
+}
+.place-head:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+.place-head .place-chevron {
+  flex: none;
+  color: var(--faint);
+  transition: transform 0.12s;
+}
+.place-group.empty .place-chevron {
+  visibility: hidden;
+}
+.place-head[aria-expanded='true'] .place-chevron {
+  transform: rotate(90deg);
+}
+.place-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.place-count {
+  color: var(--faint);
+  font-size: var(--text-xs);
+}
+.place-chats {
+  margin: 0 0 4px 14px;
+  padding-left: 6px;
+  border-left: 1px solid var(--line);
+}
+.cloud-chats {
+  border-radius: 8px;
+}
+/* Where a dragged chat can go, and the place it is over. */
+.session-list.dragging .place-group,
+.session-list.dragging .cloud-chats {
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.session-list.dragging .cloud-chats.drop-over,
+.session-list.dragging .place-group.drop-over {
+  background: #8fb6ff14;
+  box-shadow: inset 0 0 0 1px #8fb6ff88;
+}
+.session-list.dragging .place-group.empty {
+  opacity: 0.85;
+}
+.sidebar-search-button {
+  width: 100%;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--text-sm);
+  text-align: left;
+  cursor: pointer;
+}
+.sidebar-search-button kbd {
+  margin-left: auto;
+  color: var(--faint);
+  font-family: inherit;
+  font-size: 11px;
+}

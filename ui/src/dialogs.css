@@ -1,0 +1,33 @@
+.dialog-content::backdrop {
+  background: #050709b8;
+}
+.dialog-content {
+  margin: 0;
+  color: var(--text);
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--surface-raised);
+  border: 1px solid #46515e;
+  border-radius: 12px;
+  padding: 28px;
+  width: min(440px, calc(100vw - 40px));
+  z-index: 31;
+}
+.dialog-title {
+  margin: 0 0 14px;
+  font-size: 18px;
+  font-weight: 550;
+}
+.dialog-description {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+.dialog-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 24px;
+}

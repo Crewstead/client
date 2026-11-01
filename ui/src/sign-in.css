@@ -1,0 +1,44 @@
+.sign-in-page {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+.sign-in-content {
+  width: min(100%, 340px);
+}
+.credentials-form {
+  display: flex;
+  flex-direction: column;
+}
+.sign-in-brand {
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 40px;
+}
+.sign-in-content h1 {
+  font-size: 24px;
+  font-weight: 500;
+  margin-bottom: 28px;
+}
+.credentials-form label {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.credentials-form input {
+  width: 100%;
+  background: var(--surface);
+  margin-bottom: 20px;
+}
+.credentials-form .button {
+  margin-top: 8px;
+  min-height: 42px;
+}
+.sign-in-error {
+  color: var(--danger);
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 0 0 12px;
+}

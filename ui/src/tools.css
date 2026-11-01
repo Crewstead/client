@@ -1,0 +1,332 @@
+.tool-row {
+  margin: 0 0 28px;
+}
+.tool-card {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 9px;
+  overflow: hidden;
+}
+.tool-card > header {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  padding: 12px 14px;
+  color: var(--muted);
+}
+.tool-card strong {
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 550;
+}
+.tool-status {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 12px;
+}
+/* Sentence case: only the first letter of a status is capital. */
+.tool-status::first-letter {
+  text-transform: uppercase;
+}
+.tool-card[data-status='pending'] .tool-status {
+  color: var(--amber);
+}
+.tool-card[data-status='failed'] .tool-status {
+  color: var(--danger);
+}
+.tool-body {
+  padding: 14px;
+}
+.tool-path {
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+.tool-path > span {
+  margin: 0 6px;
+  color: var(--faint);
+}
+.tool-body pre {
+  margin: 0;
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.7;
+  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.approval-footer {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--line);
+  padding: 12px 14px;
+}
+.approval-footer > span {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  color: var(--muted);
+  font-size: 12px;
+}
+.approval-footer > div {
+  display: flex;
+  gap: 8px;
+}
+.tool-result {
+  padding: 12px 14px;
+  color: var(--muted);
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+}
+/* A long result (e.g. a page snapshot written for the model) folded behind one line. */
+.tool-result.folded {
+  padding: 0;
+}
+.tool-result.folded > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  cursor: pointer;
+  list-style: none;
+}
+.tool-result.folded > summary::-webkit-details-marker {
+  display: none;
+}
+.tool-result.folded > summary > span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tool-result.folded > summary > small {
+  flex-shrink: 0;
+  color: var(--faint);
+  font-size: 11px;
+}
+.tool-result.folded[data-failed='true'] > summary > span {
+  color: var(--danger);
+}
+.tool-result.folded > summary:hover > small {
+  color: var(--text);
+}
+.tool-result.folded[open] .tool-line-chevron {
+  transform: rotate(90deg);
+}
+.tool-result.folded > .tool-output {
+  max-height: 360px;
+  margin: 0;
+  overflow: auto;
+  border-top: 1px solid var(--line-subtle);
+}
+@media (max-width: 700px) {
+  .tool-row {
+    margin-left: 0;
+  }
+  .approval-footer {
+    align-items: flex-end;
+    flex-direction: column;
+  }
+}
+.approval-footer .link-button {
+  margin-right: 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.approval-footer .link-button:hover:not(:disabled) {
+  color: var(--text);
+}
+.tool-review {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 0;
+  padding: 10px 14px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 12px;
+}
+.tool-review svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.tool-review[data-outcome='approved'] svg {
+  color: #4ade80;
+}
+.tool-review[data-outcome='declined'] svg {
+  color: var(--danger);
+}
+.tool-review[data-outcome='unavailable'] svg {
+  color: var(--amber);
+}
+.tool-file {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tool-output {
+  margin: 0;
+  max-height: 360px;
+  overflow: auto;
+  padding: 12px 14px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.tool-card > .diff-view {
+  border-bottom: 0;
+}
+/* Read-only tools: one quiet line that opens to show what the model saw. */
+.tool-row:has(> .tool-line) {
+  margin-bottom: 6px;
+}
+.tool-line > summary {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  max-width: 100%;
+  padding: 4px 2px;
+  color: var(--muted);
+  font-size: 13px;
+  list-style: none;
+  cursor: pointer;
+}
+/* Icons keep their size beside long text (addresses, paths). */
+.tool-line > summary > svg,
+.explored > summary > svg {
+  flex: none;
+}
+.tool-line > summary::-webkit-details-marker {
+  display: none;
+}
+.tool-line > summary:hover {
+  color: var(--text);
+}
+.tool-line-text {
+  min-width: 0;
+  overflow: hidden;
+  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tool-line[open] .tool-line-chevron {
+  transform: rotate(90deg);
+}
+.tool-line > .tool-output {
+  margin: 4px 0 12px 21px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.tool-line[data-status='failed'] .tool-status {
+  color: var(--danger);
+}
+/* Several reads in a row, folded into one "Explored" line. */
+.tool-row:has(> .explored) {
+  margin-bottom: 6px;
+}
+.explored > summary {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 4px 2px;
+  color: var(--muted);
+  font-size: 13px;
+  list-style: none;
+  cursor: pointer;
+}
+.explored > summary::-webkit-details-marker {
+  display: none;
+}
+.explored > summary:hover {
+  color: var(--text);
+}
+.explored[open] > summary .tool-line-chevron {
+  transform: rotate(90deg);
+}
+.explored-detail {
+  color: var(--faint);
+}
+.explored-items {
+  margin: 2px 0 8px 9px;
+  padding-left: 12px;
+  border-left: 1px solid var(--line);
+}
+/* A finished reply's changes, file by file. */
+.changed-files {
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface);
+  font-size: 12px;
+}
+.changed-files > header {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 14px;
+  color: var(--text);
+  font-weight: 550;
+}
+.changed-files ul {
+  margin: 0;
+  padding: 0 0 6px;
+  list-style: none;
+}
+.changed-files li {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 4px 14px;
+}
+.changed-files > header code {
+  font-weight: 400;
+}
+.changed-files code {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.diff-count {
+  margin-left: auto;
+  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  white-space: nowrap;
+}
+.diff-count ins {
+  color: #4ade80;
+  text-decoration: none;
+}
+.diff-count del {
+  color: #f87171;
+  text-decoration: none;
+}
+/* Inside an opened line: what the automatic reviewer decided, above the result. */
+.tool-line-review {
+  margin: 4px 0 6px 21px;
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+.tool-line .tool-status {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.tool-line .tool-status.failed {
+  color: var(--danger);
+}
+.tool-line-live {
+  max-height: 200px;
+  margin: 4px 0 12px 21px;
+  overflow: auto;
+}

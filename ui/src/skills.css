@@ -1,0 +1,272 @@
+/* Skills: the Skills settings tab and its editor. */
+.skill-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.skill-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.skill-row-text {
+  display: grid;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.skill-row-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  font-size: var(--text-sm);
+}
+.skill-row-description {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: var(--text-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.skill-row[data-enabled='false'] .skill-row-text {
+  opacity: 0.55;
+}
+.skill-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 24px 0 10px;
+}
+.skill-section-header:first-child {
+  margin-top: 0;
+}
+.skill-section-header h3 {
+  margin: 0;
+  font-size: var(--text-base);
+}
+.skill-section-header p {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+.skill-empty {
+  padding: 14px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+.skill-editor {
+  width: min(720px, calc(100vw - 32px));
+}
+.skill-editor textarea.skill-instructions {
+  min-height: 280px;
+  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  font-size: 12.5px;
+  line-height: 1.55;
+}
+.skill-editor .skill-switches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+.skill-field {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 14px;
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+.skill-field input,
+.skill-field textarea {
+  width: 100%;
+  color: var(--text);
+}
+.skill-field textarea {
+  min-height: 72px;
+  max-height: 50vh;
+  padding: 10px 12px;
+  field-sizing: content;
+}
+.skill-field small {
+  font-size: var(--text-xs);
+}
+.skill-editor .dialog-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.skill-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--text-sm);
+}
+
+/* Adding skills to a chat: a plain dialog like the others, a search field, then a list to pick from. */
+.add-skill-dialog {
+  flex-direction: column;
+  width: min(520px, calc(100vw - 32px));
+  max-height: min(620px, calc(100dvh - 48px));
+  padding: 0;
+  overflow: hidden;
+}
+.add-skill-dialog[open] {
+  display: flex;
+}
+.add-skill-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 20px 16px 12px 20px;
+}
+.add-skill-header > div {
+  flex: 1;
+  min-width: 0;
+}
+.add-skill-header .dialog-title {
+  margin-top: 0;
+}
+.add-skill-header .dialog-description {
+  margin-bottom: 0;
+}
+.skill-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 20px;
+  padding: 0 12px;
+  color: var(--muted);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.skill-search:focus-within {
+  border-color: var(--muted);
+}
+.skill-search input {
+  flex: 1;
+  min-width: 0;
+  min-height: 38px;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font-size: var(--text-sm);
+}
+.skill-search input::-webkit-search-cancel-button {
+  display: none;
+}
+.skill-search-count {
+  flex-shrink: 0;
+  color: var(--faint);
+  font-size: var(--text-xs);
+}
+.skill-results {
+  flex: 1;
+  min-height: 160px;
+  margin: 8px 0 0;
+  padding: 0 10px 10px;
+  overflow-y: auto;
+  list-style: none;
+}
+.skill-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 10px 4px;
+  color: var(--faint);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+.skill-result {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 6px;
+}
+.skill-result.active {
+  background: var(--surface-hover);
+}
+.skill-result-text {
+  display: grid;
+  flex: 1;
+  gap: 2px;
+  min-width: 0;
+}
+.skill-result-text code {
+  font-size: var(--text-sm);
+}
+.skill-result-text small {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: var(--text-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.skill-added {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  color: var(--faint);
+  font-size: var(--text-xs);
+}
+/* Add and remove: one icon button, quiet until the row is chosen. */
+.skill-toggle {
+  flex-shrink: 0;
+  color: var(--muted);
+}
+/* An added skill shows a tick; pointing at it (or focusing it) offers to remove it. */
+.skill-on {
+  color: var(--text);
+}
+.skill-on .when-hover,
+.skill-on:hover .when-idle,
+.skill-on:focus-visible .when-idle {
+  display: none;
+}
+.skill-on:hover .when-hover,
+.skill-on:focus-visible .when-hover {
+  display: inline;
+}
+.skill-result.active .skill-toggle {
+  color: var(--text);
+  background: var(--surface);
+}
+.skill-none {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 36px 16px;
+  color: var(--muted);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+.skill-none strong {
+  color: var(--text);
+  font-weight: 500;
+}
+.add-skill-footer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 16px 10px 20px;
+  color: var(--muted);
+  font-size: var(--text-xs);
+  border-top: 1px solid var(--line-subtle);
+}
+.add-skill-footer > span:first-child {
+  flex: 1;
+}

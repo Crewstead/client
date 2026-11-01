@@ -1,0 +1,164 @@
+/* Settings cards: bordered lists of rows with an optional form footer. */
+.settings-card {
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.settings-card > ul > li:first-child > a {
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.settings-card > ul > li:last-child > a {
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+.settings-card > ul > li:only-child > a {
+  border-radius: var(--radius);
+}
+.settings-card > ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.settings-card > ul > li,
+.settings-card > .card-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  min-height: 54px;
+  padding: 10px var(--space-4);
+  font-size: var(--text-sm);
+}
+.settings-card > ul > li + li,
+.settings-card > .card-footer {
+  border-top: 1px solid var(--line-subtle);
+}
+.settings-card > ul > li > .row-name,
+.link-row .row-name {
+  flex: 1;
+  min-width: 0;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+.settings-card > ul > li > .empty-note {
+  margin: 0;
+}
+.settings-card .setting-row,
+.settings-card.setting-row {
+  padding: var(--space-4);
+}
+.settings-card > .card-footer.inline-form {
+  margin: 0;
+}
+.role-tag {
+  color: var(--muted);
+  font-size: var(--text-xs);
+  text-transform: capitalize;
+}
+.settings-section > .empty-note {
+  margin: 0;
+  padding: var(--space-4);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+}
+@media (max-width: 700px) {
+  .setting-row:has(> input[type='checkbox']) {
+    flex-wrap: nowrap;
+  }
+}
+@media (max-width: 560px) {
+  .card-footer input {
+    flex-basis: 100%;
+  }
+  .card-footer .option-picker {
+    flex: 1 1 120px;
+  }
+  .card-footer .option-picker summary {
+    width: 100%;
+  }
+  .card-footer .option-list {
+    left: 0;
+    right: auto;
+  }
+}
+.settings-card > ul > li.link-row {
+  padding: 0;
+}
+.link-row > a {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 54px;
+  padding: 10px var(--space-4);
+  color: inherit;
+}
+.link-row > a:hover {
+  background: var(--surface-hover);
+}
+.link-row > a > svg {
+  color: var(--faint);
+  flex-shrink: 0;
+}
+.row-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-1) var(--space-3);
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+.org-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
+}
+.org-heading h1 {
+  margin: 0 0 6px;
+  overflow-wrap: anywhere;
+}
+.org-heading p {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: 0;
+}
+.settings-card > .card-divider {
+  border-top: 1px solid var(--line-subtle);
+}
+.how-to {
+  margin-top: var(--space-4);
+  padding: 12px var(--space-4);
+  font-size: var(--text-sm);
+}
+.how-to p {
+  margin: 0;
+}
+.how-to pre {
+  margin: 8px 0;
+  overflow-x: auto;
+  font-size: 12px;
+}
+/* A row's state under its name: a dot and a short line. */
+.row-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+.settings-card .address-form {
+  display: flex;
+  flex: 1;
+  gap: var(--space-2);
+}
+.settings-card .address-form input {
+  flex: 1;
+  min-width: 0;
+}
+.row-error {
+  color: var(--danger);
+  font-size: var(--text-xs);
+}

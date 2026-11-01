@@ -1,0 +1,11 @@
+/* A scheduled task's run: its clock stays upright when opened, and the prompt keeps its lines. */
+.scheduled-divider[open] > summary svg {
+  transform: none;
+}
+.scheduled-divider > summary small {
+  margin-left: 8px;
+  color: var(--faint);
+}
+.scheduled-prompt {
+  white-space: pre-wrap;
+}

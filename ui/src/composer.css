@@ -1,0 +1,324 @@
+.composer-area {
+  padding: 16px 32px 28px;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+.composer {
+  position: relative;
+  background: #23252d;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+.composer:focus-within {
+  border-color: #686c7c;
+}
+.composer textarea {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  max-height: 220px;
+  padding: 14px 16px 2px;
+  border: 0;
+  background: transparent;
+  border-radius: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  resize: none;
+  outline: none;
+}
+.composer textarea::placeholder {
+  color: var(--muted);
+}
+/* When the controls wrap on a narrow screen, the meter and buttons stay on the bottom row. */
+.composer-toolbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px 12px 16px;
+}
+/* One row always: in a narrow box labels shorten rather than push controls onto a second row. */
+.composer-model {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 2px 8px;
+  min-width: 0;
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+.composer-model select {
+  max-width: 100%;
+  min-height: 32px;
+  font-size: var(--text-xs);
+  padding: 4px 6px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.send-button {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: 50%;
+  color: var(--accent-ink);
+  background: var(--accent);
+}
+.send-button:disabled {
+  opacity: 0.3;
+}
+.send-button.stop {
+  color: var(--text);
+  background: var(--surface-hover);
+  border: 1px solid var(--line);
+}
+.composer-caption {
+  margin: 10px 4px 0;
+  font-size: var(--text-xs);
+  color: var(--muted);
+}
+.composer-caption.failed {
+  color: var(--danger);
+}
+@media (max-width: 700px) {
+  .composer-area {
+    padding: 12px 16px 20px;
+  }
+}
+/* How full the model's context is: a small ring and percentage beside the send button. */
+/* The meter and the send, queue or stop buttons, together on the right. */
+.composer-send {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+.context-meter-wrap {
+  position: relative;
+  margin-right: 6px;
+}
+.context-meter {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.context-meter:hover,
+.context-meter:focus-visible {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+.context-meter .track {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: 2;
+}
+.context-meter .fill {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+.context-meter.high .fill {
+  stroke: var(--amber);
+}
+/* The card that opens above it on hover or keyboard focus. */
+.context-card {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 10px);
+  z-index: 12;
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  width: 240px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-raised);
+  box-shadow: 0 8px 24px #0003;
+  color: var(--text);
+  font-size: 12px;
+  text-align: left;
+}
+.context-meter-wrap:hover .context-card,
+.context-meter:focus-visible + .context-card {
+  display: flex;
+}
+.context-card strong {
+  font-weight: 550;
+}
+.context-bar {
+  position: relative;
+  height: 6px;
+  margin: 2px 0 4px;
+  border-radius: 3px;
+  background: var(--line);
+}
+.context-bar i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 3px;
+  background: var(--muted);
+}
+.context-meter.high + .context-card .context-bar i {
+  background: var(--amber);
+}
+/* Where automatic summarizing starts. */
+.context-bar b {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  background: var(--text);
+  opacity: 0.6;
+}
+.context-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.context-row > span:last-child {
+  color: var(--text);
+}
+.context-card small {
+  margin-top: 2px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+/* Slash-command suggestions, above the prompt. */
+.command-menu {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 8px);
+  left: 0;
+  z-index: 12;
+  max-height: 260px;
+  margin: 0;
+  padding: 5px;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-raised);
+  box-shadow: 0 8px 24px #0003;
+  list-style: none;
+}
+.command-menu li {
+  display: grid;
+  grid-template-columns: 11em minmax(0, 1fr);
+  gap: 14px;
+  align-items: baseline;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.command-menu li.active {
+  background: var(--surface-hover);
+}
+.command-name {
+  flex-shrink: 0;
+  color: var(--text);
+  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  font-size: 13px;
+}
+.command-name small {
+  margin-left: 6px;
+  color: var(--muted);
+}
+.command-hint {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Messages waiting for the running reply, just above the box. */
+.queued {
+  margin: 0 0 8px;
+  padding: 8px 10px 6px 14px;
+  background: var(--surface);
+  border: 1px solid var(--line-subtle);
+  border-radius: 12px;
+  font-size: var(--text-xs);
+}
+.queued header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 24px;
+  color: var(--muted);
+}
+.queued ol {
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.queued li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+}
+.queued li > svg {
+  flex-shrink: 0;
+  color: var(--faint);
+}
+.queued-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--text-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.queued .icon-button {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+}
+/* Labels in the bottom row shorten with "…" rather than wrap. */
+.composer-toolbar {
+  /* Its labels' full width must not widen the page: the row takes the box's width, labels shorten. */
+  contain: inline-size;
+}
+.composer-model > *,
+.composer-model summary {
+  min-width: 0;
+  max-width: 100%;
+}
+.composer-model > :is(.model-picker, .model-label) {
+  flex-shrink: 1;
+}
+.composer-model > .composer-attach {
+  flex-shrink: 0;
+}
+.composer-model .picker-label,
+.composer-model .model-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.composer-model summary > svg {
+  flex-shrink: 0;
+}
+/* The model's name gives way first; the place and approval mode keep their words. */
+.composer-model > :is(.approval-picker, .project-picker) {
+  flex-shrink: 0;
+}

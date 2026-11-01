@@ -1,0 +1,116 @@
+/* Option picker: an input-styled trigger with a raised list of labelled, described options. */
+.option-picker {
+  position: relative;
+  flex: 0 0 auto;
+}
+.option-picker summary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-width: 112px;
+  min-height: 34px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: var(--text-sm);
+  list-style: none;
+  cursor: pointer;
+}
+.option-picker summary::-webkit-details-marker {
+  display: none;
+}
+.option-picker summary svg {
+  color: var(--muted);
+  transition: transform 120ms ease;
+}
+.option-picker[open] summary svg {
+  transform: rotate(180deg);
+}
+.option-picker summary:hover,
+.option-picker[open] summary {
+  border-color: var(--muted);
+}
+.option-picker.wide,
+.option-picker.wide summary {
+  width: 100%;
+}
+/* Match the height of the text fields it sits beside. */
+.option-picker.wide summary {
+  min-height: 38px;
+  padding: 8px 10px;
+}
+.option-picker.wide .option-list {
+  left: 0;
+  right: auto;
+  width: 100%;
+  max-height: 320px;
+  overflow-y: auto;
+}
+.option-picker.disabled summary {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+.option-list {
+  /* A fieldset never shrinks below its content by default; keep it inside its box. */
+  box-sizing: border-box;
+  min-inline-size: 0;
+  overflow-x: hidden;
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 10;
+  min-width: 248px;
+  margin: 0;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-raised);
+  box-shadow: 0 8px 24px #0004;
+}
+.option-picker .option-list label {
+  color: var(--text);
+  font-size: var(--text-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.option-list label:hover,
+.option-list label:focus-within {
+  background: var(--surface-hover);
+}
+.option-list label:has(:focus-visible) {
+  outline: 2px solid var(--muted);
+  outline-offset: -2px;
+}
+/* Hidden radios stay 1px even inside forms that stretch inputs. */
+.option-picker .option-list input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  min-height: 0;
+  padding: 0;
+}
+.option-list span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.option-list strong {
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+.option-list small {
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+.option-list svg {
+  margin-left: auto;
+  flex-shrink: 0;
+}

@@ -1,0 +1,179 @@
+.chat-row {
+  position: relative;
+  border-radius: 7px;
+  margin-bottom: 2px;
+}
+.chat-row:hover,
+.chat-row:focus-within {
+  background: #202128;
+}
+.chat-row.selected {
+  background: var(--surface-raised);
+  box-shadow: inset 0 0 0 1px #ffffff03;
+}
+.chat-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px var(--sidebar-inset);
+  font-size: var(--text-sm);
+  line-height: 20px;
+  color: var(--nav-text);
+  min-height: var(--sidebar-row-height);
+  border-radius: 7px;
+}
+.chat-link > span:first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.chat-row.selected .chat-link,
+.chat-row:hover .chat-link,
+.chat-row:focus-within .chat-link {
+  color: var(--text);
+}
+.chat-row:hover .chat-link,
+.chat-row:focus-within .chat-link {
+  padding-right: 96px;
+}
+.pin-marker {
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--muted);
+}
+.chat-row:hover .pin-marker,
+.chat-row:focus-within .pin-marker {
+  display: none;
+}
+.chat-actions {
+  display: flex;
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  transform: translateY(-50%);
+  gap: 2px;
+  opacity: 0;
+  pointer-events: none;
+}
+.chat-row:hover .chat-actions,
+.chat-row:focus-within .chat-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+.chat-actions button {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 28px;
+  border-radius: 5px;
+  color: var(--muted);
+}
+.chat-actions button:hover {
+  color: var(--text);
+  background: #ffffff0b;
+}
+.chat-actions button:focus-visible {
+  outline-offset: 0;
+}
+.chat-error {
+  font-size: var(--text-xs);
+  color: var(--danger);
+  padding: 4px 10px;
+  margin: 0;
+}
+/* A chat's state at the end of its row: working, waiting for the owner, or a reply not seen yet. */
+.chat-state {
+  flex-shrink: 0;
+  width: 7px;
+  height: 7px;
+  margin-left: auto;
+  border-radius: 50%;
+}
+.chat-state.working {
+  background: var(--amber);
+  animation: chat-working 1.4s ease-in-out infinite;
+}
+.chat-state.waiting {
+  box-shadow: inset 0 0 0 1.5px var(--amber);
+}
+.chat-state.done {
+  background: #8fb6ff;
+}
+.chat-state.failed {
+  background: var(--danger);
+}
+@keyframes chat-working {
+  50% {
+    opacity: 0.35;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chat-state.working {
+    animation: none;
+  }
+}
+@media (hover: none) {
+  .chat-actions {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .chat-link {
+    padding-right: 76px;
+    min-height: 40px;
+  }
+  .chat-actions button {
+    width: 30px;
+    height: 32px;
+  }
+  .pin-marker {
+    display: none;
+  }
+}
+
+/* Moving a chat: the dialog's list of places. */
+.move-places {
+  display: grid;
+  gap: 2px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.move-places button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  color: var(--text);
+  border-radius: 7px;
+  text-align: left;
+}
+.move-places button:hover,
+.move-places button:focus-visible {
+  background: var(--surface-hover);
+}
+.move-places button > span {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+.move-places small {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: var(--text-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.move-computer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 4px 10px;
+  color: var(--faint);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}

@@ -1,0 +1,33 @@
+{
+  "name": "crewstead-client",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.34.9",
+  "engines": {
+    "node": ">=24.16.0 <25"
+  },
+  "scripts": {
+    "build": "pnpm --filter @crewstead/web build",
+    "check": "pnpm --filter @crewstead/web check && tsc --noEmit",
+    "test": "vitest run",
+    "machine": "node --import tsx daemon/src/main.ts",
+    "lint": "eslint . && node scripts/check-boundaries.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@types/node": "24.19.2",
+    "eslint": "10.13.0",
+    "eslint-plugin-svelte": "3.23.1",
+    "globals": "17.13.0",
+    "prettier": "3.9.10",
+    "prettier-plugin-svelte": "4.1.1",
+    "tsx": "4.23.15",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.72.1",
+    "vitest": "5.0.5",
+    "@crewstead/core": "git+ssh://git@github.com/Crewstead/core.git#v0.1.0"
+  }
+}

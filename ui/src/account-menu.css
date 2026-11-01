@@ -1,0 +1,121 @@
+.account-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 50px;
+  padding: 8px 10px;
+  border: 1px solid var(--line-subtle);
+  border-radius: 9px;
+  background: #1b1d24;
+  text-align: left;
+}
+.account-trigger:hover,
+.account-trigger[aria-expanded='true'] {
+  background: #24262f;
+  border-color: var(--line);
+}
+.account-avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #343742;
+  border: 1px solid #ffffff08;
+  color: #e4e5ee;
+  font-size: 12px;
+  font-weight: 500;
+}
+.account-trigger-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+.account-trigger > svg {
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.account-popover {
+  overflow-y: auto;
+  position: fixed;
+  top: auto;
+  right: auto;
+  margin: 0;
+  max-width: calc(100vw - 16px);
+  padding: 5px;
+  background: #25272f;
+  color: var(--text);
+  border: 1px solid #3b3e49;
+  border-radius: 11px;
+  box-shadow: 0 12px 32px #0006;
+}
+.account-popover-identity {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 6px;
+}
+.account-popover-identity:hover {
+  background: #ffffff05;
+}
+.account-identity-text {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.account-identity-text strong {
+  font-size: var(--text-sm);
+  line-height: 20px;
+  font-weight: 500;
+}
+.account-identity-text > span {
+  font-size: var(--text-xs);
+  line-height: 18px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.account-popover-identity > svg {
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.account-menu-divider {
+  height: 1px;
+  background: var(--line);
+  margin: 4px;
+}
+.account-menu-action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 36px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: var(--text-sm);
+  line-height: 20px;
+  color: var(--text);
+  text-align: left;
+}
+.account-menu-action > svg {
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.account-menu-action:hover {
+  background: #ffffff08;
+}
+.account-menu-error {
+  font-size: var(--text-xs);
+  color: var(--danger);
+  margin: 8px;
+  line-height: 1.5;
+}

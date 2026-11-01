@@ -1,0 +1,347 @@
+/* Live browsers: every chat's browser session, watched as the model works. */
+.live-browsers {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 12px;
+  height: 100dvh;
+  padding: 20px 28px 24px;
+  overflow-y: auto;
+}
+.live-header h1 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+.live-header p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+/* The tab row and the arrows that show when tabs are hidden past an end. */
+.live-tab-row {
+  position: relative;
+  display: flex;
+  min-width: 0;
+}
+.live-tab-row > .live-tabs {
+  flex: 1;
+}
+.live-tab-scroll {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  color: var(--text);
+  background: var(--tab-row-bg, #1b1c22);
+  border-radius: 6px 6px 0 0;
+}
+.live-tab-scroll:hover {
+  background: #33353f;
+}
+.live-tab-scroll.left {
+  left: 0;
+  box-shadow: 8px 0 10px -4px var(--tab-row-bg, #1b1c22);
+}
+.live-tab-scroll.right {
+  right: 0;
+  box-shadow: -8px 0 10px -4px var(--tab-row-bg, #1b1c22);
+}
+.live-tab-row.hidden-left > .live-tabs,
+.live-tab-row.hidden-right > .live-tabs {
+  mask-image: none;
+}
+.live-tabs {
+  position: relative;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 2px;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  /* Tabs fade at the edge they scroll out of. */
+  mask-image: linear-gradient(to right, #000 calc(100% - 16px), transparent);
+}
+.live-tab {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  max-width: 180px;
+  border-radius: 6px 6px 0 0;
+}
+.live-tab:hover {
+  background: #ffffff0d;
+}
+.live-tab.active {
+  background: var(--tab-active-bg, #2c2e38);
+}
+.live-tab > button[role='tab'] {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  min-height: 26px;
+  padding: 3px 8px 3px 8px;
+  color: var(--muted);
+  text-align: left;
+}
+.live-tab.active > button[role='tab'] {
+  color: var(--text);
+}
+.live-tab-icon {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  color: #8fb6ff;
+}
+.live-tab[data-where='server'] .live-tab-icon {
+  color: #c4a5ff;
+}
+.live-tab-text {
+  display: grid;
+  min-width: 0;
+}
+.live-tab-text > span {
+  overflow: hidden;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.live-tab-close {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  margin-right: 4px;
+  color: var(--muted);
+  border-radius: 4px;
+  opacity: 0;
+}
+.live-tab:hover .live-tab-close,
+.live-tab.active .live-tab-close,
+.live-tab-close:focus-visible {
+  opacity: 1;
+}
+.live-tab-close:hover {
+  color: var(--text);
+  background: var(--surface-hover);
+}
+.live-window {
+  --tab-row-bg: #1b1c22;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  background: var(--tab-row-bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.live-window > .live-tab-row {
+  margin: 5px 6px 0;
+}
+.live-window > .live-toolbar {
+  padding: 6px 8px;
+  background: var(--tab-active-bg, #2c2e38);
+}
+.live-window > .error-banner {
+  margin: 8px;
+}
+.live-window .live-screen {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.live-window .live-note {
+  margin: 0;
+  padding: 6px;
+  background: var(--tab-active-bg, #2c2e38);
+}
+.live-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.live-address {
+  flex: 1;
+  min-width: 0;
+  margin: 0 8px;
+  padding: 5px 12px;
+  overflow: hidden;
+  color: var(--muted);
+  background: var(--bg);
+  border: 1px solid var(--line-subtle);
+  border-radius: 999px;
+  font-size: var(--text-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* As wide as it can be while the page keeps its proportions and fits the window's height. */
+.live-screen {
+  position: relative;
+  width: min(100%, calc((100dvh - 210px) * var(--page-ratio, 1.6)));
+  margin: 0 auto;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: 0 16px 40px #0006;
+}
+.live-screen canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+}
+.live-screen canvas.hidden {
+  display: none;
+}
+.live-waiting {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 100%;
+  margin: 0;
+  color: var(--muted);
+  background: var(--surface);
+  font-size: var(--text-sm);
+}
+.live-cursor {
+  position: absolute;
+  z-index: 2;
+  width: 0;
+  height: 0;
+  transition:
+    left 0.42s cubic-bezier(0.22, 0.9, 0.3, 1),
+    top 0.42s cubic-bezier(0.22, 0.9, 0.3, 1);
+  pointer-events: none;
+}
+.live-cursor svg {
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  filter: drop-shadow(0 2px 3px #0007);
+}
+.live-ripple {
+  position: absolute;
+  top: -16px;
+  left: -16px;
+  width: 32px;
+  height: 32px;
+  border: 2px solid #4f8cff;
+  border-radius: 50%;
+  opacity: 0;
+  animation: live-ripple 0.7s ease-out 0.38s;
+}
+@keyframes live-ripple {
+  from {
+    opacity: 0.9;
+    transform: scale(0.3);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+}
+.live-typing {
+  position: absolute;
+  top: 20px;
+  left: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  color: #fff;
+  background: #4f8cffe6;
+  border-radius: 999px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.live-empty {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  max-width: 420px;
+  margin: 12vh auto 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+.live-empty strong {
+  color: var(--text);
+  font-size: var(--text-base);
+  font-weight: 500;
+}
+.live-empty .button {
+  margin-top: 8px;
+}
+@media (max-width: 700px) {
+  .live-browsers {
+    height: calc(100dvh - 52px);
+    padding: 12px 16px 16px;
+  }
+}
+.live-waiting .spin {
+  animation: live-spin 0.9s linear infinite;
+}
+@keyframes live-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.live-control {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  cursor: default;
+  outline: none;
+}
+.live-screen.controlled {
+  border-color: #4f8cff;
+  box-shadow:
+    0 0 0 3px #4f8cff40,
+    0 16px 40px #0006;
+}
+.live-note {
+  margin: -4px 0 0;
+  color: var(--muted);
+  font-size: var(--text-xs);
+  text-align: center;
+}
+/* One browser's tabs, like a browser's tab group: a line under them in the group's colour. */
+.live-tab-browser {
+  --group: #8fb6ff;
+  display: flex;
+  flex-shrink: 0;
+  align-items: stretch;
+  gap: 2px;
+}
+.live-tab-browser[data-group='1'] {
+  --group: #c4a5ff;
+}
+.live-tab-browser[data-group='2'] {
+  --group: #7dd3a8;
+}
+.live-tab-browser[data-group='3'] {
+  --group: #f0b67f;
+}
+.live-tab-browser[data-group='4'] {
+  --group: #f28fb0;
+}
+.live-tab-browser + .live-tab-browser {
+  margin-left: 8px;
+}
+.live-tab-browser.marked .live-tab {
+  box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--group) 70%, transparent);
+}

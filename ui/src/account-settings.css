@@ -1,0 +1,48 @@
+/* Account settings: the signed-in profile card and device-saved accounts. */
+.profile-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4);
+}
+.profile-card dl {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+.profile-card dd {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.profile-login {
+  font-size: var(--text-base);
+  font-weight: 500;
+}
+.profile-avatar {
+  display: grid;
+  place-items: center;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #343742;
+  border: 1px solid #ffffff08;
+  color: #e4e5ee;
+  font-size: 16px;
+  font-weight: 500;
+}
+.profile-avatar.small {
+  flex-basis: 30px;
+  width: 30px;
+  height: 30px;
+  font-size: 12px;
+}
+.settings-card li > .row-name:has(small) {
+  display: flex;
+  flex-direction: column;
+}
+.settings-card li > .row-name small {
+  font-weight: 400;
+}

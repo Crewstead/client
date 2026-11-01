@@ -1,0 +1,390 @@
+.conversation-layout {
+  display: flex;
+  height: 100dvh;
+  position: relative;
+}
+.conversation-main {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.conversation-heading {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 28px;
+  min-height: 64px;
+}
+.conversation-heading > div {
+  flex: 1;
+  min-width: 0;
+}
+.conversation-heading h1 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0;
+  margin: 0;
+}
+.chat-title {
+  max-width: 100%;
+  overflow: hidden;
+  padding: 2px 6px;
+  margin-left: -6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: text;
+}
+.chat-title:hover {
+  background: var(--surface-hover);
+}
+.chat-title-edit {
+  display: inline-grid;
+  max-width: calc(100% + 6px);
+  margin-left: -6px;
+  vertical-align: top;
+}
+.chat-title-edit::after,
+.chat-title-input {
+  grid-area: 1 / 1;
+  padding: 2px 6px;
+  font: inherit;
+  line-height: inherit;
+  white-space: pre;
+}
+.chat-title-edit::after {
+  content: attr(data-value) ' ';
+  overflow: hidden;
+  visibility: hidden;
+}
+/* Exactly the name's box, with no border or focus ring: editing shows as its hover background. */
+.chat-title-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 6px;
+  outline: none;
+  box-shadow: none;
+  background: var(--surface-hover);
+  color: inherit;
+}
+.chat-title-input:focus,
+.chat-title-input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+.chat-place {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0 0 3px;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.chat-place > span {
+  margin: 0 3px;
+  color: var(--faint);
+}
+.conversation-heading [role='status']:not(.sr-only) {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 4px;
+}
+.timeline {
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+.timeline-content {
+  max-width: 800px;
+  margin: auto;
+  padding: 24px 32px;
+}
+.message {
+  margin: 0 0 32px;
+}
+/* A reply's text and the tools it then uses read as one step. */
+.message:not(.user-message):has(+ .tool-row) {
+  margin-bottom: 14px;
+}
+.message-content {
+  min-width: 0;
+}
+.message-text {
+  color: var(--text);
+  font-size: var(--text-reading);
+  line-height: 1.75;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.message-text.markdown {
+  white-space: normal;
+}
+.user-message {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+.user-message .message-content {
+  max-width: 85%;
+  padding: 12px 18px;
+  background: var(--surface-raised);
+  border-radius: 14px;
+}
+.conversation-welcome {
+  padding: 24vh 0 0;
+  text-align: center;
+}
+.conversation-welcome h2 {
+  font-size: 22px;
+  font-weight: 500;
+}
+.jump-button {
+  position: absolute;
+  bottom: 180px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  box-shadow: 0 4px 20px #0004;
+}
+@media (max-width: 700px) {
+  .conversation-layout {
+    height: calc(100dvh - 52px);
+  }
+  .conversation-heading {
+    padding: 8px 16px;
+    min-height: 48px;
+  }
+  .timeline-content {
+    padding: 24px 20px;
+  }
+  .user-message .message-content {
+    max-width: 92%;
+  }
+}
+
+/* The model's reasoning, collapsed above its reply. */
+.thinking {
+  margin-bottom: var(--space-2);
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+.thinking summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px 2px 2px;
+  border-radius: 6px;
+  list-style: none;
+  cursor: pointer;
+}
+.thinking summary::-webkit-details-marker {
+  display: none;
+}
+.thinking summary:hover {
+  color: var(--text);
+}
+.thinking summary svg {
+  transition: transform 120ms ease;
+}
+.thinking[open] summary svg {
+  transform: rotate(90deg);
+}
+.thinking-text {
+  margin: var(--space-2) 0 var(--space-3);
+  padding-left: var(--space-3);
+  border-left: 2px solid var(--line);
+  line-height: 1.65;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.pulsing {
+  animation: thinking-pulse 1.4s ease-in-out infinite;
+}
+@keyframes thinking-pulse {
+  50% {
+    opacity: 0.45;
+  }
+}
+/* Where the model's view of the chat starts over from a summary. */
+.summary-divider {
+  margin: 4px 0 28px;
+}
+.summary-divider > summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 12px;
+  list-style: none;
+  cursor: pointer;
+}
+.summary-divider > summary::-webkit-details-marker {
+  display: none;
+}
+.summary-divider > summary::after {
+  content: '';
+  flex: 1;
+  border-top: 1px dashed var(--line);
+}
+.summary-divider[open] > summary svg {
+  transform: rotate(90deg);
+}
+.summary-divider > summary:hover {
+  color: var(--text);
+}
+.summary-text {
+  margin-top: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.conversation-heading .error-text {
+  color: var(--danger);
+  font-size: 12px;
+}
+.summary-state {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.summary-state::after {
+  content: '';
+  flex: 1;
+  border-top: 1px dashed var(--line);
+}
+.summary-state[data-status='failed'] {
+  color: var(--danger);
+}
+/* How long a reply worked; a running clock while it still works. */
+.worked {
+  margin: -12px 0 28px;
+  color: var(--faint);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.worked.worked-live {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 0;
+  color: var(--muted);
+}
+.working-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--amber);
+  animation: working-pulse 1.4s ease-in-out infinite;
+}
+@keyframes working-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .working-dot {
+    animation: none;
+  }
+}
+/* Where the chat moved to another place: a line across, with the new place's name. */
+.moved-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.moved-divider::before,
+.moved-divider::after {
+  content: '';
+  flex: 1;
+  border-top: 1px solid var(--line);
+}
+.moved-divider > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.moved-divider small {
+  color: var(--faint);
+  font-size: 11px;
+}
+.moved-divider small::before {
+  content: '·';
+  margin-right: 6px;
+}
+/* Above a message another chat's model sent: who sent it, and from which chat. */
+.sent-by {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0 0 4px;
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+.sent-by a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+/* A subagent's chat ends its place line with the chat it belongs to, which leads back to it. */
+.chat-parent {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  color: var(--muted);
+  text-decoration: none;
+}
+.chat-parent > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.chat-parent:hover {
+  color: var(--text);
+}
+/* A chat that is slow to load: a quiet spinner in the middle, no text. */
+.chat-loading {
+  display: grid;
+  place-items: center;
+  min-height: 40vh;
+  margin: 0;
+  color: var(--faint);
+}
+.chat-loading svg {
+  animation: chat-loading-spin 0.9s linear infinite;
+}
+@keyframes chat-loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chat-loading svg {
+    animation: none;
+  }
+}

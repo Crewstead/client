@@ -1,0 +1,8 @@
+packages:
+  - web
+  - ui
+  - daemon
+minimumReleaseAge: 1440
+onlyBuiltDependencies:
+  - esbuild
+  - rolldown

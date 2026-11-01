@@ -1,0 +1,28 @@
+.diff-view {
+  margin: 0;
+  max-height: 420px;
+  overflow: auto;
+  padding: 8px 0;
+  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text);
+}
+.diff-view > span {
+  display: block;
+  padding: 0 14px;
+  white-space: pre;
+  min-height: 1.6em;
+}
+.diff-view > .add {
+  background: color-mix(in srgb, #4ade80 13%, transparent);
+  color: #bbf7d0;
+}
+.diff-view > .del {
+  background: color-mix(in srgb, #f87171 13%, transparent);
+  color: #fecaca;
+}
+.diff-view > .hunk {
+  color: var(--muted);
+  background: color-mix(in srgb, var(--text) 5%, transparent);
+}

@@ -1,0 +1,35 @@
+.settings-tabs {
+  display: flex;
+  gap: 24px;
+  border-bottom: 1px solid var(--line-subtle);
+  margin: 24px 0;
+  overflow-x: auto;
+}
+.settings-tab {
+  flex-shrink: 0;
+  min-height: 40px;
+  padding: 10px 0;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+.settings-tab:hover {
+  color: var(--text);
+}
+.settings-tab[aria-selected='true'] {
+  color: var(--text);
+  border-bottom-color: var(--text);
+}
+.settings-tab:focus-visible {
+  outline-offset: -2px;
+}
+.settings-panel .settings-section {
+  margin-top: var(--space-6);
+  padding: var(--space-6) 0 0;
+}
+.settings-panel .settings-section:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}

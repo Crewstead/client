@@ -1,0 +1,219 @@
+.model-picker {
+  position: relative;
+}
+.model-picker summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 4px;
+  list-style: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+.model-picker summary::-webkit-details-marker {
+  display: none;
+}
+.model-picker summary:hover {
+  color: var(--text);
+}
+.model-options {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 0;
+  z-index: 10;
+  margin: 0;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-raised);
+  min-width: 180px;
+  max-width: calc(100vw - 24px);
+  box-shadow: 0 8px 24px #0003;
+}
+.model-options label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 36px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text);
+  white-space: nowrap;
+}
+.model-options label:hover,
+.model-options label:focus-within {
+  background: var(--surface-hover);
+}
+.model-options input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  min-height: 0;
+  padding: 0;
+}
+.model-options label:has(:focus-visible) {
+  outline: 2px solid var(--muted);
+  outline-offset: -2px;
+}
+.model-options svg {
+  margin-left: auto;
+}
+.model-label {
+  display: inline-block;
+  padding: 6px 4px;
+}
+.effort-option {
+  white-space: normal;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.effort-option small {
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+.approval-picker[data-mode='auto'] summary {
+  color: var(--text);
+}
+.approval-picker[data-mode='all'] summary {
+  color: #fbbf24;
+}
+.model-options fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+/* Effort sits under the models, as one row of choices, like Claude desktop. */
+/* "Effort · Auto ›" under the models opens its own small menu beside this one, like Claude desktop. */
+.effort-menu {
+  position: relative;
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid var(--line);
+}
+.menu-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 36px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.menu-row:hover,
+.menu-row:focus-visible,
+.menu-row[aria-expanded='true'] {
+  background: var(--surface-hover);
+}
+.menu-row-value {
+  margin-left: auto;
+  color: var(--muted);
+}
+.model-options .menu-row svg {
+  margin-left: 0;
+}
+.model-options .effort-flyout {
+  position: absolute;
+  bottom: -5px;
+  left: calc(100% + 10px);
+  z-index: 11;
+  min-width: 210px;
+  margin: 0;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-raised);
+  box-shadow: 0 8px 24px #0003;
+}
+.model-options .effort-flyout[data-side='left'] {
+  right: calc(100% + 10px);
+  left: auto;
+}
+.model-options .effort-flyout[data-side='over'] {
+  right: 0;
+  bottom: calc(100% + 4px);
+  left: auto;
+}
+.project-picker .model-options {
+  min-width: 260px;
+  max-width: min(420px, calc(100vw - 24px));
+}
+.project-picker .effort-option small {
+  overflow-wrap: anywhere;
+}
+.project-picker.offline summary {
+  color: var(--amber);
+}
+/* The Where picker: the cloud, then each computer's projects under its name. */
+.place-options label {
+  align-items: flex-start;
+}
+.place-options .effort-option {
+  flex: 1;
+  min-width: 0;
+  align-items: flex-start;
+  text-align: left;
+}
+.place-options .effort-option > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+/* Icons beside a name stay with it; only the tick goes to the right. */
+.place-options .effort-option svg,
+.place-computer svg {
+  margin-left: 0;
+  flex: none;
+}
+.place-options .effort-option small {
+  padding-left: 19px;
+}
+.place-computer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 6px 0 0;
+  padding: 6px 10px 2px;
+  border-top: 1px solid var(--line-subtle);
+  color: var(--faint);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  justify-content: flex-start;
+}
+/* In Settings: a bordered button that opens its options below, aligned to its right edge. */
+.choice-picker summary {
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: var(--text-sm);
+}
+.choice-picker summary:hover {
+  background: var(--surface-hover);
+}
+.choice-picker summary[aria-disabled='true'] {
+  opacity: 0.6;
+  cursor: default;
+}
+.choice-picker .model-options {
+  top: calc(100% + 6px);
+  right: 0;
+  bottom: auto;
+  left: auto;
+  min-width: 240px;
+}
+.choice-picker label.unavailable {
+  opacity: 0.55;
+  cursor: default;
+}

@@ -1,0 +1,102 @@
+/* The chat statistics panel. */
+.stats-dialog {
+  width: min(600px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  padding: 22px 24px;
+}
+.stats-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.stats-head .dialog-title {
+  margin: 0;
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 18px 0 0;
+}
+.stats-grid > div {
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+}
+.stats-grid dt {
+  color: var(--muted);
+  font-size: 12px;
+}
+.stats-grid dd {
+  margin: 4px 0 0;
+  font-size: 18px;
+  font-weight: 550;
+  font-variant-numeric: tabular-nums;
+}
+.stats-grid small,
+.stats-table small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+.stats-section {
+  margin: 22px 0 10px;
+  font-size: 13px;
+  font-weight: 550;
+}
+.stats-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.stats-table th,
+.stats-table td {
+  padding: 8px 12px;
+  text-align: right;
+  white-space: nowrap;
+}
+.stats-table th:first-child,
+.stats-table td:first-child {
+  text-align: left;
+  white-space: normal;
+}
+.stats-table th {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  border-bottom: 1px solid var(--line);
+}
+.stats-table tbody tr + tr td,
+.stats-table tfoot td {
+  border-top: 1px solid var(--line-subtle);
+}
+.stats-table tfoot td {
+  font-weight: 550;
+}
+.stats-note {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+@media (max-width: 520px) {
+  .stats-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  /* On a phone the table keeps what fits: cached tokens are left out. */
+  .stats-table .cached {
+    display: none;
+  }
+  .stats-table th,
+  .stats-table td {
+    padding: 8px;
+  }
+}
