@@ -9,6 +9,7 @@
   import { useAuthentication } from '#lib/auth/auth.svelte.ts';
   import ModuleSlot from '../ModuleSlot.svelte';
   import OrgMembers from './OrgMembers.svelte';
+  import ChatTitle from '#lib/components/ChatTitle.svelte';
   import '@crewstead/ui/connections.css';
   import '@crewstead/ui/settings-cards.css';
   import '@crewstead/ui/switch.css';
@@ -60,7 +61,16 @@
   {#if org}
     <header class="org-heading">
       <div>
-        <h1>{org.name}</h1>
+        {#if manager}<!-- Owners and admins rename it here; the hub checks the role. -->
+          <ChatTitle
+            what="organisation"
+            title={org.name}
+            rename={async (name) => {
+              org = await organisations.update(orgId, { name });
+              // The workspace menu lists it by name.
+              await workspace.refresh();
+            }}
+          />{:else}<h1>{org.name}</h1>{/if}
         <p class="muted-text">
           <span class="role-tag">{org.role}</span>
         </p>

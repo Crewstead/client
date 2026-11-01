@@ -1,11 +1,15 @@
 <script lang="ts">
   import { tick } from 'svelte';
+  import '@crewstead/ui/rename-title.css';
   let {
     title,
     rename,
+    what = 'chat',
   }: {
     title: string;
     rename: (title: string) => Promise<void>;
+    /** What is named, for its labels: "chat", "organisation". */
+    what?: string;
   } = $props();
   let editing = $state(false);
   let draft = $state('');
@@ -26,12 +30,12 @@
     try {
       await rename(next);
     } catch (cause) {
-      error = cause instanceof Error ? cause.message : 'Could not rename the chat';
+      error = cause instanceof Error ? cause.message : `Could not rename the ${what}`;
     }
   }
 </script>
 
-<!-- Click the name to rename the chat; Enter saves, Escape keeps the old name. The box takes
+<!-- Click the name to rename it (a chat, an organisation); Enter saves, Escape keeps the old name. The box takes
      exactly the name's place, so nothing around it moves. -->
 <h1>
   {#if editing}<!-- A hidden copy of the text sizes the box to the name. --><span
@@ -40,7 +44,7 @@
       ><input
         bind:this={input}
         class="chat-title-input"
-        aria-label="Chat name"
+        aria-label={`${what[0]!.toUpperCase()}${what.slice(1)} name`}
         size="1"
         maxlength="100"
         bind:value={draft}
@@ -50,6 +54,7 @@
           else if (event.key === 'Escape') editing = false;
         }}
       /></span
-    >{:else}<button class="chat-title" title="Rename chat" onclick={start}>{title}</button>{/if}
+    >{:else}<button class="chat-title" title={`Rename ${what}`} onclick={start}>{title}</button
+    >{/if}
 </h1>
 {#if error}<span class="error-text" role="alert">{error}</span>{/if}

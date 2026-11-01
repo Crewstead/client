@@ -1,0 +1,58 @@
+/* A name renamed in place (chats, organisations): the box keeps exactly the name's size. */
+.chat-title {
+  max-width: 100%;
+  overflow: hidden;
+  padding: 2px 6px;
+  margin-left: -6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: text;
+}
+.chat-title:hover {
+  background: var(--surface-hover);
+}
+.chat-title-edit {
+  display: inline-grid;
+  max-width: calc(100% + 6px);
+  margin-left: -6px;
+  vertical-align: top;
+}
+.chat-title-edit::after,
+.chat-title-input {
+  grid-area: 1 / 1;
+  padding: 2px 6px;
+  font: inherit;
+  line-height: inherit;
+  white-space: pre;
+}
+.chat-title-edit::after {
+  content: attr(data-value) ' ';
+  overflow: hidden;
+  visibility: hidden;
+}
+/* Exactly the name's box, with no border or focus ring: editing shows as its hover background. */
+.chat-title-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 6px;
+  outline: none;
+  box-shadow: none;
+  background: var(--surface-hover);
+  color: inherit;
+}
+.chat-title-input:focus,
+.chat-title-input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
