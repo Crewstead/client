@@ -2,10 +2,10 @@
 
 What people use to reach a [Crewstead](https://github.com/Crewstead/server) hub:
 
-| Folder | What it is |
-| --- | --- |
-| `web/` | The Svelte 5 / SvelteKit web app the hub serves |
-| `ui/` | Its shared styles and design tokens |
+| Folder    | What it is                                                                                 |
+| --------- | ------------------------------------------------------------------------------------------ |
+| `web/`    | The Svelte 5 / SvelteKit web app the hub serves                                            |
+| `ui/`     | Its shared styles and design tokens                                                        |
 | `daemon/` | The computer service: lets chats work in this computer's projects and use Claude Code here |
 
 Planned here too: the desktop app (Linux, Windows, macOS) with the computer service built in, so it
