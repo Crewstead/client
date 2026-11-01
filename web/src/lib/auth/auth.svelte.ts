@@ -22,6 +22,8 @@ const session = (server: string, userId: string) =>
 interface User {
   id: string;
   login: string;
+  /** The hub's owner asked this account for a new password; nothing else opens until then. */
+  mustChangePassword?: boolean;
 }
 interface Profile {
   user: User;
@@ -122,6 +124,19 @@ export class Authentication {
   async chooseAccount(account: SavedAccount) {
     if (await this.switchAccount(account)) await goto(resolve('/'), { replace: true });
     else this.openAccount(account);
+  }
+  /** Replaces the account's password; it stays signed in here and is signed out everywhere else. */
+  async changePassword(current: string, password: string) {
+    const response = await fetch(apiUrl('/auth/password'), {
+      method: 'POST',
+      credentials: 'include',
+      redirect: 'error',
+      headers: { 'Content-Type': 'application/json', ...csrfHeaders(), ...accountHeaders() },
+      body: JSON.stringify({ current, password }),
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.message ?? 'Could not change the password.');
+    this.accept(result as Profile);
   }
   expire() {
     this.user = null;

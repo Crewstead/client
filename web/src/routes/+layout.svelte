@@ -3,6 +3,7 @@
   import type { Snippet } from 'svelte';
   import { Authentication } from '#lib/auth/auth.svelte.ts';
   import SignIn from '#lib/auth/SignIn.svelte';
+  import NewPassword from '#lib/auth/NewPassword.svelte';
   import AccountDialog from '#lib/auth/AccountDialog.svelte';
   import AppShell from '#lib/components/AppShell.svelte';
   import '@crewstead/ui/typography.css';
@@ -34,5 +35,6 @@
     <p class="muted-text" role="status">Connecting…</p>
   </main>
 {:else if !auth.user}<SignIn />
+{:else if auth.user.mustChangePassword}<NewPassword />
 {:else}{#key auth.scope}<AppShell {children} />{/key}{/if}
 {#if auth.connecting}<AccountDialog />{/if}
