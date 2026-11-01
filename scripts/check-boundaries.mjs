@@ -1,7 +1,16 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { dirname, join, relative, resolve } from 'node:path';
 
-const roots = ['web', 'ui', 'daemon', 'scripts', 'tests'];
+const roots = [
+  'web',
+  'ui',
+  'daemon',
+  'desktop/src',
+  'desktop/scripts',
+  'desktop/assets',
+  'scripts',
+  'tests',
+];
 const failures = [];
 let checked = 0;
 
@@ -58,6 +67,9 @@ async function walk(directory) {
     // hub's own SearXNG container with it.
     if (/from ['"]@crewstead\/core\/sandbox['"]/.test(text) && !path.startsWith('tests/'))
       failures.push(`${path}: only the cloud-sandbox and web-search modules may use the sandbox`);
+    // The desktop app uses the computer service's own modules, never the web app's code.
+    if (path.startsWith('desktop/') && /from ['"]([./]*(web|ui)\/|@crewstead\/(web|ui))/.test(text))
+      failures.push(`${path}: the desktop app imports web app code`);
     if (/from ['"](@openai\/codex|@anthropic-ai\/claude-agent-sdk)/.test(text))
       failures.push(`${path}: prohibited CLI-backed SDK`);
   }

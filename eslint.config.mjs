@@ -9,6 +9,7 @@ export default [
       '**/node_modules/**',
       '**/.svelte-kit/**',
       '**/build/**',
+      '**/dist/**',
       '**/.data/**',
       '**/test-results/**',
       '**/playwright-report/**',

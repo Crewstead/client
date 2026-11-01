@@ -2,7 +2,9 @@ packages:
   - web
   - ui
   - daemon
+  - desktop
 minimumReleaseAge: 1440
 onlyBuiltDependencies:
+  - electron
   - esbuild
   - rolldown

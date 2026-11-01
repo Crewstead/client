@@ -11,6 +11,11 @@
     "noEmit": true,
     "types": ["node"]
   },
-  "include": ["daemon/**/*.ts", "tests/unit/**/*.ts"],
+  "include": [
+    "daemon/**/*.ts",
+    "desktop/src/**/*.ts",
+    "desktop/src/**/*.cts",
+    "tests/unit/**/*.ts"
+  ],
   "exclude": ["node_modules"]
 }

@@ -6,3 +6,5 @@ docs
 .data
 playwright-report
 test-results
+desktop/dist
+desktop/build

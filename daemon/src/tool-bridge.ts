@@ -52,7 +52,12 @@ export async function openToolBridge(
       hub: {
         command: process.execPath,
         args: [fileURLToPath(new URL('./mcp-bridge.mjs', import.meta.url))],
-        env: { HUB_BRIDGE_SOCKET: path, HUB_BRIDGE_TOOLS: JSON.stringify(tools) },
+        env: {
+          HUB_BRIDGE_SOCKET: path,
+          HUB_BRIDGE_TOOLS: JSON.stringify(tools),
+          // Inside the desktop app this program is Electron, which runs scripts only as Node.
+          ...(process.versions.electron ? { ELECTRON_RUN_AS_NODE: '1' } : {}),
+        },
       },
     },
   });
