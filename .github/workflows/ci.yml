@@ -41,9 +41,25 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: gh release create "${{ github.ref_name }}" crewstead-web-*.tar.gz --generate-notes --verify-tag
 
+  # The computer service's Windows-specific parts (the Claude Code tool bridge's named pipe, which
+  # folders may be projects), on a real Windows machine.
+  windows:
+    runs-on: windows-2025
+    steps:
+      - uses: actions/checkout@v4
+      - uses: webfactory/ssh-agent@v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.CORE_DEPLOY_KEY }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.16.0
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec vitest run tests/unit/tool-bridge.test.ts
+
   # A version tag also builds the desktop app on each system and adds its installers to the release.
   desktop:
-    needs: check
+    needs: [check, windows]
     if: startsWith(github.ref, 'refs/tags/v')
     strategy:
       fail-fast: false

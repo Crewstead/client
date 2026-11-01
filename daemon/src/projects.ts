@@ -13,6 +13,15 @@ const SYSTEM = ['/bin', '/boot', '/dev', '/etc', '/lib', '/lib64', '/proc', '/ro
 const TOO_BROAD = ['/', '/home', '/tmp', '/mnt', '/media', '/opt', '/srv'];
 
 const inside = (path: string, folder: string) => path === folder || path.startsWith(folder + sep);
+/**
+ * The same on Windows: drive roots, the folders of the system, of all users and of installed programs,
+ * and each account's AppData (its programs' settings, browser profiles and sign-ins).
+ */
+const windowsSystem = (path: string) =>
+  /^[a-z]:\\?$/i.test(path) ||
+  /^[a-z]:\\users\\[^\\]+\\appdata(\\|$)/i.test(path) ||
+  (/^[a-z]:\\(windows|program files|program files \(x86\)|programdata|users)(\\|$)/i.test(path) &&
+    !/^[a-z]:\\users\\[^\\]+\\./i.test(path));
 
 /** Checks a folder can be a project: an existing directory, not a system, home or sign-in folder. */
 export function projectRoot(path: string, home = homedir()): string {
@@ -24,7 +33,11 @@ export function projectRoot(path: string, home = homedir()): string {
   }
   if (!statSync(root).isDirectory()) throw new Error(`Not a folder: ${root}`);
   if (root === realpathSync(home)) throw new Error('Your whole home folder cannot be a project.');
-  if (TOO_BROAD.includes(root) || SYSTEM.some((folder) => inside(root, folder)))
+  if (
+    TOO_BROAD.includes(root) ||
+    SYSTEM.some((folder) => inside(root, folder)) ||
+    (process.platform === 'win32' && windowsSystem(root))
+  )
     throw new Error(`System folders cannot be projects: ${root}`);
   const realHome = realpathSync(home);
   for (const entry of PRIVATE_HOME_ENTRIES) {

@@ -23,7 +23,11 @@ export async function openToolBridge(
   tools: MachineTool[],
   onCall: (name: string, args: string) => Promise<ToolAnswer>,
 ) {
-  const path = join(folder, `bridge-${randomBytes(6).toString('hex')}.sock`);
+  // A socket file on Linux and macOS (only this user may open it); a named pipe with a random name on
+  // Windows, which other accounts there may open read-only but not write to.
+  const name = `bridge-${randomBytes(6).toString('hex')}`;
+  const windows = process.platform === 'win32';
+  const path = windows ? `\\\\.\\pipe\\crewstead-${name}` : join(folder, `${name}.sock`);
   const sockets = new Set<Socket>();
   const server = createServer((socket) => {
     sockets.add(socket);
@@ -67,7 +71,7 @@ export async function openToolBridge(
     async close() {
       for (const socket of sockets) socket.destroy();
       await new Promise((resolve) => server.close(resolve));
-      await rm(path, { force: true });
+      if (!windows) await rm(path, { force: true });
     },
   };
 }
