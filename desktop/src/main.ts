@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { computerSettings } from '../../daemon/src/computer.ts';
 import { machineHome } from '../../daemon/src/config.ts';
 import { setAutostart } from './autostart.ts';
+import { terminalPath } from './shell-path.ts';
 import { Computer } from './computer.ts';
 import { hubOrigin, readSettings, writeSettings } from './settings.ts';
 import { createTray } from './tray.ts';
@@ -105,6 +106,8 @@ ipcMain.handle('connect-hub', async (event, input: string) => {
 });
 
 void app.whenReady().then(() => {
+  // The computer service runs Claude Code and project commands as a terminal would find them.
+  process.env.PATH = terminalPath();
   window = createWindow(icon);
   stayOn(window, hub);
   // Closing the window keeps the app (and this computer's service) running in the tray.

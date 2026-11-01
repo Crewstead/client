@@ -1,6 +1,6 @@
 {
   "name": "@crewstead/desktop",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "private": true,
   "type": "module",
   "description": "Crewstead for the desktop: your hub, with this computer's service built in.",
