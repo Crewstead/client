@@ -4,6 +4,7 @@ import { computerSettings } from '../../daemon/src/computer.ts';
 import { machineHome } from '../../daemon/src/config.ts';
 import { setAutostart } from './autostart.ts';
 import { terminalPath } from './shell-path.ts';
+import { keepUpdated } from './updates.ts';
 import { Computer } from './computer.ts';
 import { hubOrigin, readSettings, writeSettings } from './settings.ts';
 import { createTray } from './tray.ts';
@@ -141,6 +142,7 @@ void app.whenReady().then(() => {
   // Only a connection made for this app's hub; a computer connected elsewhere is asked first.
   if (computer.connectedHub() === hub()) computer.start();
   refreshTray();
+  keepUpdated();
 });
 app.on('second-instance', show);
 app.on('activate', () => window && show());

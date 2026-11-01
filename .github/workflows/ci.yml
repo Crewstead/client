@@ -89,4 +89,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           shopt -s nullglob
-          gh release upload "$GITHUB_REF_NAME" desktop/dist/Crewstead-*.{AppImage,exe,dmg} --clobber
+          # The installers, and what the apps' updater reads (latest*.yml, block maps).
+          gh release upload "$GITHUB_REF_NAME" desktop/dist/Crewstead-*.{AppImage,exe,dmg} \
+            desktop/dist/latest*.yml desktop/dist/*.blockmap --clobber
