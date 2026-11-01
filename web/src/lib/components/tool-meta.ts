@@ -28,6 +28,7 @@ import {
   Bot,
   Radar,
   ListChecks,
+  CalendarClock,
 } from '@lucide/svelte';
 import { kindOf, type ToolKind } from './tool-kinds.ts';
 
@@ -68,6 +69,10 @@ const shown: Record<string, { title: string; icon: typeof Wrench }> = {
   watch_list: { title: 'List watches', icon: Radar },
   watch_stop: { title: 'Stop watch', icon: Radar },
   plan_update: { title: 'Update the plan', icon: ListChecks },
+  schedule_create: { title: 'Schedule a task', icon: CalendarClock },
+  schedule_list: { title: 'List scheduled tasks', icon: CalendarClock },
+  schedule_update: { title: 'Change a scheduled task', icon: CalendarClock },
+  schedule_delete: { title: 'Delete a scheduled task', icon: CalendarClock },
   web_open: { title: 'Open page on the server', icon: Globe },
   web_click: { title: 'Click (server browser)', icon: MousePointerClick },
   web_type: { title: 'Type (server browser)', icon: Keyboard },
