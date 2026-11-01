@@ -13,6 +13,9 @@
   const done = $derived(steps.filter((step) => step.status === 'completed').length);
   // Folded at the end of a turn with every step done; open while there is something to follow.
   const finished = $derived(!docked && done === steps.length);
+  // Once the turn ended nothing is in progress any more: a step left so shows as not done.
+  const status = (step: PlanStep) =>
+    !docked && step.status === 'in_progress' ? 'pending' : step.status;
 </script>
 
 <!-- The model's step list for this turn, as it last kept it with plan_update. -->
@@ -24,9 +27,9 @@
   >
   <ol aria-label="Steps">
     {#each steps as step, index (index)}
-      <li data-status={step.status} class:live={docked && step.status === 'in_progress'}>
+      <li data-status={status(step)} class:live={docked && step.status === 'in_progress'}>
         {#if step.status === 'completed'}<CircleCheck size={14} aria-label="Done" />
-        {:else if step.status === 'in_progress'}<CircleDot size={14} aria-label="In progress" />
+        {:else if status(step) === 'in_progress'}<CircleDot size={14} aria-label="In progress" />
         {:else}<Circle size={14} aria-label="Not started" />{/if}
         <span>{step.step}</span>
       </li>

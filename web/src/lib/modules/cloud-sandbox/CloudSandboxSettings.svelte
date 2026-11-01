@@ -38,14 +38,19 @@
         >Code sandbox</span
       >
       <span class="row-status"
-        ><span class="status-dot" class:online={view.enabled}></span>For chats without a project · {busy &&
-        !view.enabled
+        ><span
+          class="status-dot"
+          class:online={view.enabled && !view.missing.length}
+          class:failed={view.enabled && view.missing.length > 0}
+        ></span>For chats without a project · {busy && !view.enabled
           ? 'setting up (the first time downloads gVisor)'
-          : view.enabled
-            ? `on, ${view.sandboxes} of ${view.limit} in use`
-            : view.missing.length
-              ? `needs ${view.missing.join(', ')} on the server`
-              : 'off'}</span
+          : view.enabled && view.missing.length
+            ? `on, but not working: needs ${view.missing.join(', ')} on the server`
+            : view.enabled
+              ? `on, ${view.sandboxes} of ${view.limit} in use`
+              : view.missing.length
+                ? `needs ${view.missing.join(', ')} on the server`
+                : 'off'}</span
       >
       {#if error}<span class="row-error" role="alert">{error}</span>{/if}
     </span>
