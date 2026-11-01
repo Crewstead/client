@@ -16,6 +16,12 @@ jobs:
       - uses: webfactory/ssh-agent@v0.9.1
         with:
           ssh-private-key: ${{ secrets.CORE_DEPLOY_KEY }}
+      # The computer service searches with ripgrep and sandboxes commands with bubblewrap; Ubuntu
+      # blocks the user namespaces bubblewrap needs unless allowed.
+      - name: Tools the computer service uses
+        run: |
+          sudo apt-get update -q && sudo apt-get install -yq ripgrep bubblewrap
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
       - uses: actions/setup-node@v4
         with:
           node-version: 24.16.0
