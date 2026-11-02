@@ -46,6 +46,17 @@
   let picked = $state('');
   const chosen = $derived(picked || conversation.session?.modelId || '');
   const model = $derived(models.find((entry) => entry.id === chosen));
+  /**
+   * A model picked here becomes the chat's model at once, so its scheduled tasks use it too; during
+   * a reply it switches with the next message instead.
+   */
+  function pickModel(id: string) {
+    picked = id;
+    const session = conversation.session;
+    if (!session || id === session.modelId) return;
+    if (session.status === 'running' || session.status === 'awaiting_approval') return;
+    void workspace.setPreferences(session.id, { modelId: id }).catch(() => {});
+  }
   // The project for the next message, likewise: '' is none, undefined keeps the chat's own.
   let pickedProject = $state<string>();
   const project = $derived(pickedProject ?? conversation.session?.projectId ?? '');
@@ -316,7 +327,7 @@
           {#snippet controls()}
             {#if models.length}<ModelPicker
                 {models}
-                bind:value={() => chosen, (id) => (picked = id)}
+                bind:value={() => chosen, pickModel}
                 effort={!!model?.effort}
                 disabled={conversation.sending}
               />{:else}<span>Unavailable model</span>{/if}

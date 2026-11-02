@@ -43,7 +43,10 @@ export class Workspace {
     if (this.catalog) this.catalog.preferences = result;
   }
 
-  async setPreferences(id: string, patch: Partial<Pick<Session, 'pinned' | 'archived' | 'title'>>) {
+  async setPreferences(
+    id: string,
+    patch: Partial<Pick<Session, 'pinned' | 'archived' | 'title' | 'modelId'>>,
+  ) {
     const context = this.context;
     const updated = await request<Session>(scoped(`/sessions/${id}`, context), {
       method: 'PATCH',
@@ -52,7 +55,13 @@ export class Workspace {
     if (context !== this.context) return;
     this.sessions = this.sessions.map((session) =>
       session.id === id
-        ? { ...session, pinned: updated.pinned, archived: updated.archived, title: updated.title }
+        ? {
+            ...session,
+            pinned: updated.pinned,
+            archived: updated.archived,
+            title: updated.title,
+            modelId: updated.modelId,
+          }
         : session,
     );
   }
