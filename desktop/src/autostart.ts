@@ -26,6 +26,7 @@ export function setAutostart(on: boolean) {
       'Type=Application',
       'Name=Crewstead',
       `Exec="${program}" --hidden`,
+      'Icon=crewstead',
       'X-GNOME-Autostart-enabled=true',
       '',
     ].join('\n'),

@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { computerSettings } from '../../daemon/src/computer.ts';
 import { machineHome } from '../../daemon/src/config.ts';
 import { setAutostart } from './autostart.ts';
+import { addToLauncher } from './launcher.ts';
 import { terminalPath } from './shell-path.ts';
 import { keepUpdated } from './updates.ts';
 import { Computer } from './computer.ts';
@@ -148,6 +149,7 @@ void app.whenReady().then(() => {
     quit: () => app.quit(),
   });
   setAutostart(readSettings().autostart !== false);
+  addToLauncher(join(assets, 'icon-256.png'));
   openHub();
   // Only a connection made for this app's hub; a computer connected elsewhere is asked first.
   if (computer.connectedHub() === hub()) computer.start();
