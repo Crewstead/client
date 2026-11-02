@@ -81,10 +81,11 @@
         {#each server.tools as tool (tool.name)}
           <li data-rule={tool.rule}>
             <span class="mcp-tool-text">
-              <span class="skill-row-name"
-                >{tool.name}{#if tool.readOnly}<span class="pill">Reads only</span>{/if}</span
+              <span class="skill-row-name">{tool.name}</span>
+              <span class="mcp-tool-description"
+                >{#if tool.readOnly}<span class="mcp-tool-reads">Reads only</span
+                  >{#if tool.description}&nbsp;·&#32;{/if}{/if}{tool.description}</span
               >
-              <span class="mcp-tool-description">{tool.description}</span>
             </span>
             <OptionPicker
               value={tool.rule}

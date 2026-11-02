@@ -9,9 +9,9 @@
 .settings-section .mcp-heading h2 {
   margin: 0;
 }
-.mcp-tools .pill {
-  font-family: inherit;
-  white-space: nowrap;
+.mcp-tool-reads {
+  color: var(--text);
+  font-weight: 500;
 }
 .mcp-server {
   border: 1px solid var(--line);
@@ -90,7 +90,7 @@
 .mcp-tools > li {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
   padding: 10px 14px 10px 34px;
 }
 .mcp-tools > li + li {
