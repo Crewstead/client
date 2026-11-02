@@ -1,4 +1,4 @@
-import { Menu, Tray, type MenuItemConstructorOptions } from 'electron';
+import { app, Menu, Tray, type MenuItemConstructorOptions } from 'electron';
 import type { ComputerState } from './computer.ts';
 
 const states: Record<ComputerState, string> = {
@@ -13,6 +13,7 @@ export interface TrayActions {
   useComputer(): void;
   wholeComputer(on: boolean): void;
   autostart(on: boolean): void;
+  checkUpdates(): void;
   changeHub(): void;
   quit(): void;
 }
@@ -48,6 +49,7 @@ export function createTray(icon: string, actions: TrayActions) {
           click: (item) => actions.autostart(item.checked),
         },
         { label: 'Use another hub…', click: actions.changeHub },
+        { label: `Check for updates… (version ${app.getVersion()})`, click: actions.checkUpdates },
         { label: 'Quit Crewstead', click: actions.quit },
       ]),
     );

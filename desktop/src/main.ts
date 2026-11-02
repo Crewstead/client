@@ -5,7 +5,7 @@ import { machineHome } from '../../daemon/src/config.ts';
 import { setAutostart } from './autostart.ts';
 import { addToLauncher } from './launcher.ts';
 import { terminalPath } from './shell-path.ts';
-import { keepUpdated } from './updates.ts';
+import { checkNow, keepUpdated } from './updates.ts';
 import { Computer } from './computer.ts';
 import { hubOrigin, readSettings, writeSettings } from './settings.ts';
 import { createTray } from './tray.ts';
@@ -146,6 +146,7 @@ void app.whenReady().then(() => {
       openHub();
       show();
     },
+    checkUpdates: () => void checkNow(),
     quit: () => app.quit(),
   });
   setAutostart(readSettings().autostart !== false);
