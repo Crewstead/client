@@ -107,14 +107,40 @@
   color: var(--muted);
   font-size: var(--text-xs);
 }
+/* A computer's status beside its name, on one line. */
+.machine-status {
+  display: inline-flex;
+  margin-left: 12px;
+  align-items: center;
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+/* Notes under a computer's projects read as text, code included. */
+.provider-group > ul > li.provider-empty {
+  display: block;
+}
+/* Phones: icon | name, path and what it allows | ⋯ — the summary under the name, not wrapped. */
 @media (max-width: 560px) {
   .provider-group > ul > li.project-row {
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    column-gap: var(--space-3);
+    row-gap: 2px;
   }
-  .project-text {
-    flex-basis: calc(100% - 60px);
+  .project-row > svg {
+    grid-row: 1;
   }
-  .project-allowed {
-    margin-left: 23px;
+  .project-row > .project-text {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .project-row > .project-allowed {
+    grid-column: 2;
+    grid-row: 2;
+    white-space: normal;
+  }
+  .project-row > .row-menu {
+    grid-column: 3;
+    grid-row: 1 / span 2;
   }
 }

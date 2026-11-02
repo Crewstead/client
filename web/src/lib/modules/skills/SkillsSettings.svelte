@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Pencil, Plus, Trash2 } from '@lucide/svelte';
+  import { Plus } from '@lucide/svelte';
+  import RowMenu, { type MenuItem } from '#lib/components/RowMenu.svelte';
   import type { Skill, SkillScope, SkillsView } from '@crewstead/core/protocol';
   import { skills } from './api.ts';
   import SkillEditor from './SkillEditor.svelte';
@@ -8,7 +9,6 @@
   let view = $state<SkillsView>();
   let error = $state('');
   let editing = $state<{ scope: SkillScope; skill?: Skill }>();
-  let confirming = $state('');
   async function refresh() {
     try {
       view = await skills.list();
@@ -24,9 +24,26 @@
     } catch (cause) {
       error = cause instanceof Error ? cause.message : 'That did not work.';
     }
-    confirming = '';
     await refresh();
   }
+  const menu = (skill: Skill): MenuItem[] => [
+    {
+      label: 'On',
+      checked: skill.enabled,
+      hint: 'Offered in chats',
+      run: () => act(() => skills.update(skill.id, { enabled: !skill.enabled })),
+    },
+    {
+      label: 'Edit',
+      hint: 'Name, description and instructions',
+      run: () => (editing = { scope: skill.scope, skill }),
+    },
+    {
+      label: 'Delete',
+      confirm: 'Delete? Click again to confirm.',
+      run: () => act(() => skills.remove(skill.id)),
+    },
+  ];
   const sections = $derived([
     {
       scope: 'global' as const,
@@ -72,37 +89,20 @@
           <li class="skill-row" data-enabled={skill.enabled}>
             <span class="skill-row-text">
               <span class="skill-row-name"
-                >{skill.name}{#if skill.always}<span class="pill">Every chat</span>{/if}</span
+                >{skill.name}{#if skill.always}<span class="pill">Every chat</span
+                  >{/if}{#if !skill.enabled && skill.editable}<span class="pill">Off</span
+                  >{/if}</span
               >
               <span class="skill-row-description" title={skill.description}
                 >{skill.description}</span
               >
             </span>
             {#if skill.editable}
-              <input
-                type="checkbox"
-                class="switch"
-                aria-label={`${skill.name} on`}
-                checked={skill.enabled}
-                onchange={(event) =>
-                  act(() => skills.update(skill.id, { enabled: event.currentTarget.checked }))}
+              <RowMenu
+                label={`Settings for ${skill.name}`}
+                title={skill.name}
+                items={menu(skill)}
               />
-              <button
-                class="icon-button"
-                aria-label={`Edit ${skill.name}`}
-                onclick={() => (editing = { scope: skill.scope, skill })}
-                ><Pencil size={14} /></button
-              >
-              {#if confirming === skill.id}<button
-                  class="button danger small"
-                  onclick={() => act(() => skills.remove(skill.id))}
-                  onblur={() => (confirming = '')}
-                  {@attach (node) => node.focus()}>Delete</button
-                >{:else}<button
-                  class="icon-button"
-                  aria-label={`Delete ${skill.name}`}
-                  onclick={() => (confirming = skill.id)}><Trash2 size={14} /></button
-                >{/if}
             {:else if !skill.enabled}<span class="pill">Off</span>{/if}
           </li>
         {/each}

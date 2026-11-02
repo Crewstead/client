@@ -45,11 +45,12 @@
   {#each list as machine (machine.id)}
     <div class="provider-group" role="group" aria-label={`Projects on ${machine.name}`}>
       <div class="provider-head">
-        <span class="row-text"><strong>{machine.name}</strong></span>
-        <span class="row-meta"
-          ><span class="status-dot" class:online={machine.online}></span>{machine.online
-            ? 'Online'
-            : 'Offline'}</span
+        <span class="row-text"
+          ><strong>{machine.name}</strong><small class="machine-status"
+            ><span class="status-dot" class:online={machine.online}></span>{machine.online
+              ? 'Online'
+              : 'Offline'}</small
+          ></span
         >
         {#if machine.online && machine.folders.length}
           <button class="button subtle small add-project-button" onclick={() => (adding = machine)}

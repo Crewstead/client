@@ -152,12 +152,14 @@
   font-size: 12px;
 }
 /* A row's state under its name: a dot and a short line. */
+/* A status line: its dot sits in the text, so a wrapped line continues under the dot. */
 .row-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+  display: block;
   color: var(--muted);
   font-size: var(--text-xs);
+}
+.row-status > .status-dot {
+  vertical-align: 1px;
 }
 .settings-card .address-form {
   display: flex;
