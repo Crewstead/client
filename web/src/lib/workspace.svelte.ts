@@ -179,6 +179,22 @@ export class Workspace {
     }
   }
 
+  /**
+   * Re-reads the catalog (models, projects, computers), so a computer that comes online or goes
+   * offline shows without a reload. Quiet: a failed check keeps what is shown.
+   */
+  async refreshCatalog() {
+    if (this.disposed || !this.catalog) return;
+    const generation = this.generation;
+    const context = this.context;
+    try {
+      const catalog = await request<Catalog>(scoped('/catalog', context));
+      if (generation === this.generation && context === this.context) this.catalog = catalog;
+    } catch {
+      // Offline for a moment: the next check tries again.
+    }
+  }
+
   /** The active workspace entry (Personal or an organisation, with the caller's role). */
   get current() {
     return this.catalog?.contexts.find((context) => context.id === this.context);

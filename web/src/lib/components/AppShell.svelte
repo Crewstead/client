@@ -17,6 +17,26 @@
     sidebarWidth.load();
     chatPanelWidth.load();
     void workspace.initialize();
+    // Computers come online and go offline: the list of places follows while the page is shown.
+    const fresh = () => document.visibilityState === 'visible' && void workspace.refreshCatalog();
+    const timer = setInterval(fresh, 15_000);
+    window.addEventListener('focus', fresh);
+    document.addEventListener('visibilitychange', fresh);
+    // In the desktop app: this computer just connected or dropped, so refresh now.
+    const desktop = (
+      globalThis as {
+        crewsteadDesktop?: { onComputerState?: (listener: () => void) => () => void };
+      }
+    ).crewsteadDesktop;
+    const stopFollowing = desktop?.onComputerState?.(
+      () => void setTimeout(() => workspace.refreshCatalog(), 500),
+    );
+    return () => {
+      stopFollowing?.();
+      clearInterval(timer);
+      window.removeEventListener('focus', fresh);
+      document.removeEventListener('visibilitychange', fresh);
+    };
   });
   onDestroy(() => workspace.dispose());
 </script>

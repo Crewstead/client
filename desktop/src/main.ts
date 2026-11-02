@@ -27,7 +27,11 @@ const trayIcon = join(assets, 'tray.png');
 let window: BrowserWindow;
 let quitting = false;
 let asked = false;
-const computer = new Computer(() => refreshTray());
+// The page hears when this computer connects, so it shows it online at once.
+const computer = new Computer(() => {
+  refreshTray();
+  if (window && !window.isDestroyed()) window.webContents.send('computer-state', computer.state);
+});
 let tray: ReturnType<typeof createTray> | undefined;
 
 const hub = () => readSettings().hub;
