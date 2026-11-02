@@ -139,7 +139,8 @@
     display: none;
     position: fixed;
     z-index: 21;
-    --sidebar-width: 272px;
+    /* Most of a phone's width, so chat titles have room. */
+    --sidebar-width: min(340px, 88vw);
     left: 0;
   }
   .sidebar.open {
@@ -254,4 +255,10 @@
   color: var(--faint);
   font-family: inherit;
   font-size: 11px;
+}
+/* No keyboard shortcut to show on touch screens. */
+@media (hover: none) {
+  .sidebar-search-button kbd {
+    display: none;
+  }
 }

@@ -113,18 +113,50 @@
     animation: none;
   }
 }
+/* The touch screens' menu button, and the strip of labelled actions it opens under the chat. */
+.chat-actions .chat-more {
+  display: none;
+}
+.chat-row-menu {
+  display: flex;
+  gap: 6px;
+  margin: 2px 0 6px;
+  padding: 0 6px;
+}
+.chat-row-menu button {
+  display: inline-flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--text-sm);
+}
 @media (hover: none) {
   .chat-actions {
     opacity: 1;
     pointer-events: auto;
   }
-  .chat-link {
-    padding-right: 76px;
-    min-height: 40px;
+  .chat-actions > button:not(.chat-more) {
+    display: none;
   }
-  .chat-actions button {
-    width: 30px;
-    height: 32px;
+  .chat-actions .chat-more {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+  }
+  .chat-link {
+    padding-right: 44px;
+    min-height: 44px;
+  }
+  .chat-row.menu-open .chat-link {
+    background: var(--surface);
   }
   .pin-marker {
     display: none;
