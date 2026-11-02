@@ -2,13 +2,13 @@
   import ResizeHandle from './ResizeHandle.svelte';
   import { sidebarWidth } from '#lib/panel-widths.svelte.ts';
   import { resolve } from '$app/paths';
-  import { Cloud, Laptop, MonitorPlay, Plus, Search } from '@lucide/svelte';
-  import { SvelteSet } from 'svelte/reactivity';
+  import { ChevronLeft, MonitorPlay, Plus, Search } from '@lucide/svelte';
   import { page } from '$app/state';
   import { busy, useWorkspace } from '#lib/workspace.svelte.ts';
   import { notifier } from '#lib/notifications.svelte.ts';
   import ChatRow from './ChatRow.svelte';
-  import PlaceGroup from './PlaceGroup.svelte';
+  import PlaceRow from './PlaceRow.svelte';
+  import { CLOUD, placesOf } from './sidebar-places.ts';
   import AccountMenu from './AccountMenu.svelte';
   import WorkspaceMenu from './WorkspaceMenu.svelte';
   import { activeModules } from '#lib/modules/registry.ts';
@@ -24,50 +24,40 @@
     activeModules(workspace.catalog?.modules).flatMap((module) => module.sidebarLinks ?? []),
   );
   let search = $state('');
-  const active = $derived(
-    workspace.sessions
-      .filter((session) => !session.archived)
-      .sort((a, b) => Number(b.pinned) - Number(a.pinned)),
+  const sessions = $derived(workspace.sessions.filter((session) => !session.archived));
+  const places = $derived(placesOf(sessions, workspace.catalog?.projects ?? []));
+  /** With only the cloud there is nothing to choose between: its chats are the list. */
+  const cloudOnly = $derived(places.length === 1);
+  // The place whose chats show: the one chosen in the panel, else the open chat's (or the new chat's).
+  let chosen = $state<string | null>();
+  $effect(() => {
+    void page.url.href;
+    chosen = undefined;
+    search = '';
+  });
+  const following = $derived.by(() => {
+    const chat = sessions.find((session) => session.id === page.params.id);
+    if (chat) return chat.projectId ?? CLOUD;
+    if (page.url.pathname === '/new') return page.url.searchParams.get('project') ?? undefined;
+    return undefined;
+  });
+  const shownId = $derived(cloudOnly ? CLOUD : chosen !== undefined ? chosen : following);
+  const shown = $derived(places.find((place) => place.id === shownId));
+  function choose(id: string | null) {
+    chosen = id;
+    search = '';
+  }
+  const words = $derived(search.trim().toLowerCase());
+  const chats = $derived(
+    (shown?.chats ?? []).filter((session) => session.title.toLowerCase().includes(words)),
   );
-  const sessions = $derived(
-    active.filter((session) => session.title.toLowerCase().includes(search.toLowerCase())),
+  const listed = $derived(
+    places.filter((place) => `${place.name} ${place.machine ?? ''}`.toLowerCase().includes(words)),
   );
-  type Place = { id: string; name: string; computer: boolean; sessions: typeof sessions };
-  // Chats on a computer are grouped under it, and there by place: the whole computer first, then
-  // each project. While a chat is dragged, places with no chats yet show too, as places to drop it.
+  // While a chat is dragged, the other places show above the chats, as places to drop it.
   let dragging = $state<{ id: string; from: string }>();
   let over = $state('');
   let moveError = $state('');
-  const computers = $derived.by(() => {
-    const list: { name: string; places: Place[] }[] = [];
-    const placeFor = (id: string, saved?: string) => {
-      const known = workspace.catalog?.projects.find((project) => project.id === id);
-      const name = known?.machine ?? 'Offline computer';
-      let computer = list.find((entry) => entry.name === name);
-      if (!computer) list.push((computer = { name, places: [] }));
-      let place = computer.places.find((entry) => entry.id === id);
-      if (!place) {
-        const whole = known?.kind === 'computer' || id.endsWith(':computer');
-        place = {
-          id,
-          name: whole ? 'Whole computer' : (known?.name ?? saved ?? 'Project'),
-          computer: whole,
-          sessions: [],
-        };
-        computer.places.push(place);
-      }
-      return place;
-    };
-    for (const session of sessions)
-      if (session.projectId)
-        placeFor(session.projectId, session.projectName).sessions.push(session);
-    for (const computer of list)
-      computer.places.sort((a, b) => Number(b.computer) - Number(a.computer));
-    // Added below the places already shown, so starting a drag does not move them under the pointer.
-    if (dragging) for (const project of workspace.catalog?.projects ?? []) placeFor(project.id);
-    return list;
-  });
-  const loose = $derived(sessions.filter((session) => !session.projectId));
   // While any chat is working, the list checks back every few seconds, so its row changes when it ends;
   // with notifications on, now and then too, for replies the hub starts (scheduled tasks).
   $effect(() => {
@@ -79,26 +69,6 @@
   $effect(() => {
     workspace.seen(page.params.id ?? '');
   });
-  // Folded places, remembered in this browser.
-  const FOLDED = 'crewstead:folded-places';
-  const folded = new SvelteSet<string>(
-    (() => {
-      try {
-        return JSON.parse(localStorage.getItem(FOLDED) ?? '[]') as string[];
-      } catch {
-        return [];
-      }
-    })(),
-  );
-  function fold(id: string) {
-    if (folded.has(id)) folded.delete(id);
-    else folded.add(id);
-    try {
-      localStorage.setItem(FOLDED, JSON.stringify([...folded]));
-    } catch {
-      // Not remembered in a private window; folding still works.
-    }
-  }
   function dropZone(target: string) {
     return (node: HTMLElement) => {
       const allowed = () => dragging && dragging.from !== target;
@@ -119,7 +89,7 @@
         over = '';
         moveError = '';
         try {
-          await workspace.move(chat, target === 'cloud' ? null : target);
+          await workspace.move(chat, target === CLOUD ? null : target);
         } catch (cause) {
           moveError = cause instanceof Error ? cause.message : 'The chat could not be moved.';
         }
@@ -135,7 +105,7 @@
     };
   }
   const dragOf = (session: (typeof sessions)[number]) => (started: boolean) => {
-    dragging = started ? { id: session.id, from: session.projectId ?? 'cloud' } : undefined;
+    dragging = started ? { id: session.id, from: session.projectId ?? CLOUD } : undefined;
     if (!started) over = '';
   };
 </script>
@@ -162,62 +132,79 @@
       onclick={close}><Icon size={15} />{link.label}</a
     >
   {/each}
-  <div class="sessions-heading">
-    <h2>Chats</h2>
-    <a
-      class="new-session"
-      href={resolve('/new')}
-      onclick={close}
-      aria-label="New chat"
-      title="New chat"><Plus size={16} /></a
-    >
-  </div>
-  {#if active.length > 8}<div class="sidebar-search">
+  {#if shown && !cloudOnly}
+    <div class="sessions-heading place-heading-open">
+      <button
+        class="place-back"
+        aria-label="All projects"
+        title="All projects"
+        onclick={() => choose(null)}><ChevronLeft size={16} /></button
+      >
+      <h2 title={shown.machine ? `${shown.name} on ${shown.machine}` : shown.name}>
+        {shown.name}{#if shown.machine}<small>{shown.machine}</small>{/if}
+      </h2>
+      <!-- eslint-disable svelte/no-navigation-without-resolve -- built with resolve() -->
+      <a
+        class="new-session"
+        href={shown.id === CLOUD
+          ? resolve('/new')
+          : `${resolve('/new')}?project=${encodeURIComponent(shown.id)}`}
+        onclick={close}
+        aria-label={`New chat in ${shown.name}`}
+        title={`New chat in ${shown.name}`}><Plus size={16} /></a
+      >
+      <!-- eslint-enable svelte/no-navigation-without-resolve -->
+    </div>
+  {:else}
+    <div class="sessions-heading">
+      <h2>{cloudOnly ? 'Chats' : 'Projects'}</h2>
+      <a
+        class="new-session"
+        href={resolve('/new')}
+        onclick={close}
+        aria-label="New chat"
+        title="New chat"><Plus size={16} /></a
+      >
+    </div>
+  {/if}
+  {#if (shown ? shown.chats.length : places.length) > 8}<div class="sidebar-search">
       <Search size={14} /><input
-        aria-label="Search chats"
-        placeholder="Search chats"
+        aria-label={shown ? 'Search chats' : 'Search projects'}
+        placeholder={shown ? `Search chats in ${shown.name}` : 'Search projects'}
         bind:value={search}
       />
     </div>{/if}
   <nav class="session-list" class:dragging aria-label="Chats">
     {#if moveError}<p class="chat-error" role="alert">{moveError}</p>{/if}
-    {#each computers as computer (computer.name)}
-      <section class="computer-chats" aria-label={`Computer ${computer.name}`}>
-        <h3 class="computer-name"><Laptop size={12} />{computer.name}</h3>
-        {#each computer.places as place (place.id)}
-          <PlaceGroup
-            label={place.computer ? `Whole computer ${computer.name}` : `Project ${place.name}`}
-            name={place.name}
-            kind={place.computer ? 'computer' : 'project'}
-            chats={place.sessions}
-            open={!folded.has(place.id)}
-            toggle={() => fold(place.id)}
-            over={over === place.id}
-            drop={dropZone(place.id)}
-            selected={page.params.id}
-            {close}
-            drag={dragOf}
-          />
-        {/each}
-      </section>
-    {/each}
-    <!-- The cloud is a "where" like a computer; it has no projects, so its chats sit right under it. -->
-    <section
-      class="computer-chats cloud-chats"
-      class:drop-over={over === 'cloud'}
-      aria-label="Cloud chats"
-      {@attach dropZone('cloud')}
-    >
-      {#if computers.length || dragging}<h3 class="computer-name"><Cloud size={12} />Cloud</h3>{/if}
-      {#each loose as session (session.id)}
+    {#if shown}
+      {#if dragging && !cloudOnly}
+        <section class="drop-places" aria-label="Move to">
+          <p>Move to</p>
+          {#each places.filter((place) => place.id !== shown.id) as place (place.id)}
+            <PlaceRow {place} open={() => {}} over={over === place.id} drop={dropZone(place.id)} />
+          {/each}
+        </section>
+      {/if}
+      {#each chats as session (session.id)}
         <ChatRow
           {session}
           selected={page.params.id === session.id}
           {close}
           drag={dragOf(session)}
         />
+      {:else}
+        <p class="place-empty">{words ? 'No chats match.' : 'No chats here yet.'}</p>
       {/each}
-    </section>
+    {:else}
+      {#each listed as place (place.id)}
+        <PlaceRow
+          {place}
+          open={() => choose(place.id)}
+          over={over === place.id}
+          drop={dropZone(place.id)}
+        />
+      {/each}
+    {/if}
   </nav>
   <footer class="sidebar-footer">
     {#key open}<AccountMenu {close} />{/key}

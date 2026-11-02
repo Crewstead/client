@@ -1,6 +1,7 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
   import { resolve } from '$app/paths';
+  import { page } from '$app/state';
   import type { Session } from '@crewstead/core/protocol';
   import { request, scoped } from '#lib/api.ts';
   import { useWorkspace } from '#lib/workspace.svelte.ts';
@@ -12,8 +13,8 @@
   const workspace = useWorkspace();
   let model = $state('');
   const selected = $derived(workspace.catalog?.models.find((item) => item.id === model));
-  // A new chat starts in the cloud; pick a project for one that needs it.
-  let project = $state('');
+  // A new chat starts in the cloud, or in the project the left panel's + was for (?project=).
+  let project = $state(page.url.searchParams.get('project') ?? '');
   const projects = $derived(workspace.catalog?.projects ?? []);
   $effect(() => {
     if (project && workspace.catalog && !projects.some((item) => item.id === project)) project = '';
