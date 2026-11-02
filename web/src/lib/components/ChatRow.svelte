@@ -2,6 +2,7 @@
   import { resolve } from '$app/paths';
   import { Pin, PinOff, Archive, FolderInput, Ellipsis } from '@lucide/svelte';
   import MoveChat from './MoveChat.svelte';
+  import ChatActionsSheet from './ChatActionsSheet.svelte';
   import { tick } from 'svelte';
   import type { Session } from '@crewstead/core/protocol';
   import { useWorkspace } from '#lib/workspace.svelte.ts';
@@ -21,20 +22,6 @@
   let moving = $state(false);
   /** On touch screens the actions live behind one button, so titles keep the row's width. */
   let menu = $state(false);
-  let row = $state<HTMLElement>();
-  $effect(() => {
-    if (!menu) return;
-    const away = (event: PointerEvent) => {
-      if (!row?.parentElement?.contains(event.target as Node)) menu = false;
-    };
-    const escape = (event: KeyboardEvent) => event.key === 'Escape' && (menu = false);
-    window.addEventListener('pointerdown', away);
-    window.addEventListener('keydown', escape);
-    return () => {
-      window.removeEventListener('pointerdown', away);
-      window.removeEventListener('keydown', escape);
-    };
-  });
   const workspace = useWorkspace();
   /** How its last reply ended, when that happened while another chat was open. */
   const ending = $derived(workspace.unseen.get(session.id));
@@ -59,13 +46,7 @@
   }
 </script>
 
-<div
-  class="chat-row"
-  class:selected
-  class:menu-open={menu}
-  aria-label={session.title}
-  bind:this={row}
->
+<div class="chat-row" class:selected aria-label={session.title}>
   <a
     class="chat-link"
     class:pinned={session.pinned}
@@ -121,34 +102,18 @@
     <button
       class="chat-more"
       aria-label={`Actions for ${session.title}`}
-      aria-expanded={menu}
-      onclick={() => (menu = !menu)}><Ellipsis size={16} /></button
+      aria-haspopup="dialog"
+      onclick={() => (menu = true)}><Ellipsis size={16} /></button
     >
   </div>
 </div>
-{#if menu}<div class="chat-row-menu" role="group" aria-label={`Actions for ${session.title}`}>
-    <button
-      disabled={busy}
-      onclick={() => {
-        menu = false;
-        void update({ pinned: !session.pinned });
-      }}
-      >{#if session.pinned}<PinOff size={14} />Unpin{:else}<Pin size={14} />Pin{/if}</button
-    >
-    <button
-      disabled={busy}
-      onclick={() => {
-        menu = false;
-        moving = true;
-      }}><FolderInput size={14} />Move</button
-    >
-    <button
-      disabled={busy}
-      onclick={() => {
-        menu = false;
-        void update({ archived: true });
-      }}><Archive size={14} />Archive</button
-    >
-  </div>{/if}
+{#if menu}<ChatActionsSheet
+    title={session.title}
+    pinned={session.pinned}
+    pin={() => void update({ pinned: !session.pinned })}
+    move={() => (moving = true)}
+    archive={() => void update({ archived: true })}
+    close={() => (menu = false)}
+  />{/if}
 {#if error}<p class="chat-error" role="alert">{error}</p>{/if}
 {#if moving}<MoveChat {session} close={() => (moving = false)} />{/if}

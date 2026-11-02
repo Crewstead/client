@@ -256,9 +256,10 @@
   font-family: inherit;
   font-size: 11px;
 }
-/* No keyboard shortcut to show on touch screens. */
+/* No keyboard shortcut to show on touch screens, and one search: Search finds chats by name too. */
 @media (hover: none) {
-  .sidebar-search-button kbd {
+  .sidebar-search-button kbd,
+  .sidebar-search {
     display: none;
   }
 }
