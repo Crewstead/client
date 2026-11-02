@@ -17,6 +17,8 @@ export interface MachineConfig {
   folders?: MachineFolder[];
   /** Whole-computer chats: off unless its owner turned them on here (`crewstead computer on`). */
   computer?: { enabled: boolean; commands: boolean; browser: boolean };
+  /** Claude Code accounts here; absent: just the usual sign-in (claude-accounts.ts). */
+  claudeAccounts?: { id: string; name: string; folder: string | null }[];
 }
 
 /** The daemon's own folder; never Claude Code's or any other tool's configuration. */

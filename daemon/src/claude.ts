@@ -43,11 +43,13 @@ export async function runClaude(
   signal: AbortSignal,
   /** Called for each hub tool the model uses; resolves with the hub's result. */
   onToolCall: (name: string, args: string) => Promise<ToolAnswer>,
+  /** Claude Code's environment, which names the account's folder. */
+  env: NodeJS.ProcessEnv = claudeEnvironment(process.env),
 ) {
   const bridge = run.tools.length ? await openToolBridge(cwd, run.tools, onToolCall) : undefined;
   const child = spawn(binary, claudeArgs(run, bridge?.config), {
     cwd,
-    env: claudeEnvironment(process.env),
+    env,
     stdio: ['pipe', 'pipe', 'pipe'],
     detached: process.platform !== 'win32',
   });

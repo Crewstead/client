@@ -36,3 +36,21 @@ export const computerProjects = {
     patch: { enabled?: false; commands?: boolean; browser?: boolean },
   ) => request(`/machines/${machineId}/computer`, { method: 'PATCH', body: JSON.stringify(patch) }),
 };
+
+/** Claude Code accounts on one computer. Signing in happens in that computer's browser. */
+export const claudeAccounts = {
+  add: (machineId: string, name: string, mode: 'usual' | 'new') =>
+    request(`/machines/${machineId}/claude-accounts`, {
+      method: 'POST',
+      body: JSON.stringify({ name, mode }),
+    }),
+  login: (machineId: string, account: string) =>
+    request(`/machines/${machineId}/claude-accounts/${account}/login`, { method: 'POST' }),
+  rename: (machineId: string, account: string, name: string) =>
+    request(`/machines/${machineId}/claude-accounts/${account}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ name }),
+    }),
+  remove: (machineId: string, account: string) =>
+    request(`/machines/${machineId}/claude-accounts/${account}`, { method: 'DELETE' }),
+};

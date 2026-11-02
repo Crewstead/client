@@ -1,0 +1,65 @@
+/* Claude Code accounts on a computer (Settings → Models) and the dialog that adds or renames one. */
+.provider-group > ul > li.claude-account {
+  padding-left: 58px;
+}
+.claude-account .project-path > .status-dot {
+  vertical-align: 1px;
+}
+.claude-account[data-signed-in='false'] .row-name {
+  color: var(--muted);
+}
+.provider-group > ul > li.claude-account-add {
+  padding-left: 52px;
+}
+.claude-account-dialog {
+  width: min(520px, calc(100vw - 32px));
+}
+.claude-account-modes {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 14px;
+  padding: 0;
+  border: 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+.claude-account-modes legend {
+  margin-bottom: 6px;
+  padding: 0;
+}
+.claude-account-modes label {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.claude-account-modes label:has(input:checked) {
+  border-color: var(--accent);
+}
+.claude-account-modes label.disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.claude-account-modes input {
+  margin-top: 3px;
+}
+.claude-account-modes span {
+  display: grid;
+  gap: 2px;
+}
+.claude-account-modes strong {
+  color: var(--text);
+  font-weight: 500;
+}
+.claude-account-modes small {
+  font-size: var(--text-xs);
+}
+@media (max-width: 560px) {
+  .provider-group > ul > li.claude-account,
+  .provider-group > ul > li.claude-account-add {
+    padding-left: var(--space-4);
+  }
+}

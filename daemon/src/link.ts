@@ -9,6 +9,12 @@ import type {
   MachineReport,
 } from '@crewstead/core/protocol';
 import { detectClaudeCode, runClaude } from './claude.ts';
+import {
+  accountEnvironment,
+  accountFor,
+  accountStatuses,
+  claudeAccountAction,
+} from './claude-accounts.ts';
 import { computerHello } from './computer.ts';
 import type { MachineConfig } from './config.ts';
 import { listFolders, projectAction } from './folders.ts';
@@ -78,10 +84,20 @@ async function linkOnce(options: LinkOptions, connected: () => void) {
     if (!response.ok) throw new Error(`hub answered ${response.status}`);
     return response;
   };
+  const claudeHello = async () => {
+    const found = await detectClaudeCode(options.claude);
+    return (
+      found && { ...found, accounts: await accountStatuses(options.claude, options.tools.home) }
+    );
+  };
+  const sendHello = () =>
+    void hello()
+      .then((value) => call('/api/machine/hello', value))
+      .catch(() => {});
   const hello = async (): Promise<MachineHello> => ({
     name: hostname().slice(0, 80) || 'Computer',
     version: DAEMON_VERSION,
-    claudeCode: await detectClaudeCode(options.claude),
+    claudeCode: await claudeHello(),
     projects: listProjects(options.tools.home),
     sandbox: options.tools.sandbox,
     folders: listFolders(options.tools.home),
@@ -132,7 +148,16 @@ async function linkOnce(options: LinkOptions, connected: () => void) {
       const { action } = command;
       if (isBrowserAction(action))
         answer = { requestId: command.requestId, ...(await browsers.answer(action)) };
-      else {
+      else if (action.kind.startsWith('claude_')) {
+        await claudeAccountAction(
+          options.claude,
+          options.tools.home,
+          action as Parameters<typeof claudeAccountAction>[2],
+          sendHello,
+        );
+        await call('/api/machine/hello', await hello()).catch(() => {});
+        answer = { requestId: command.requestId };
+      } else {
         const result = projectAction(options.tools.home, action);
         if (action.kind !== 'browse')
           await call('/api/machine/hello', await hello()).catch(() => {});
@@ -245,6 +270,7 @@ async function execute(
       (chunk) => pending.push(chunk),
       signal,
       onToolCall,
+      accountEnvironment(accountFor(options.tools.home, run.account)),
     );
     clearInterval(timer);
     await flush({ done: true });
