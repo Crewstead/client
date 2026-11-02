@@ -1,4 +1,4 @@
-import type { FolderEntry, MachineView, ProjectRules } from '@crewstead/core/protocol';
+import type { MachineView, ProjectRules } from '@crewstead/core/protocol';
 import { request } from '#lib/api.ts';
 
 /** Computers connected through the Crewstead app on them. The token is returned only once. */
@@ -12,17 +12,8 @@ export const machines = {
   remove: (id: string) => request(`/machines/${id}`, { method: 'DELETE' }),
 };
 
-/** Projects on one computer, managed from here inside the folders its owner allowed there. */
+/** Projects on one computer: added there, restricted or removed from here. */
 export const computerProjects = {
-  browse: (machineId: string, folderId: string, path: string) =>
-    request<{ entries: FolderEntry[]; more: boolean }>(
-      `/machines/${machineId}/folders/${folderId}?path=${encodeURIComponent(path)}`,
-    ),
-  add: (machineId: string, folderId: string, path: string) =>
-    request(`/machines/${machineId}/projects`, {
-      method: 'POST',
-      body: JSON.stringify({ folderId, path }),
-    }),
   update: (machineId: string, projectId: string, patch: { rules?: Partial<ProjectRules> }) =>
     request(`/machines/${machineId}/projects/${projectId}`, {
       method: 'PATCH',

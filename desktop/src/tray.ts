@@ -11,7 +11,6 @@ const states: Record<ComputerState, string> = {
 export interface TrayActions {
   show(): void;
   useComputer(): void;
-  allowFolder(): void;
   wholeComputer(on: boolean): void;
   autostart(on: boolean): void;
   changeHub(): void;
@@ -28,7 +27,6 @@ export function createTray(icon: string, actions: TrayActions) {
       state === 'off' || state === 'removed'
         ? [{ label: 'Let chats use this computer…', click: actions.useComputer }]
         : [
-            { label: 'Allow a folder for projects…', click: actions.allowFolder },
             {
               label: 'Chats may use the whole computer',
               type: 'checkbox',

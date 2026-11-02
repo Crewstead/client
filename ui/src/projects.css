@@ -1,9 +1,13 @@
-/* Settings → Projects: project rows with their rules, and the Add project folder browser. */
-.add-project-button {
-  display: inline-flex;
+/* Settings → Projects: project rows with their rules. */
+.projects-heading {
+  display: flex;
   align-items: center;
-  gap: 4px;
-  margin-left: auto;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.settings-section .projects-heading h2 {
+  margin: 0;
 }
 .provider-group > ul > li.project-row {
   padding-left: var(--space-4);
@@ -24,88 +28,6 @@
   color: var(--muted);
   font-size: var(--text-xs);
   white-space: nowrap;
-}
-.add-project .folder-select {
-  width: 100%;
-  margin-bottom: var(--space-3);
-}
-.folder-trail {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 2px;
-  margin-bottom: var(--space-2);
-  color: var(--muted);
-  font-size: var(--text-sm);
-}
-.trail-step {
-  min-height: 0;
-  padding: 2px 6px;
-  border: 0;
-  border-radius: 6px;
-  background: none;
-  color: var(--text);
-  font: inherit;
-  cursor: pointer;
-}
-.trail-step:hover:not(:disabled) {
-  background: var(--surface-hover);
-}
-.trail-step:disabled {
-  color: var(--muted);
-  cursor: default;
-}
-.folder-list {
-  max-height: min(360px, 50vh);
-  margin: 0 0 var(--space-3);
-  padding: 0;
-  overflow-y: auto;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  list-style: none;
-}
-.folder-list > li {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-height: 40px;
-  padding: 4px var(--space-2) 4px 4px;
-  font-size: var(--text-sm);
-}
-.folder-list > li + li {
-  border-top: 1px solid var(--line-subtle);
-}
-.folder-list > li.provider-empty {
-  padding-left: var(--space-3);
-}
-.folder-open {
-  display: flex;
-  flex: 1;
-  align-items: center;
-  gap: var(--space-2);
-  min-width: 0;
-  min-height: 32px;
-  padding: 4px 8px;
-  border: 0;
-  border-radius: 6px;
-  background: none;
-  color: var(--text);
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-.folder-open:hover {
-  background: var(--surface-hover);
-}
-.folder-open > span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.folder-added {
-  padding: 0 8px;
-  color: var(--muted);
-  font-size: var(--text-xs);
 }
 /* A computer's status beside its name, on one line. */
 .machine-status {

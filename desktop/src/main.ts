@@ -77,18 +77,29 @@ async function offerComputer(force = false) {
   }
 }
 
-async function allowFolder() {
+/**
+ * Adds a project on this computer from the folder its owner picks in the system's dialog. Asked by
+ * the hub's Settings page; only the hub this computer is connected to may ask.
+ */
+ipcMain.handle('add-project', async (event) => {
+  const address = hub();
+  const from = event.senderFrame?.url;
+  if (!address || !from || new URL(from).origin !== address) return 'Not allowed.';
+  if (computer.connectedHub() !== address || computer.state === 'removed')
+    return 'Let chats use this computer first (Crewstead asks when you sign in).';
   const picked = await dialog.showOpenDialog(window, {
-    title: 'Allow a folder for projects',
+    title: 'Add a project folder',
+    buttonLabel: 'Add project',
     properties: ['openDirectory', 'createDirectory'],
   });
-  if (picked.canceled || !picked.filePaths[0]) return;
+  if (picked.canceled || !picked.filePaths[0]) return 'cancelled';
   try {
-    await computer.command(['allow', picked.filePaths[0]]);
+    await computer.command(['add', picked.filePaths[0]]);
+    return '';
   } catch (error) {
-    dialog.showErrorBox('Could not allow that folder', String((error as Error).message));
+    return (error as Error).message.split('\n').at(-1) || 'Could not add that folder.';
   }
-}
+});
 
 // The first-run page's address; accepted from that page only, never from a hub page.
 ipcMain.handle('connect-hub', async (event, input: string) => {
@@ -123,7 +134,6 @@ void app.whenReady().then(() => {
   tray = createTray(trayIcon, {
     show,
     useComputer: () => void offerComputer(true),
-    allowFolder: () => void allowFolder(),
     wholeComputer: (on) =>
       void computer.command(['computer', on ? 'on' : 'off']).then(refreshTray, refreshTray),
     autostart: (on) => {
