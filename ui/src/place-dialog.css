@@ -111,3 +111,45 @@
     max-height: calc(85dvh - 60px);
   }
 }
+/* The model chooser: one line per model, and the effort choice below the list. */
+.place-choice.model-choice {
+  min-height: 38px;
+}
+.model-effort {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+.model-effort > span {
+  margin-right: auto;
+}
+.model-effort button {
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: var(--text-xs);
+  cursor: pointer;
+}
+.model-effort button[aria-pressed='true'] {
+  border-color: var(--text);
+  color: var(--text);
+}
+/* Below the places: adding a project (in the desktop app), or where to do that. */
+.place-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
