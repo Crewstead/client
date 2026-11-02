@@ -143,13 +143,21 @@
   color: var(--text);
 }
 /* Below the places: adding a project (in the desktop app), or where to do that. */
+.search-field .place-add {
+  margin: -6px -8px -6px 0;
+}
 .place-footer {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 12px;
+  margin: 0;
   padding: 10px 14px;
   border-top: 1px solid var(--line);
   color: var(--muted);
   font-size: var(--text-xs);
+}
+.place-spin {
+  animation: place-spin 0.9s linear infinite;
+}
+@keyframes place-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }

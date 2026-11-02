@@ -1,5 +1,14 @@
 <script lang="ts">
-  import { Check, Cloud, Folder, FolderPlus, Laptop, Monitor, Search } from '@lucide/svelte';
+  import {
+    Check,
+    Cloud,
+    Folder,
+    Laptop,
+    LoaderCircle,
+    Monitor,
+    Plus,
+    Search,
+  } from '@lucide/svelte';
   import type { Project } from '@crewstead/core/protocol';
   import { useWorkspace } from '#lib/workspace.svelte.ts';
   import '@crewstead/ui/dialogs.css';
@@ -131,6 +140,18 @@
       bind:value={query}
       onkeydown={keys}
     />
+    {#if desktop?.addProject}
+      <button
+        class="icon-button place-add"
+        aria-label="Add project"
+        title="Add project: pick a folder on this computer"
+        disabled={adding}
+        onclick={addProject}
+        >{#if adding}<LoaderCircle size={18} class="place-spin" />{:else}<Plus
+            size={18}
+          />{/if}</button
+      >
+    {/if}
   </div>
   <div class="place-choices" role="listbox" aria-label="Places">
     {#if showCloud}
@@ -156,14 +177,11 @@
     {/each}
     {#if !choices.length}<p class="place-empty">Nothing matches “{query.trim()}”.</p>{/if}
   </div>
-  <div class="place-footer">
-    {#if desktop?.addProject}
-      <button class="button subtle small" disabled={adding} onclick={addProject}
-        ><FolderPlus size={14} /> {adding ? 'Adding…' : 'Add project'}</button
-      >
-      {#if problem}<span role="status">{problem}</span>{/if}
-    {:else}
-      <span>To add a project, open Crewstead on that computer: Add project is there.</span>
-    {/if}
-  </div>
+  {#if problem}
+    <p class="place-footer" role="status">{problem}</p>
+  {:else if !desktop?.addProject}
+    <p class="place-footer">
+      To add a project, open Crewstead on that computer: Add project is there.
+    </p>
+  {/if}
 </dialog>
