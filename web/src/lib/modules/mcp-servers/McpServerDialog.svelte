@@ -18,10 +18,31 @@
   // The form starts from the server being edited; later prop changes do not reset what was typed.
   const initial = () => ({ name: server?.name ?? '', url: server?.url ?? '' });
   let fields = $state(initial());
-  // Saved header values are never shown again: editing replaces all of them, or keeps them.
-  const headerCount = () => server?.headerNames.length ?? 0;
-  let keep = $state(headerCount() > 0);
-  let headers = $state(headerCount() ? [] : [{ name: 'Authorization', value: '' }]);
+  // Saved header values are never shown again: a saved header left empty keeps its value.
+  const savedNames = () => server?.headerNames ?? [];
+  let headers = $state<Array<{ name: string; value: string; saved?: boolean }>>(
+    savedNames().length
+      ? savedNames().map((name) => ({ name, value: '', saved: true }))
+      : [{ name: 'Authorization', value: '' }],
+  );
+  /** Headers to send: none when nothing about them changed. */
+  function changedHeaders() {
+    const kept = headers.filter(
+      (header) => header.name.trim() && (header.saved || header.value.trim()),
+    );
+    const same =
+      kept.length === savedNames().length &&
+      kept.every(
+        (header, index) =>
+          header.saved && !header.value.trim() && header.name === savedNames()[index],
+      );
+    if (same) return undefined;
+    return kept.map((header) =>
+      header.value.trim()
+        ? { name: header.name.trim(), value: header.value }
+        : { name: header.name },
+    );
+  }
   let busy = $state(false);
   let error = $state('');
   let saved = false;
@@ -29,15 +50,21 @@
     event.preventDefault();
     busy = true;
     error = '';
-    const filled = headers.filter((header) => header.name.trim() && header.value.trim());
+    const changed = changedHeaders();
     try {
       if (server)
         await mcpServers.update(server.id, {
           ...(fields.name !== server.name ? { name: fields.name } : {}),
           ...(fields.url !== server.url ? { url: fields.url } : {}),
-          ...(keep ? {} : { headers: filled }),
+          ...(changed ? { headers: changed } : {}),
         });
-      else await mcpServers.create({ ...fields, headers: filled });
+      else
+        await mcpServers.create({
+          ...fields,
+          headers: headers
+            .filter((header) => header.name.trim() && header.value.trim())
+            .map((header) => ({ name: header.name.trim(), value: header.value })),
+        });
       saved = true;
       (event.target as HTMLElement).closest('dialog')?.close();
     } catch (cause) {
@@ -89,48 +116,40 @@
     </label>
     <fieldset class="mcp-headers" disabled={busy}>
       <legend>Headers</legend>
-      {#if keep}
-        <p class="mcp-kept">
-          Sent with every request: {server?.headerNames.join(', ')}. Their values stay hidden.
-          <button type="button" class="button subtle small" onclick={() => (keep = false)}
-            >Replace</button
-          >
-        </p>
-      {:else}
-        {#each headers as header, index (index)}
-          <div class="mcp-header-row">
-            <input
-              bind:value={header.name}
-              aria-label="Header name"
-              placeholder="Authorization"
-              autocomplete="off"
-              spellcheck="false"
-            />
-            <input
-              bind:value={header.value}
-              type="password"
-              aria-label={`Value of ${header.name || 'header'}`}
-              placeholder="Bearer …"
-              autocomplete="off"
-            />
-            <button
-              type="button"
-              class="icon-button"
-              aria-label={`Remove ${header.name || 'header'}`}
-              onclick={() => headers.splice(index, 1)}><X size={14} /></button
-            >
-          </div>
-        {/each}
-        {#if headers.length < 5}<button
+      {#each headers as header, index (index)}
+        <div class="mcp-header-row">
+          <input
+            bind:value={header.name}
+            readonly={header.saved}
+            aria-label="Header name"
+            placeholder="Authorization"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <input
+            bind:value={header.value}
+            type="password"
+            aria-label={`Value of ${header.name || 'header'}`}
+            placeholder={header.saved ? 'Saved · type to replace' : 'Bearer …'}
+            autocomplete="off"
+          />
+          <button
             type="button"
-            class="button subtle small"
-            onclick={() => headers.push({ name: '', value: '' })}><Plus size={14} /> Header</button
-          >{/if}
-        <small
-          >For a server that needs a token, e.g. <code>Authorization: Bearer …</code>. Kept on the
-          hub, never shown again, never given to models.</small
-        >
-      {/if}
+            class="icon-button"
+            aria-label={`Remove ${header.name || 'header'}`}
+            onclick={() => headers.splice(index, 1)}><X size={14} /></button
+          >
+        </div>
+      {/each}
+      {#if headers.length < 5}<button
+          type="button"
+          class="button subtle small"
+          onclick={() => headers.push({ name: '', value: '' })}><Plus size={14} /> Header</button
+        >{/if}
+      <small
+        >For a server that needs a token, e.g. <code>Authorization: Bearer …</code>. Kept on the
+        hub, never shown again, never given to models.</small
+      >
     </fieldset>
     {#if error}<p class="error-banner" role="alert">{error}</p>{/if}
     <div class="dialog-actions">

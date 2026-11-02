@@ -2,7 +2,7 @@
   import { Monitor } from '@lucide/svelte';
   import type { MachineView } from '@crewstead/core/protocol';
   import { computerProjects } from './api.ts';
-  import RowMenu, { type MenuItem } from './RowMenu.svelte';
+  import RowMenu, { type MenuItem } from '#lib/components/RowMenu.svelte';
   let { machine, changed }: { machine: MachineView; changed: (error?: string) => void } = $props();
   const computer = $derived(machine.computer);
   async function change(patch: { enabled?: false; commands?: boolean; browser?: boolean }) {

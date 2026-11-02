@@ -1,6 +1,8 @@
 <script lang="ts">
   import { Check, Ellipsis } from '@lucide/svelte';
   import { keepInView } from '#lib/keep-in-view.ts';
+  import '@crewstead/ui/row-menu.css';
+  import RowMenuSheet from './RowMenuSheet.svelte';
 
   /** A choice that is on or off, or one action (destructive ones confirm first). */
   export interface MenuItem {
@@ -18,7 +20,16 @@
     label,
     items,
     disabled = false,
-  }: { label: string; items: MenuItem[]; disabled?: boolean } = $props();
+    title,
+  }: {
+    label: string;
+    items: MenuItem[];
+    disabled?: boolean;
+    /** The sheet's heading on touch screens; the label by default. */
+    title?: string;
+  } = $props();
+  /** Touch screens get the items as a sheet from the bottom instead. */
+  let sheet = $state(false);
   let details = $state<HTMLDetailsElement>();
   /** The label of the destructive item asking again. */
   let confirming = $state<string>();
@@ -51,7 +62,13 @@
     aria-label={label}
     title={label}
     aria-disabled={disabled}
-    onclick={(event) => disabled && event.preventDefault()}><Ellipsis size={16} /></summary
+    onclick={(event) => {
+      if (disabled) event.preventDefault();
+      else if (matchMedia('(hover: none)').matches) {
+        event.preventDefault();
+        sheet = true;
+      }
+    }}><Ellipsis size={16} /></summary
   >
   <div class="row-menu-items" role="menu">
     {#each items as item (item.label)}
@@ -73,3 +90,4 @@
     {/each}
   </div>
 </details>
+{#if sheet}<RowMenuSheet title={title ?? label} {items} close={() => (sheet = false)} />{/if}

@@ -9,8 +9,8 @@ importers:
   .:
     devDependencies:
       '@crewstead/core':
-        specifier: git+ssh://git@github.com/Crewstead/core.git#v0.1.2
-        version: git+ssh://git@github.com/Crewstead/core.git#18ac06b7579f9159da8bed18fbacac71cf04ae58
+        specifier: git+ssh://git@github.com/Crewstead/core.git#v0.1.3
+        version: git+ssh://git@github.com/Crewstead/core.git#8618fd4d7e23e403f10467b3facc97b66a18feb6
       '@eslint/js':
         specifier: 10.0.1
         version: 10.0.1(eslint@10.13.0(jiti@2.7.0))
@@ -48,8 +48,8 @@ importers:
   daemon:
     dependencies:
       '@crewstead/core':
-        specifier: git+ssh://git@github.com/Crewstead/core.git#v0.1.2
-        version: git+ssh://git@github.com/Crewstead/core.git#18ac06b7579f9159da8bed18fbacac71cf04ae58
+        specifier: git+ssh://git@github.com/Crewstead/core.git#v0.1.3
+        version: git+ssh://git@github.com/Crewstead/core.git#8618fd4d7e23e403f10467b3facc97b66a18feb6
 
   desktop:
     dependencies:
@@ -82,8 +82,8 @@ importers:
   web:
     dependencies:
       '@crewstead/core':
-        specifier: git+ssh://git@github.com/Crewstead/core.git#v0.1.2
-        version: git+ssh://git@github.com/Crewstead/core.git#18ac06b7579f9159da8bed18fbacac71cf04ae58
+        specifier: git+ssh://git@github.com/Crewstead/core.git#v0.1.3
+        version: git+ssh://git@github.com/Crewstead/core.git#8618fd4d7e23e403f10467b3facc97b66a18feb6
       '@crewstead/ui':
         specifier: workspace:*
         version: link:../ui
@@ -127,8 +127,8 @@ packages:
   '@cacheable/utils@2.5.0':
     resolution: {integrity: sha512-buipgOVDkkPXNR5+xBpDw7Zk2n1EvU7qBJCNUcL7rhQ//kfpOXPAvQ511Os0vpLYJ1pZnvudNytkQt2hst3wqA==}
 
-  '@crewstead/core@git+ssh://git@github.com/Crewstead/core.git#18ac06b7579f9159da8bed18fbacac71cf04ae58':
-    resolution: {commit: 18ac06b7579f9159da8bed18fbacac71cf04ae58, repo: git@github.com:Crewstead/core.git, type: git}
+  '@crewstead/core@git+ssh://git@github.com/Crewstead/core.git#8618fd4d7e23e403f10467b3facc97b66a18feb6':
+    resolution: {commit: 8618fd4d7e23e403f10467b3facc97b66a18feb6, repo: git@github.com:Crewstead/core.git, type: git}
     version: 0.1.0
     engines: {node: '>=24.16.0 <25'}
 
@@ -2288,7 +2288,7 @@ snapshots:
       hashery: 1.5.1
       keyv: 5.6.0
 
-  '@crewstead/core@git+ssh://git@github.com/Crewstead/core.git#18ac06b7579f9159da8bed18fbacac71cf04ae58':
+  '@crewstead/core@git+ssh://git@github.com/Crewstead/core.git#8618fd4d7e23e403f10467b3facc97b66a18feb6':
     dependencies:
       playwright-core: 1.64.1
       zod: 4.6.7

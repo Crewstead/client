@@ -47,6 +47,22 @@
 .action-sheet-actions button + button {
   border-top: 1px solid var(--line-subtle);
 }
+.action-sheet-actions button > span {
+  display: grid;
+  flex: 1;
+  gap: 2px;
+  padding: 8px 0;
+}
+.action-sheet-actions small {
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+.action-sheet-actions button.danger {
+  color: var(--danger);
+}
+.action-sheet-actions button:disabled {
+  color: var(--muted);
+}
 .action-sheet-actions button > svg {
   color: var(--muted);
 }

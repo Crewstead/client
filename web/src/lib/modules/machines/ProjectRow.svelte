@@ -2,7 +2,7 @@
   import { Folder } from '@lucide/svelte';
   import type { MachineProject, ProjectRules } from '@crewstead/core/protocol';
   import { computerProjects } from './api.ts';
-  import RowMenu, { type MenuItem } from './RowMenu.svelte';
+  import RowMenu, { type MenuItem } from '#lib/components/RowMenu.svelte';
   let {
     machineId,
     project,

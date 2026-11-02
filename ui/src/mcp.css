@@ -55,7 +55,7 @@
   gap: 2px;
   min-width: 0;
 }
-.mcp-server[data-enabled='false'] .mcp-server-text {
+.mcp-server[data-enabled='false'] .mcp-server-text > :not(.skill-row-name) {
   opacity: 0.55;
 }
 .mcp-server-count {
@@ -65,14 +65,6 @@
 }
 .mcp-server-count.problem {
   color: var(--danger);
-}
-.mcp-server .spin {
-  animation: mcp-spin 0.9s linear infinite;
-}
-@keyframes mcp-spin {
-  to {
-    transform: rotate(360deg);
-  }
 }
 .mcp-problem {
   margin: 0;
@@ -146,24 +138,7 @@
   width: 100%;
   color: var(--text);
 }
-.mcp-kept {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-}
 @media (max-width: 560px) {
-  .mcp-server-head {
-    flex-wrap: wrap;
-  }
-  .mcp-server-toggle {
-    flex-basis: 100%;
-  }
-  .mcp-server-count {
-    margin-right: auto;
-    padding-left: 30px;
-  }
   .mcp-tools > li {
     flex-wrap: wrap;
     padding-left: 14px;
