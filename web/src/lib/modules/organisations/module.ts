@@ -6,6 +6,7 @@ export const organisationsClient: ClientModule = {
     {
       id: 'organisations',
       label: 'Organisations',
+      group: 'people',
       order: 20,
       load: () => import('./OrganisationSettings.svelte'),
     },

@@ -1,7 +1,7 @@
 import { app, dialog, ipcMain, type BrowserWindow } from 'electron';
 import { join } from 'node:path';
 import { computerSettings } from '../../daemon/src/computer.ts';
-import { machineHome } from '../../daemon/src/config.ts';
+import { machineHome, readConfig } from '../../daemon/src/config.ts';
 import { setAutostart } from './autostart.ts';
 import { addToLauncher } from './launcher.ts';
 import { terminalPath } from './shell-path.ts';
@@ -120,6 +120,26 @@ ipcMain.handle('update-state', (event) => (fromHub(event) ? updateState() : unde
 ipcMain.handle('update-check', (event) => (fromHub(event) ? check() : undefined));
 ipcMain.handle('update-restart', (event) => {
   if (fromHub(event)) restartToUpdate();
+});
+
+// Whole-computer settings of this computer, from its own window: turning them on happens at the
+// computer, and this app is there. The page asks which computer this is, to offer it on its row.
+ipcMain.handle('this-computer', (event) =>
+  fromHub(event) && computer.connectedHub() === hub()
+    ? readConfig(machineHome())?.machineId
+    : undefined,
+);
+ipcMain.handle('computer-setting', async (event, key: unknown, on: unknown) => {
+  if (!fromHub(event) || typeof on !== 'boolean') return 'Not allowed.';
+  if (key !== 'enabled' && key !== 'commands' && key !== 'browser') return 'Not allowed.';
+  const value = on ? 'on' : 'off';
+  try {
+    await computer.command(['computer', ...(key === 'enabled' ? [value] : [key, value])]);
+    refreshTray();
+    return '';
+  } catch (error) {
+    return (error as Error).message.split('\n').at(-1) || 'That did not work.';
+  }
 });
 
 // The first-run page's address; accepted from that page only, never from a hub page.

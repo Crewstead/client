@@ -7,6 +7,7 @@ export const scheduledTasksClient: ClientModule = {
     {
       id: 'scheduled',
       label: 'Scheduled',
+      group: 'chats',
       order: 19,
       load: () => import('./TasksSettings.svelte'),
     },

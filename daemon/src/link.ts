@@ -16,7 +16,7 @@ import {
   claudeAccountAction,
 } from './claude-accounts.ts';
 import { computerHello } from './computer.ts';
-import type { MachineConfig } from './config.ts';
+import { readConfig, writeConfig, type MachineConfig } from './config.ts';
 import { listFolders, projectAction } from './folders.ts';
 import { browserLink, isBrowserAction } from './browser-link.ts';
 import { projectCommands, watchProjects } from './project-link.ts';
@@ -70,6 +70,13 @@ export async function keepLinked(options: LinkOptions) {
   }
 }
 
+/** Keeps the id the hub gave this computer, so the desktop app knows which one it is. */
+function rememberId(home: string, answer: { id?: unknown }) {
+  const config = readConfig(home);
+  if (config && typeof answer.id === 'string' && config.machineId !== answer.id)
+    writeConfig(home, { ...config, machineId: answer.id });
+}
+
 async function linkOnce(options: LinkOptions, connected: () => void) {
   const { config, signal } = options;
   const headers = { Authorization: `Bearer ${config.token}` };
@@ -105,7 +112,7 @@ async function linkOnce(options: LinkOptions, connected: () => void) {
     computer: computerHello(options.tools.home, !!options.tools.browser),
   });
   const first = await hello();
-  await call('/api/machine/hello', first);
+  rememberId(options.tools.home, await (await call('/api/machine/hello', first)).json());
   const stream = await call('/api/machine/link');
   connected();
   const unwatch = watchProjects(options.tools.home, () => {

@@ -4,7 +4,13 @@ import { skills, usableSkills } from './api.ts';
 export const skillsClient: ClientModule = {
   id: 'skills',
   tabs: [
-    { id: 'skills', label: 'Skills', order: 18, load: () => import('./SkillsSettings.svelte') },
+    {
+      id: 'skills',
+      label: 'Skills',
+      group: 'tools',
+      order: 18,
+      load: () => import('./SkillsSettings.svelte'),
+    },
   ],
   panels: [{ slot: 'chat-panel', order: 10, load: () => import('./PanelSkills.svelte') }],
   mentions: async () =>

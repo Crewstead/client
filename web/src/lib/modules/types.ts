@@ -23,9 +23,13 @@ export interface SlotProps {
 }
 export type SlotName = keyof SlotProps;
 
+/** Where a section sits in the Settings list: models and what chats can use, chats, or people. */
+export type SettingsGroup = 'tools' | 'chats' | 'people';
+
 export interface SettingsTab {
   id: string;
   label: string;
+  group: SettingsGroup;
   /** Position among all Settings tabs; core tabs use 10, 30, 40. */
   order: number;
   load: Lazy<Record<string, never>>;

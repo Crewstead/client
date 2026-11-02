@@ -11,6 +11,8 @@ import {
 export interface MachineConfig {
   hub: string;
   token: string;
+  /** This computer's id at the hub, as the hub says when it connects (for the desktop app). */
+  machineId?: string;
   /** Project folders the owner registered here; the hub can only reach these. */
   projects?: MachineProject[];
   /** Folders the owner allowed here, inside which the hub may browse and add projects. */
