@@ -5,7 +5,14 @@ import { machineHome } from '../../daemon/src/config.ts';
 import { setAutostart } from './autostart.ts';
 import { addToLauncher } from './launcher.ts';
 import { terminalPath } from './shell-path.ts';
-import { checkNow, keepUpdated } from './updates.ts';
+import {
+  check,
+  checkNow,
+  keepUpdated,
+  onUpdateState,
+  restartToUpdate,
+  updateState,
+} from './updates.ts';
 import { Computer } from './computer.ts';
 import { hubOrigin, readSettings, writeSettings } from './settings.ts';
 import { createTray } from './tray.ts';
@@ -26,6 +33,7 @@ let tray: ReturnType<typeof createTray> | undefined;
 const hub = () => readSettings().hub;
 function refreshTray() {
   tray?.update(
+    updateState().ready,
     computer.state,
     readSettings().autostart !== false,
     computerSettings(machineHome()).enabled,
@@ -102,6 +110,18 @@ ipcMain.handle('add-project', async (event) => {
   }
 });
 
+// Updates, for the hub's pages in this window: what is known, a check now, and the restart.
+const fromHub = (event: Electron.IpcMainInvokeEvent) => {
+  const address = hub();
+  const from = event.senderFrame?.url;
+  return !!address && !!from && from.startsWith('http') && new URL(from).origin === address;
+};
+ipcMain.handle('update-state', (event) => (fromHub(event) ? updateState() : undefined));
+ipcMain.handle('update-check', (event) => (fromHub(event) ? check() : undefined));
+ipcMain.handle('update-restart', (event) => {
+  if (fromHub(event)) restartToUpdate();
+});
+
 // The first-run page's address; accepted from that page only, never from a hub page.
 ipcMain.handle('connect-hub', async (event, input: string) => {
   if (!event.senderFrame?.url.startsWith('file:')) return 'Not allowed.';
@@ -155,6 +175,11 @@ void app.whenReady().then(() => {
   // Only a connection made for this app's hub; a computer connected elsewhere is asked first.
   if (computer.connectedHub() === hub()) computer.start();
   refreshTray();
+  // The window and tray hear of every change: a bar in the window offers the restart.
+  onUpdateState((state) => {
+    window.webContents.send('update-state', state);
+    refreshTray();
+  });
   keepUpdated();
 });
 app.on('second-instance', show);

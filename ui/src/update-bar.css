@@ -1,0 +1,25 @@
+/* The desktop app's "new version ready" bar, above the page. */
+.update-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-raised);
+  color: var(--text);
+  font-size: var(--text-sm);
+}
+.update-bar > svg {
+  flex: none;
+  color: var(--accent);
+}
+.update-bar > span:not(.update-actions) {
+  flex: 1;
+  min-width: 160px;
+}
+.update-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}

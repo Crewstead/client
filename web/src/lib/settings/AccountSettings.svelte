@@ -1,4 +1,5 @@
 <script lang="ts">
+  import DesktopAppSettings from '#lib/desktop/DesktopAppSettings.svelte';
   import { goto } from '$app/navigation';
   import { resolve } from '$app/paths';
   import { useAuthentication } from '#lib/auth/auth.svelte.ts';
@@ -94,3 +95,5 @@
     <p class="muted-text empty-note">No other accounts yet.</p>
   {/if}
 </section>
+
+<DesktopAppSettings />

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import UpdateBar from '#lib/desktop/UpdateBar.svelte';
   import { onMount, onDestroy, setContext } from 'svelte';
   import type { Snippet } from 'svelte';
   import { Workspace } from '#lib/workspace.svelte.ts';
@@ -52,6 +53,7 @@
         onclick={() => (navigationOpen = !navigationOpen)}><Menu size={20} /></button
       ><a href={resolve('/')}>Crewstead</a>
     </header>
+    <UpdateBar />
     <main id="main">{@render children()}</main>
   </div>
 </div>

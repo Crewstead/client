@@ -23,7 +23,13 @@ export function createTray(icon: string, actions: TrayActions) {
   const tray = new Tray(icon);
   tray.setToolTip('Crewstead');
   tray.on('click', actions.show);
-  const update = (state: ComputerState, autostart: boolean, whole: boolean) => {
+  const update = (
+    /** A downloaded version waiting for a restart. */
+    ready: string | undefined,
+    state: ComputerState,
+    autostart: boolean,
+    whole: boolean,
+  ) => {
     const computer: MenuItemConstructorOptions[] =
       state === 'off' || state === 'removed'
         ? [{ label: 'Let chats use this computer…', click: actions.useComputer }]
@@ -49,7 +55,12 @@ export function createTray(icon: string, actions: TrayActions) {
           click: (item) => actions.autostart(item.checked),
         },
         { label: 'Use another hub…', click: actions.changeHub },
-        { label: `Check for updates… (version ${app.getVersion()})`, click: actions.checkUpdates },
+        {
+          label: ready
+            ? `Restart to update to ${ready}`
+            : `Check for updates… (version ${app.getVersion()})`,
+          click: actions.checkUpdates,
+        },
         { label: 'Quit Crewstead', click: actions.quit },
       ]),
     );
