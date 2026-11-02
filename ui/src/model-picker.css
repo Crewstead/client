@@ -143,54 +143,6 @@
   bottom: calc(100% + 4px);
   left: auto;
 }
-.project-picker .model-options {
-  min-width: 260px;
-  max-width: min(420px, calc(100vw - 24px));
-}
-.project-picker .effort-option small {
-  overflow-wrap: anywhere;
-}
-.project-picker.offline summary {
-  color: var(--amber);
-}
-/* The Where picker: the cloud, then each computer's projects under its name. */
-.place-options label {
-  align-items: flex-start;
-}
-.place-options .effort-option {
-  flex: 1;
-  min-width: 0;
-  align-items: flex-start;
-  text-align: left;
-}
-.place-options .effort-option > span {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-/* Icons beside a name stay with it; only the tick goes to the right. */
-.place-options .effort-option svg,
-.place-computer svg {
-  margin-left: 0;
-  flex: none;
-}
-.place-options .effort-option small {
-  padding-left: 19px;
-}
-.place-computer {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin: 6px 0 0;
-  padding: 6px 10px 2px;
-  border-top: 1px solid var(--line-subtle);
-  color: var(--faint);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
-  justify-content: flex-start;
-}
 /* In Settings: a bordered button that opens its options below, aligned to its right edge. */
 .choice-picker summary {
   padding: 6px 10px;
@@ -216,4 +168,30 @@
 .choice-picker label.unavailable {
   opacity: 0.55;
   cursor: default;
+}
+/* Many models: a scrolling list under headings, one per provider key or Claude Code account. */
+.model-list {
+  max-height: min(60vh, 440px);
+  overflow-y: auto;
+}
+.model-group {
+  margin: 6px 0 0;
+  padding: 6px 10px 2px;
+  border-top: 1px solid var(--line-subtle);
+  color: var(--faint);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+.model-list > .model-group:first-of-type {
+  margin-top: 0;
+  border-top: 0;
+}
+.model-options:has(.model-group) {
+  min-width: 260px;
+}
+.model-group {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

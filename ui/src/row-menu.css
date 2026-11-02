@@ -64,3 +64,8 @@
   border: 0;
   border-top: 1px solid var(--line-subtle);
 }
+/* A card that clips its corners lets an open menu reach past its edge. */
+.provider-groups:has(.row-menu[open]),
+.settings-card:has(.row-menu[open]) {
+  overflow: visible;
+}
