@@ -49,6 +49,8 @@ export function changedFiles(items: TimelineItem[]): ChangedFile[] {
   const files: ChangedFile[] = [];
   for (const item of items) {
     if (item.role !== 'tool' || item.status !== 'completed' || !item.diff) continue;
+    // Skills are the account's settings, not files of the chat's place; their cards show the change.
+    if (item.toolName?.startsWith('skill_')) continue;
     const path = /^\+\+\+ b\/(.+)$/m.exec(item.diff)?.[1];
     if (!path) continue;
     const { added, removed } = stats(item.diff);
