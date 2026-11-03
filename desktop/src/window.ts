@@ -1,9 +1,9 @@
-import { BrowserWindow, shell } from 'electron';
+import { app, BrowserWindow, shell } from 'electron';
 import { join } from 'node:path';
 
 /**
- * The app's one window. It shows the hub's own web app and nothing else: other sites open in the
- * browser, page code gets no access to this computer (no Node, sandboxed, isolated context).
+ * The app's one window. It shows the app's own interface at the hub's address (local-interface.ts)
+ * and nothing else: other sites open in the browser, page code gets no access to this computer (no Node, sandboxed, isolated context).
  */
 export function createWindow(icon: string) {
   const window = new BrowserWindow({
@@ -24,6 +24,27 @@ export function createWindow(icon: string) {
       spellcheck: true,
     },
   });
+  // No menu bar in the window (Alt would show it, and Alt with the arrow keys moves projects);
+  // its shortcuts that matter stay. macOS keeps its menu at the top of the screen.
+  if (process.platform !== 'darwin') {
+    window.removeMenu();
+    window.webContents.on('before-input-event', (event, input) => {
+      if (input.type !== 'keyDown' || !(input.control || input.meta)) {
+        if (input.type === 'keyDown' && input.key === 'F5') window.webContents.reload();
+        return;
+      }
+      const page = window.webContents;
+      const zoom = page.getZoomLevel();
+      const key = input.key.toLowerCase();
+      if (key === 'r') page.reload();
+      else if (key === '=' || key === '+') page.setZoomLevel(Math.min(zoom + 0.5, 5));
+      else if (key === '-') page.setZoomLevel(Math.max(zoom - 0.5, -3));
+      else if (key === '0') page.setZoomLevel(0);
+      else if (key === 'i' && input.shift && !app.isPackaged) page.toggleDevTools();
+      else return;
+      event.preventDefault();
+    });
+  }
   window.once('ready-to-show', () => {
     if (!process.argv.includes('--hidden')) window.show();
   });

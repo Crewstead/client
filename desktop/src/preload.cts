@@ -1,7 +1,8 @@
 // The only bridge from page code to the app. The first-run page submits the hub's address with
 // `connect` (accepted from that page only); the hub's own pages ask to add a project on this computer
 // with `addProject`, which opens the system's folder picker, and follow and install the app's
-// updates with `updates` (both accepted from the connected hub only).
+// updates with `updates`, and hear whether the hub answers with `hub` (accepted from the connected hub
+// only; the pages are the app's own interface shown at the hub's address).
 // main.ts checks the sender of each.
 import { contextBridge, ipcRenderer } from 'electron';
 
@@ -19,6 +20,15 @@ contextBridge.exposeInMainWorld('crewsteadDesktop', {
     const forward = (_event: unknown, state: string) => listener(state);
     ipcRenderer.on('computer-state', forward);
     return () => void ipcRenderer.off('computer-state', forward);
+  },
+  /** Whether the hub answers ('online' or 'offline'; unknown before the first request), and changes. */
+  hub: {
+    state: () => ipcRenderer.invoke('hub-state') as Promise<string | undefined>,
+    onChange: (listener: (state: string) => void) => {
+      const forward = (_event: unknown, state: string) => listener(state);
+      ipcRenderer.on('hub-state', forward);
+      return () => void ipcRenderer.off('hub-state', forward);
+    },
   },
   /** The app's updates: what is known, a check now, the restart that installs one, and changes. */
   updates: {

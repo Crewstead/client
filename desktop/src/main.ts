@@ -15,6 +15,7 @@ import {
 } from './updates.ts';
 import { Computer } from './computer.ts';
 import { hubOrigin, readSettings, writeSettings } from './settings.ts';
+import { serveInterface } from './local-interface.ts';
 import { createTray } from './tray.ts';
 import { createWindow, stayOn } from './window.ts';
 
@@ -33,6 +34,7 @@ const computer = new Computer(() => {
   if (window && !window.isDestroyed()) window.webContents.send('computer-state', computer.state);
 });
 let tray: ReturnType<typeof createTray> | undefined;
+let reach: ReturnType<typeof serveInterface> | undefined;
 
 const hub = () => readSettings().hub;
 function refreshTray() {
@@ -120,6 +122,7 @@ const fromHub = (event: Electron.IpcMainInvokeEvent) => {
   const from = event.senderFrame?.url;
   return !!address && !!from && from.startsWith('http') && new URL(from).origin === address;
 };
+ipcMain.handle('hub-state', (event) => (fromHub(event) ? reach?.state() : undefined));
 ipcMain.handle('update-state', (event) => (fromHub(event) ? updateState() : undefined));
 ipcMain.handle('update-check', (event) => (fromHub(event) ? check() : undefined));
 ipcMain.handle('update-restart', (event) => {
@@ -167,6 +170,10 @@ void app.whenReady().then(() => {
   process.env.PATH = terminalPath();
   window = createWindow(icon);
   stayOn(window, hub);
+  // The interface is this app's own; only the API goes to the hub. The page hears when it cannot.
+  reach = serveInterface(window.webContents.session, hub, (state) => {
+    if (!window.isDestroyed()) window.webContents.send('hub-state', state);
+  });
   // Closing the window keeps the app (and this computer's service) running in the tray.
   window.on('close', (event) => {
     if (quitting) return;
