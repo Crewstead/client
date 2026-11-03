@@ -138,10 +138,12 @@ ipcMain.handle('this-computer', (event) =>
 );
 ipcMain.handle('computer-setting', async (event, key: unknown, on: unknown) => {
   if (!fromHub(event) || typeof on !== 'boolean') return 'Not allowed.';
-  if (key !== 'enabled' && key !== 'commands' && key !== 'browser') return 'Not allowed.';
+  if (key !== 'enabled' && key !== 'commands' && key !== 'browser' && key !== 'terminals')
+    return 'Not allowed.';
   const value = on ? 'on' : 'off';
   try {
-    await computer.command(['computer', ...(key === 'enabled' ? [value] : [key, value])]);
+    if (key === 'terminals') await computer.command(['terminal', value]);
+    else await computer.command(['computer', ...(key === 'enabled' ? [value] : [key, value])]);
     refreshTray();
     return '';
   } catch (error) {

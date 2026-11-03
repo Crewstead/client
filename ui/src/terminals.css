@@ -1,0 +1,85 @@
+/* Terminals under a chat: a drawer with tabs, and each terminal filling it. */
+.terminal-drawer {
+  display: flex;
+  flex-direction: column;
+  height: min(42vh, 380px);
+  min-height: 180px;
+  /* Lined up with the message box under it (.composer-area: 800px with 32px sides). */
+  margin: 0 auto 4px;
+  width: calc(min(100%, 800px) - 64px);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #16171c;
+}
+.terminal-drawer > header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--line-subtle);
+  background: var(--surface);
+}
+.terminal-tabs {
+  display: flex;
+  flex: 1;
+  gap: 2px;
+  min-width: 0;
+  overflow-x: auto;
+}
+.terminal-tab {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  border-radius: 6px;
+  color: var(--muted);
+}
+.terminal-tab.active {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+.terminal-tab > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: var(--text-xs);
+  cursor: pointer;
+}
+.terminal-tab small {
+  color: var(--faint);
+}
+.terminal-tab-close {
+  padding: 4px !important;
+}
+.terminal-note {
+  margin: 0;
+  padding: 4px 10px;
+  color: var(--faint);
+  font-size: var(--text-xs);
+}
+.terminal-note.failed {
+  color: var(--danger);
+}
+.terminal-pane {
+  flex: 1;
+  min-height: 0;
+  padding: 4px 0 0 8px;
+}
+.terminal-pane[hidden] {
+  display: none;
+}
+.terminal-view {
+  width: 100%;
+  height: 100%;
+}
+@media (max-width: 700px) {
+  .terminal-drawer {
+    width: calc(100% - 32px);
+    height: 55vh;
+  }
+}

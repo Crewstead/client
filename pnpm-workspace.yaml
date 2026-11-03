@@ -7,4 +7,5 @@ minimumReleaseAge: 1440
 onlyBuiltDependencies:
   - electron
   - esbuild
+  - node-pty
   - rolldown

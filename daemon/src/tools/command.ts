@@ -25,7 +25,17 @@ export interface SandboxOptions {
  * read-only, private home folders (sign-ins, keys) replaced by empty ones, private /tmp and /run, its
  * own process space, and no network unless asked.
  */
-export function sandboxArguments(root: string, network: boolean, hidden: string[] = []) {
+export function sandboxArguments(
+  root: string,
+  network: boolean,
+  hidden: string[] = [],
+  /**
+   * For a terminal someone watches or types into (terminal-link.ts): colours and a real terminal
+   * type, and the terminal stays its controlling one, so Ctrl+C reaches the program. It is the
+   * sandbox's own pseudo-terminal, never the owner's, so there is nothing outside to type into.
+   */
+  terminal = false,
+) {
   const args = ['--ro-bind', '/', '/', '--dev', '/dev', '--proc', '/proc', '--tmpfs', '/tmp'];
   // /run holds sockets (session and system D-Bus, Docker, systemd) that could start programs outside
   // the sandbox; commands get an empty one. With network on, DNS settings stay readable.
@@ -42,18 +52,18 @@ export function sandboxArguments(root: string, network: boolean, hidden: string[
     args.push('--ro-bind', join(root, '.git'), join(root, '.git'));
   args.push('--unshare-pid', '--unshare-ipc', '--unshare-uts', '--unshare-cgroup-try');
   if (!network) args.push('--unshare-net');
-  args.push('--die-with-parent', '--new-session', '--chdir', root, '--clearenv');
+  args.push('--die-with-parent', ...(terminal ? [] : ['--new-session']), '--chdir', root);
+  args.push('--clearenv');
   const env: Record<string, string> = {
     PATH: process.env.PATH ?? '/usr/local/bin:/usr/bin:/bin',
     HOME: homedir(),
     USER: process.env.USER ?? '',
     LANG: process.env.LANG ?? 'C.UTF-8',
-    TERM: 'dumb',
+    TERM: terminal ? 'xterm-256color' : 'dumb',
     TMPDIR: '/tmp',
     XDG_CACHE_HOME: '/tmp/.cache',
     npm_config_cache: '/tmp/.npm',
-    CI: '1',
-    NO_COLOR: '1',
+    ...(terminal ? { COLORTERM: 'truecolor' } : { CI: '1', NO_COLOR: '1' }),
     GIT_TERMINAL_PROMPT: '0',
   };
   for (const [name, value] of Object.entries(env)) args.push('--setenv', name, value);

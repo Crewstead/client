@@ -8,7 +8,7 @@ import type {
   ProjectAction,
   ProjectRules,
 } from '@crewstead/core/protocol';
-import { changeComputer } from './computer.ts';
+import { changeComputer, changeTerminals } from './computer.ts';
 import { readConfig, writeConfig } from './config.ts';
 import { addProject, projectRoot, removeProject } from './projects.ts';
 
@@ -127,8 +127,9 @@ export function projectAction(home: string, action: ProjectAction) {
       removeProject(home, action.projectId);
       return {};
     case 'computer': {
-      const { kind: _kind, ...change } = action;
-      changeComputer(home, change, 'hub');
+      const { kind: _kind, terminals, ...change } = action;
+      if (terminals === false) changeTerminals(home, false, 'hub');
+      if (Object.keys(change).length) changeComputer(home, change, 'hub');
       return {};
     }
   }

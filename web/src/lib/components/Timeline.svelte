@@ -10,6 +10,8 @@
   import PlanSteps from './PlanSteps.svelte';
   import WorkedFor from './WorkedFor.svelte';
   import { timelineEntries } from './timeline-entries.ts';
+  import { watchReport } from './watch-report.ts';
+  import WatchNotice from './WatchNotice.svelte';
   import PromptActions from './versions/PromptActions.svelte';
   import PromptEditor from './versions/PromptEditor.svelte';
   import TurnActions from './versions/TurnActions.svelte';
@@ -179,6 +181,7 @@
             >
             <div class="summary-text markdown"><Markdown text={item.text} /></div>
           </details>
+        {:else if watchReport(item)}{@const report = watchReport(item)!}<WatchNotice {report} />
         {:else}<article
             data-item-id={item.id}
             class="message"

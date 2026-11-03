@@ -5,6 +5,7 @@
   import { machines } from './api.ts';
   import ProjectRow from './ProjectRow.svelte';
   import WholeComputerRow from './WholeComputerRow.svelte';
+  import TerminalsRow from './TerminalsRow.svelte';
   import '@crewstead/ui/settings-cards.css';
   import '@crewstead/ui/providers.css';
   import '@crewstead/ui/projects.css';
@@ -72,7 +73,10 @@
         >
       </div>
       <ul aria-label={`Project folders on ${machine.name}`}>
-        {#if machine.online}<WholeComputerRow {machine} {changed} />{/if}
+        {#if machine.online}<WholeComputerRow {machine} {changed} /><TerminalsRow
+            {machine}
+            {changed}
+          />{/if}
         {#each machine.projects as project (project.id)}
           <ProjectRow
             machineId={machine.id}

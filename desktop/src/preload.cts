@@ -13,7 +13,7 @@ contextBridge.exposeInMainWorld('crewsteadDesktop', {
   /** This computer's id at the hub, when the app's computer service is connected to it. */
   thisComputer: () => ipcRenderer.invoke('this-computer') as Promise<string | undefined>,
   /** Turns a whole-computer setting of this computer on or off; '' or why it could not. */
-  computerSetting: (key: 'enabled' | 'commands' | 'browser', on: boolean) =>
+  computerSetting: (key: 'enabled' | 'commands' | 'browser' | 'terminals', on: boolean) =>
     ipcRenderer.invoke('computer-setting', key, on) as Promise<string>,
   /** Calls `listener` when this computer's link to the hub changes (e.g. 'connected'). */
   onComputerState: (listener: (state: string) => void) => {

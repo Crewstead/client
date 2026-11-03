@@ -32,11 +32,22 @@
   import QueuedMessages from '#lib/components/QueuedMessages.svelte';
   import PlanSteps from '#lib/components/PlanSteps.svelte';
   import { livePlan } from '#lib/components/timeline-entries.ts';
+  import { ChatTerminals, provideTerminals } from '#lib/terminals/terminals.svelte.ts';
+  import TerminalDrawer from '#lib/terminals/TerminalDrawer.svelte';
   import '@crewstead/ui/conversation.css';
   import '@crewstead/ui/tools.css';
   import '@crewstead/ui/composer.css';
   const workspace = useWorkspace();
   const conversation = new Conversation();
+  const terminals = provideTerminals(new ChatTerminals());
+  const terminalsFor = $derived(
+    conversation.session && `${conversation.session.id}|${conversation.session.projectId ?? ''}`,
+  );
+  $effect(() => {
+    if (!terminalsFor) return;
+    const [id, projectId] = terminalsFor.split('|');
+    return terminals.follow(id!, projectId || undefined);
+  });
   onMount(() => chatPanel.load());
   const mockEnabled = $derived(
     workspace.catalog?.modules.find((item) => item.id === 'mock-provider')?.enabled ?? false,
@@ -271,6 +282,7 @@
         running={session.status === 'running' || session.status === 'awaiting_approval'}
         focus={page.url.searchParams.get('item') ?? undefined}
       />
+      <TerminalDrawer />
       {#key session.id}<Composer
           draftKey={workspace.draftKey(`draft:${workspace.context}:${session.id}`)}
           busy={session.status === 'running' || session.status === 'awaiting_approval'}

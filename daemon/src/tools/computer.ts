@@ -131,9 +131,11 @@ export const computerHidden = (host: ToolHost) => [
 ];
 
 /** The owner's environment for approved commands, without the hub's own settings. */
-export function ownerEnv() {
+export function ownerEnv(terminal = false) {
   const env = Object.fromEntries(
     Object.entries(process.env).filter(([name]) => !name.startsWith('HUB_')),
   );
+  // In a terminal someone watches, programs may colour and ask (it is the owner's own shell).
+  if (terminal) return Object.assign(env, { TERM: 'xterm-256color', COLORTERM: 'truecolor' });
   return Object.assign(env, { TERM: 'dumb', CI: '1', NO_COLOR: '1', GIT_TERMINAL_PROMPT: '0' });
 }

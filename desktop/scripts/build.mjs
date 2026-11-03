@@ -18,14 +18,15 @@ await build({
   format: 'cjs',
   external: ['electron'],
 });
-// ES module, with `require` for bundled CommonJS code; Playwright stays a real package, since it
-// starts its own programs from its files.
+// ES module, with `require` for bundled CommonJS code.
 await build({
   ...common,
   entryPoints: [resolve(root, '../daemon/src/main.ts')],
   outfile: resolve(out, 'daemon/main.mjs'),
   format: 'esm',
-  external: ['playwright-core'],
+  // Real packages beside the app: Playwright starts its own programs from its files, and node-pty
+  // loads a native module for terminals.
+  external: ['playwright-core', 'node-pty'],
   banner: {
     js: "import { createRequire as __require } from 'node:module'; const require = __require(import.meta.url);",
   },

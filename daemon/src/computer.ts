@@ -68,3 +68,26 @@ export function describeComputer(settings: ComputerSettings) {
   if (!settings.enabled) return 'off (crewstead computer on)';
   return `on: files${settings.commands ? ', commands' : ''}${settings.browser ? ', browser' : ''}`;
 }
+
+/** Whether the owner turned on shells opened from the hub, here (terminal-link.ts). */
+export function terminalsOn(home: string) {
+  return readConfig(home)?.terminals === true;
+}
+
+/** Turns shells from the hub on or off. From the hub, only off: on is said at the computer. */
+export function changeTerminals(home: string, on: boolean, from: 'hub' | 'computer') {
+  const config = readConfig(home);
+  if (!config) throw new Error('Not set up yet. Run: crewstead connect <hub address>');
+  if (from === 'hub' && on && !config.terminals)
+    throw new Error('Terminals are turned on only at the computer itself: crewstead terminal on');
+  writeConfig(home, { ...config, terminals: on });
+  return on;
+}
+
+/** `crewstead terminal on|off`. */
+export function terminalCommand(home: string, args: string[]) {
+  if (args[0] !== 'on' && args[0] !== 'off') throw new Error('Usage: crewstead terminal on|off');
+  return changeTerminals(home, args[0] === 'on', 'computer')
+    ? 'on: you can open shells here from Crewstead, in projects and (when on) the whole computer'
+    : 'off';
+}

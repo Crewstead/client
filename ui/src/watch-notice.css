@@ -1,0 +1,39 @@
+/* A watch's report in the chat: one line like a tool's, its output inside. */
+.watch-notice {
+  margin: 0 0 6px;
+}
+.watch-notice .watch-label {
+  flex: none;
+  color: var(--text);
+  font-size: 13px;
+}
+.watch-notice[data-ended='true'] .watch-label {
+  color: var(--muted);
+}
+.watch-body {
+  margin: 4px 0 12px 21px;
+}
+.watch-command {
+  display: block;
+  margin-bottom: 6px;
+  overflow-wrap: anywhere;
+  color: var(--faint);
+  font-size: 12px;
+}
+.watch-body > .tool-output {
+  max-height: 320px;
+  margin: 0;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.watch-command-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+.watch-command-row > .watch-command {
+  flex: 1;
+  margin-bottom: 0;
+}

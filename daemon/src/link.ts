@@ -15,12 +15,13 @@ import {
   accountStatuses,
   claudeAccountAction,
 } from './claude-accounts.ts';
-import { computerHello } from './computer.ts';
+import { computerHello, terminalsOn } from './computer.ts';
 import { readConfig, writeConfig, type MachineConfig } from './config.ts';
 import { listFolders, projectAction } from './folders.ts';
 import { browserLink, isBrowserAction } from './browser-link.ts';
 import { projectCommands, watchProjects } from './project-link.ts';
 import { watchCommands } from './watch-link.ts';
+import { loadPty, terminalLink } from './terminal-link.ts';
 import { listProjects } from './projects.ts';
 import type { ToolHost } from './tools/run.ts';
 import type { ToolAnswer } from './tool-bridge.ts';
@@ -101,6 +102,7 @@ async function linkOnce(options: LinkOptions, connected: () => void) {
     void hello()
       .then((value) => call('/api/machine/hello', value))
       .catch(() => {});
+  const pty = await loadPty();
   const hello = async (): Promise<MachineHello> => ({
     name: hostname().slice(0, 80) || 'Computer',
     version: DAEMON_VERSION,
@@ -110,6 +112,7 @@ async function linkOnce(options: LinkOptions, connected: () => void) {
     folders: listFolders(options.tools.home),
     browser: !!options.tools.browser,
     computer: computerHello(options.tools.home, !!options.tools.browser),
+    terminals: !!pty && terminalsOn(options.tools.home),
   });
   const first = await hello();
   rememberId(options.tools.home, await (await call('/api/machine/hello', first)).json());
@@ -137,11 +140,20 @@ async function linkOnce(options: LinkOptions, connected: () => void) {
         : ' Claude Code not found.') +
       ` ${first.projects.length} project${first.projects.length === 1 ? '' : 's'}.`,
   );
-  const watches = watchCommands(options.tools, (body) =>
-    call('/api/machine/watch-events', body).then(
+  const terminals = terminalLink(options.tools, pty, (body) =>
+    call('/api/machine/terminal-events', body).then(
       () => undefined,
       () => undefined,
     ),
+  );
+  const watches = watchCommands(
+    options.tools,
+    (body) =>
+      call('/api/machine/watch-events', body).then(
+        () => undefined,
+        () => undefined,
+      ),
+    terminals,
   );
   const browsers = browserLink(options.tools.browser, (body) =>
     call('/api/machine/browser-events', body).then(() => undefined),
@@ -184,6 +196,7 @@ async function linkOnce(options: LinkOptions, connected: () => void) {
       if (event.event !== 'command') continue;
       const command = JSON.parse(event.data) as MachineCommand;
       if (projects.handle(command) || browsers.handle(command) || watches.handle(command)) continue;
+      if (terminals.handle(command)) continue;
       if (command.type === 'tool' || command.type === 'cancel_tool') continue;
       if (command.type === 'watch' || command.type === 'watch_stop') continue;
       if (command.type === 'browser_watch' || command.type === 'browser_unwatch') continue;
@@ -224,6 +237,7 @@ async function linkOnce(options: LinkOptions, connected: () => void) {
     projects.stop();
     browsers.stop();
     watches.stop();
+    terminals.stop();
     unwatch();
     await options.tools.browser?.closeAll();
   }

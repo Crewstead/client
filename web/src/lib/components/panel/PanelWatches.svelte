@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Radar, Square } from '@lucide/svelte';
+  import { Radar, Square, SquareTerminal } from '@lucide/svelte';
+  import { useTerminals } from '#lib/terminals/terminals.svelte.ts';
   import type { Session } from '@crewstead/core/protocol';
   import { request, scoped } from '#lib/api.ts';
   import { useWorkspace } from '#lib/workspace.svelte.ts';
@@ -13,6 +14,7 @@
   };
   let { session }: { session: Session } = $props();
   const workspace = useWorkspace();
+  const terminals = useTerminals();
   let watches = $state<Watch[]>([]);
   async function load() {
     watches = await request<Watch[]>(
@@ -60,6 +62,12 @@
                 : ''} · {watch.reports} report{watch.reports === 1 ? '' : 's'}</small
             >
           </span>
+          {#if terminals?.find(watch.id)}<button
+              class="icon-button"
+              aria-label={`Open terminal of ${watch.label}`}
+              title="Open its terminal"
+              onclick={() => terminals.show(watch.id)}><SquareTerminal size={13} /></button
+            >{/if}
           <button
             class="icon-button"
             aria-label={`Stop watch ${watch.label}`}

@@ -14,6 +14,7 @@
   import PanelBrowsers from './PanelBrowsers.svelte';
   import PanelSubagents from './PanelSubagents.svelte';
   import PanelWatches from './PanelWatches.svelte';
+  import PanelTerminals from './PanelTerminals.svelte';
   import '@crewstead/ui/chat-panel.css';
   let {
     session,
@@ -74,6 +75,7 @@
     <ModuleSlot slot="chat-panel" props={{ session }} />
     <PanelSubagents {session} />
     <PanelWatches {session} />
+    <PanelTerminals />
     <PanelBrowsers {session} />
 
     <section class="panel-section" aria-label="Files in this chat">

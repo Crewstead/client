@@ -19,6 +19,8 @@ export interface MachineConfig {
   folders?: MachineFolder[];
   /** Whole-computer chats: off unless its owner turned them on here (`crewstead computer on`). */
   computer?: { enabled: boolean; commands: boolean; browser: boolean };
+  /** Shells opened from the hub: off unless its owner turned them on here (`crewstead terminal on`). */
+  terminals?: boolean;
   /** Claude Code accounts here; absent: just the usual sign-in (claude-accounts.ts). */
   claudeAccounts?: { id: string; name: string; folder: string | null }[];
 }

@@ -289,3 +289,23 @@
   gap: 8px;
   padding: 6px 8px;
 }
+/* A shell in the panel's list: opens in the drawer under the chat. */
+.panel-terminal {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.panel-terminal small {
+  color: var(--muted);
+  font-size: 11px;
+}
+.panel-terminal:hover .panel-subagent-title {
+  text-decoration: underline;
+}

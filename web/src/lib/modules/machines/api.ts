@@ -24,7 +24,7 @@ export const computerProjects = {
   /** Narrows or turns off whole-computer chats; turning them on happens at the computer. */
   computer: (
     machineId: string,
-    patch: { enabled?: false; commands?: boolean; browser?: boolean },
+    patch: { enabled?: false; commands?: boolean; browser?: boolean; terminals?: false },
   ) => request(`/machines/${machineId}/computer`, { method: 'PATCH', body: JSON.stringify(patch) }),
 };
 

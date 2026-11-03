@@ -9,8 +9,8 @@ importers:
   .:
     devDependencies:
       '@crewstead/core':
-        specifier: git+ssh://git@github.com/Crewstead/core.git#v0.1.12
-        version: git+ssh://git@github.com/Crewstead/core.git#89abcfb12aa736bc313cc3915b2dc47eeaf5cc62
+        specifier: git+ssh://git@github.com/Crewstead/core.git#v0.1.14
+        version: git+ssh://git@github.com/Crewstead/core.git#d7e8aa226112975f639bef376843c259206eaced
       '@eslint/js':
         specifier: 10.0.1
         version: 10.0.1(eslint@10.13.0(jiti@2.7.0))
@@ -48,8 +48,12 @@ importers:
   daemon:
     dependencies:
       '@crewstead/core':
-        specifier: git+ssh://git@github.com/Crewstead/core.git#v0.1.12
-        version: git+ssh://git@github.com/Crewstead/core.git#89abcfb12aa736bc313cc3915b2dc47eeaf5cc62
+        specifier: git+ssh://git@github.com/Crewstead/core.git#v0.1.14
+        version: git+ssh://git@github.com/Crewstead/core.git#d7e8aa226112975f639bef376843c259206eaced
+    optionalDependencies:
+      node-pty:
+        specifier: 1.1.0
+        version: 1.1.0
 
   desktop:
     dependencies:
@@ -69,6 +73,10 @@ importers:
       esbuild:
         specifier: 0.28.2
         version: 0.28.2
+    optionalDependencies:
+      node-pty:
+        specifier: 1.1.0
+        version: 1.1.0
 
   ui:
     dependencies:
@@ -82,8 +90,8 @@ importers:
   web:
     dependencies:
       '@crewstead/core':
-        specifier: git+ssh://git@github.com/Crewstead/core.git#v0.1.12
-        version: git+ssh://git@github.com/Crewstead/core.git#89abcfb12aa736bc313cc3915b2dc47eeaf5cc62
+        specifier: git+ssh://git@github.com/Crewstead/core.git#v0.1.14
+        version: git+ssh://git@github.com/Crewstead/core.git#d7e8aa226112975f639bef376843c259206eaced
       '@crewstead/ui':
         specifier: workspace:*
         version: link:../ui
@@ -93,6 +101,12 @@ importers:
       '@tanstack/svelte-query':
         specifier: 6.3.6
         version: 6.3.6(svelte@5.57.3(@typescript-eslint/types@8.72.1))
+      '@xterm/addon-fit':
+        specifier: 0.11.0
+        version: 0.11.0
+      '@xterm/xterm':
+        specifier: 6.0.0
+        version: 6.0.0
     devDependencies:
       '@opentelemetry/api':
         specifier: 1.9.0
@@ -127,8 +141,8 @@ packages:
   '@cacheable/utils@2.5.0':
     resolution: {integrity: sha512-buipgOVDkkPXNR5+xBpDw7Zk2n1EvU7qBJCNUcL7rhQ//kfpOXPAvQ511Os0vpLYJ1pZnvudNytkQt2hst3wqA==}
 
-  '@crewstead/core@git+ssh://git@github.com/Crewstead/core.git#89abcfb12aa736bc313cc3915b2dc47eeaf5cc62':
-    resolution: {commit: 89abcfb12aa736bc313cc3915b2dc47eeaf5cc62, repo: git@github.com:Crewstead/core.git, type: git}
+  '@crewstead/core@git+ssh://git@github.com/Crewstead/core.git#d7e8aa226112975f639bef376843c259206eaced':
+    resolution: {commit: d7e8aa226112975f639bef376843c259206eaced, repo: git@github.com:Crewstead/core.git, type: git}
     version: 0.1.0
     engines: {node: '>=24.16.0 <25'}
 
@@ -732,6 +746,12 @@ packages:
   '@xmldom/xmldom@0.8.15':
     resolution: {integrity: sha512-/5NV/vDALVFDXgLmfsy9TRCBlKwO2LNBFzpzvb9iIj+jR+eSc6DLYYvVOdivT/jm7MtU6TebYuRmzEOI7w40UA==}
     engines: {node: '>=10.0.0'}
+
+  '@xterm/addon-fit@0.11.0':
+    resolution: {integrity: sha512-jYcgT6xtVYhnhgxh3QgYDnnNMYTcf8ElbxxFzX0IZo+vabQqSPAjC3c1wJrKB5E19VwQei89QCiZZP86DCPF7g==}
+
+  '@xterm/xterm@6.0.0':
+    resolution: {integrity: sha512-TQwDdQGtwwDt+2cgKDLn0IRaSxYu1tSUjgKarSDkUM0ZNiSRXFpjxEsvc/Zgc5kq5omJ+V0a8/kIM2WD3sMOYg==}
 
   abbrev@4.0.0:
     resolution: {integrity: sha512-a1wflyaL0tHtJSmLSOVybYhy22vRih4eduhhrkcjgrWGnRfrZtovJ2FRjxuTtkkj47O/baf0R86QU5OuYpz8fA==}
@@ -1657,6 +1677,9 @@ packages:
     resolution: {integrity: sha512-GuvqvtrOk+AC27RidBxBsMzVNkwNl7PjHgc4NXbmdvSVLgIUjpaqcG1FjNRYnt2Yn9Ytq+Ln37XsBaglUcte/w==}
     engines: {node: '>=22.12.0'}
 
+  node-addon-api@7.1.1:
+    resolution: {integrity: sha512-5m3bsyrjFWE1xf7nz7YXdN4udnVtXK6/Yfgn5qnahL6bCkf2yKt4k3nuTKAtT4r3IG8JNR2ncsIMdZuAzJjHQQ==}
+
   node-api-version@0.2.1:
     resolution: {integrity: sha512-2xP/IGGMmmSQpI1+O/k72jF/ykvZ89JeuKX3TLJAYPDVLUalrshrLHkeVcCCZqG/eEa635cr8IBYzgnDvM2O8Q==}
 
@@ -1667,6 +1690,9 @@ packages:
 
   node-int64@0.4.0:
     resolution: {integrity: sha512-O5lz91xSOeoXP6DulyHfllpq+Eg00MWitZIbtPfoSEvqIHdl5gfcY6hYzDWnj0qD5tz52PI08u9qUvSVeUBeHw==}
+
+  node-pty@1.1.0:
+    resolution: {integrity: sha512-20JqtutY6JPXTUnL0ij1uad7Qe1baT46lyolh2sSENDd4sTzKZ4nmAFkeAARDKwmlLjPx6XKRlwRUxwjOy+lUg==}
 
   nopt@9.0.0:
     resolution: {integrity: sha512-Zhq3a+yFKrYwSBluL4H9XP3m3y5uvQkB/09CwDruCiRmR/UJYnn9W4R48ry0uGC70aeTPKLynBtscP9efFFcPw==}
@@ -2288,7 +2314,7 @@ snapshots:
       hashery: 1.5.1
       keyv: 5.6.0
 
-  '@crewstead/core@git+ssh://git@github.com/Crewstead/core.git#89abcfb12aa736bc313cc3915b2dc47eeaf5cc62':
+  '@crewstead/core@git+ssh://git@github.com/Crewstead/core.git#d7e8aa226112975f639bef376843c259206eaced':
     dependencies:
       playwright-core: 1.64.1
       zod: 4.6.7
@@ -2838,6 +2864,10 @@ snapshots:
   '@vitest/spy@5.0.5': {}
 
   '@xmldom/xmldom@0.8.15': {}
+
+  '@xterm/addon-fit@0.11.0': {}
+
+  '@xterm/xterm@6.0.0': {}
 
   abbrev@4.0.0: {}
 
@@ -3844,6 +3874,9 @@ snapshots:
     dependencies:
       semver: 7.8.5
 
+  node-addon-api@7.1.1:
+    optional: true
+
   node-api-version@0.2.1:
     dependencies:
       semver: 7.8.5
@@ -3862,6 +3895,11 @@ snapshots:
       which: 6.0.1
 
   node-int64@0.4.0: {}
+
+  node-pty@1.1.0:
+    dependencies:
+      node-addon-api: 7.1.1
+    optional: true
 
   nopt@9.0.0:
     dependencies:

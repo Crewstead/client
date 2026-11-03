@@ -1,7 +1,12 @@
 #!/usr/bin/env node
 import { createInterface } from 'node:readline/promises';
 import { claudeBinary } from './claude.ts';
-import { computerCommand, computerSettings, describeComputer } from './computer.ts';
+import {
+  computerCommand,
+  computerSettings,
+  describeComputer,
+  terminalCommand,
+} from './computer.ts';
 import {
   hubDataFolder,
   hubUrl,
@@ -34,6 +39,8 @@ const HELP = `Crewstead on this computer
   crewstead remove <name>           Remove a project (its files stay)
   crewstead computer on|off         Let chats work on this whole computer as you (they ask first);
                                     computer commands|browser on|off narrows it
+  crewstead terminal on|off         Let you open shells here from Crewstead (in projects, and
+                                    on the whole computer when that is on)
   crewstead install-browser         Download the headless browser again (install does it once)
   crewstead logs                    Follow the background service's log
   crewstead restart                 Restart the background service
@@ -94,6 +101,8 @@ async function main([command = 'status', ...args]: string[]) {
     case 'computer':
       // The running service sees the change and tells the hub.
       return log(`Whole-computer chats: ${computerCommand(home, args)}`);
+    case 'terminal':
+      return log(`Terminals from Crewstead: ${terminalCommand(home, args)}`);
     case 'remove':
     case 'remove-project':
       return log(
