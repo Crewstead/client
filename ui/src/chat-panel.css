@@ -69,8 +69,7 @@
   padding: 0;
   list-style: none;
 }
-.panel-skill,
-.panel-change {
+.panel-skill {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -116,20 +115,6 @@
 }
 .panel-empty.failed {
   color: var(--danger);
-}
-.panel-change code {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  direction: rtl;
-  text-align: left;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 12px;
-}
-.panel-change .diff-count {
-  flex-shrink: 0;
-  font-size: 11px;
 }
 .panel-facts {
   display: grid;

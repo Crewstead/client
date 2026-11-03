@@ -10,10 +10,23 @@
     decide,
   }: {
     item: TimelineItem;
-    /** 'approve-all' approves this call and switches every chat to approving everything. */
-    decide: (id: string, decision: 'approve' | 'reject' | 'approve-all') => Promise<void>;
+    /** 'approve-all' approves this call and switches every chat to approving everything. True once
+     * the hub took the answer. */
+    decide: (id: string, decision: 'approve' | 'reject' | 'approve-all') => Promise<boolean>;
   } = $props();
   let busy = $state(false);
+  /** Answered here: shown at once, before the hub reports the call running (it may take a while). */
+  let answered = $state<'approve' | 'reject' | 'approve-all'>();
+  /** The answer, from this page or as the hub reports it (another device, or after a reload). */
+  const given = $derived(
+    answered ??
+      (item.answered === 'approved'
+        ? 'approve'
+        : item.answered === 'declined'
+          ? 'reject'
+          : undefined),
+  );
+  const asking = $derived(item.status === 'pending' && !!item.approvalId && !given);
   const meta = $derived(metaFor(item.toolName));
   const note = $derived(meta.kind === 'note');
   const Icon = $derived(meta.icon);
@@ -57,9 +70,13 @@
     if (item.status === 'pending')
       return item.review?.outcome === 'checking'
         ? 'Checking'
-        : item.approvalId
-          ? 'Approval required'
-          : 'Running';
+        : given === 'reject'
+          ? 'Declining'
+          : given
+            ? 'Allowed · running'
+            : item.approvalId
+              ? 'Approval required'
+              : 'Running';
     if (item.status === 'completed' && item.autoApproved) return 'approved automatically';
     if (item.status === 'completed' && review?.outcome === 'approved') return 'approved by review';
     if (item.status === 'rejected' && review?.outcome === 'declined') return 'declined by review';
@@ -76,14 +93,14 @@
     if (!item.approvalId || busy) return;
     busy = true;
     try {
-      await decide(item.approvalId, decision);
+      if (await decide(item.approvalId, decision)) answered = decision;
     } finally {
       busy = false;
     }
   }
 </script>
 
-{#if (meta.kind === 'read' && !item.approvalId) || ((meta.kind === 'chat' || meta.kind === 'command') && !(item.status === 'pending' && item.approvalId))}<ToolLine
+{#if (meta.kind === 'read' && !item.approvalId) || ((meta.kind === 'chat' || meta.kind === 'command') && !asking)}<ToolLine
     {item}
   />{:else}<article
     class="tool-card"
@@ -106,7 +123,7 @@
             size={14}
           />{/if}<span>{reviewText}</span>
       </p>{/if}
-    {#if item.status === 'pending' && item.approvalId}<div class="approval-footer">
+    {#if asking}<div class="approval-footer">
         <span><ShieldCheck size={14} /> {footer}</span>
         <div>
           <button class="link-button" disabled={busy} onclick={() => answer('approve-all')}

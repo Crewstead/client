@@ -278,16 +278,8 @@
   color: var(--text);
   font-weight: 550;
 }
-.changed-files ul {
-  margin: 0;
-  padding: 0 0 6px;
-  list-style: none;
-}
-.changed-files li {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  padding: 4px 14px;
+.changed-files-list {
+  padding: 0 14px 8px;
 }
 .changed-files > header code {
   font-weight: 400;
@@ -329,4 +321,56 @@
   max-height: 200px;
   margin: 4px 0 12px 21px;
   overflow: auto;
+}
+/* A list of changed files: name, then its folder (cut from the left, so its end shows), then the
+   counts. The folder is marked left-to-right inside, so dots and slashes stay in place. */
+.change-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+}
+.change-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+  padding: 3px 0;
+}
+.change-name {
+  flex: none;
+  max-width: 60%;
+  overflow: hidden;
+  color: var(--text);
+  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.change-folder {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--faint);
+  direction: rtl;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.change-list .diff-count {
+  flex: none;
+  margin-left: auto;
+}
+.change-more {
+  margin-top: 2px;
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.change-more:hover {
+  color: var(--text);
+  text-decoration: underline;
 }

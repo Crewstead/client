@@ -184,10 +184,10 @@
     void workspace.refresh();
   });
   async function decide(id: string, decision: 'approve' | 'reject' | 'approve-all') {
-    if (!conversation.session) return;
+    if (!conversation.session) return false;
     // Approving everything also approves what chats are waiting on.
     if (decision === 'approve-all') return approveAll();
-    await conversation.command(
+    return conversation.accepted(
       `/sessions/${conversation.session.id}/approvals/${id}`,
       workspace.context,
       { decision },
@@ -196,8 +196,10 @@
   async function approveAll() {
     try {
       await workspace.setApprovalMode('all');
+      return true;
     } catch (cause) {
       conversation.error = cause instanceof Error ? cause.message : 'Could not change approvals';
+      return false;
     }
   }
 </script>

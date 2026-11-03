@@ -9,6 +9,7 @@
   import Attachments from '../attachments/Attachments.svelte';
   import { compact, percent } from '../chat-stats.ts';
   import { changedFiles } from '../timeline-entries.ts';
+  import ChangeList from '../ChangeList.svelte';
   import { chatFiles } from './chat-facts.ts';
   import PanelBrowsers from './PanelBrowsers.svelte';
   import PanelSubagents from './PanelSubagents.svelte';
@@ -88,15 +89,7 @@
         <FileDiff size={13} />Changed files{#if changes.length}<span>{changes.length}</span>{/if}
       </h3>
       {#if changes.length}
-        <ul class="panel-list">
-          {#each changes as file (file.path)}
-            <li class="panel-change">
-              <code title={file.path}>{file.path}</code><span class="diff-count"
-                ><ins>+{file.added}</ins> <del>−{file.removed}</del></span
-              >
-            </li>
-          {/each}
-        </ul>
+        <ChangeList files={changes} />
       {:else}<p class="panel-empty">No files changed in this chat.</p>{/if}
     </section>
 

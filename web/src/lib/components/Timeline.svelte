@@ -33,7 +33,7 @@
     running?: boolean;
     /** A message to scroll to and mark once, e.g. one a search found. */
     focus?: string | undefined;
-    decide: (id: string, decision: 'approve' | 'reject' | 'approve-all') => Promise<void>;
+    decide: (id: string, decision: 'approve' | 'reject' | 'approve-all') => Promise<boolean>;
   } = $props();
   let viewport: HTMLDivElement;
   /** The prompt being edited. */

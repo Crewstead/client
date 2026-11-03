@@ -153,14 +153,21 @@ export class Conversation {
   }
 
   async command(path: string, context: ContextId, body: unknown = {}, method = 'POST') {
+    await this.accepted(path, context, body, method);
+  }
+
+  /** Sends a command; whether the hub accepted it (why not shows as the chat's error). */
+  async accepted(path: string, context: ContextId, body: unknown = {}, method = 'POST') {
     this.error = '';
     try {
       await request(scoped(path, context), {
         method,
         ...(body === undefined ? {} : { body: JSON.stringify(body) }),
       });
+      return true;
     } catch (error) {
       this.error = error instanceof Error ? error.message : 'Action failed';
+      return false;
     }
   }
 
