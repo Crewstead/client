@@ -18,8 +18,8 @@ export interface Catalog {
   modules: ModuleInfo[];
   /** For organisation workspaces: the caller's role and the personal-model policy. */
   policy: { allowPersonal: boolean; role?: Role };
-  /** The account's own choices, e.g. how tool calls are approved. */
-  preferences: { approvalMode: ApprovalMode };
+  /** The account's own choices: how tool calls are approved, how the left panel orders places. */
+  preferences: { approvalMode: ApprovalMode; placeOrder?: string[] };
 }
 
 export async function request<T>(path: string, options?: RequestInit): Promise<T> {

@@ -18,11 +18,12 @@ export interface Place {
 }
 
 /**
- * Every place, busiest first: each project and whole computer the hub knows (with or without chats),
- * places only past chats name (a computer that is offline or removed), then the cloud. Chats keep the
- * order given, pinned first.
+ * Every place: each project and whole computer the hub knows (with or without chats), places only past
+ * chats name (a computer that is offline or removed), and the cloud. In the owner's own order once
+ * they arranged it (places added since go after, busiest first); until then busiest first, the cloud
+ * last. Chats keep the order given, pinned first.
  */
-export function placesOf(chats: Chat[], projects: Project[]): Place[] {
+export function placesOf(chats: Chat[], projects: Project[], order: string[] = []): Place[] {
   const places = new Map<string, Place>();
   const add = (id: string, saved?: string) => {
     let place = places.get(id);
@@ -53,5 +54,12 @@ export function placesOf(chats: Chat[], projects: Project[]): Place[] {
   const listed = [...places.values()].sort(
     (a, b) => b.latest.localeCompare(a.latest) || a.name.localeCompare(b.name),
   );
-  return [...listed, cloud];
+  const all = [...listed, cloud];
+  if (!order.length) return all;
+  const rank = (place: Place) => {
+    const at = order.indexOf(place.id);
+    return at < 0 ? order.length : at;
+  };
+  // A stable sort: places not in the saved order keep their busiest-first order after the rest.
+  return all.sort((a, b) => rank(a) - rank(b));
 }

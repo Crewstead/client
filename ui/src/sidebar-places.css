@@ -112,3 +112,61 @@
   background: #8fb6ff14;
   box-shadow: inset 0 0 0 1px #8fb6ff88;
 }
+/*
+ * Reordering: the row's icon is its handle. With a mouse the icon turns into a grip on hover; on touch
+ * screens dragging the icon moves the row (the rest of the row still scrolls the list).
+ */
+.place-item {
+  position: relative;
+}
+.place-icon {
+  display: inline-flex;
+  flex: none;
+}
+.place-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: calc(var(--sidebar-inset) + 22px);
+  padding-left: var(--sidebar-inset);
+  color: var(--muted);
+  opacity: 0;
+  cursor: grab;
+  touch-action: none;
+}
+.place-handle:active {
+  cursor: grabbing;
+}
+.place-item:hover .place-handle,
+.place-handle:focus-visible,
+.place-item.moving .place-handle {
+  opacity: 1;
+}
+.place-item:hover .place-icon,
+.place-item:has(.place-handle:focus-visible) .place-icon,
+.place-item.moving .place-icon {
+  visibility: hidden;
+}
+.place-handle:focus-visible {
+  outline: none;
+}
+.place-item:has(.place-handle:focus-visible) .place-row {
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.place-item.moving .place-row {
+  background: var(--surface-raised);
+  box-shadow: 0 4px 14px #0006;
+  color: var(--text);
+}
+@media (hover: none) {
+  .place-item:hover .place-handle {
+    opacity: 0;
+  }
+  .place-item:hover .place-icon {
+    visibility: visible;
+  }
+}

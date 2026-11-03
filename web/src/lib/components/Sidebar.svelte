@@ -9,6 +9,8 @@
   import ChatRow from './ChatRow.svelte';
   import PlaceRow from './PlaceRow.svelte';
   import { CLOUD, placesOf } from './sidebar-places.ts';
+  import { PlaceReorder } from './place-reorder.svelte.ts';
+  import { flip } from 'svelte/animate';
   import AccountMenu from './AccountMenu.svelte';
   import WorkspaceMenu from './WorkspaceMenu.svelte';
   import { activeModules } from '#lib/modules/registry.ts';
@@ -25,7 +27,19 @@
   );
   let search = $state('');
   const sessions = $derived(workspace.sessions.filter((session) => !session.archived));
-  const places = $derived(placesOf(sessions, workspace.catalog?.projects ?? []));
+  const places = $derived(
+    placesOf(
+      sessions,
+      workspace.catalog?.projects ?? [],
+      workspace.catalog?.preferences.placeOrder,
+    ),
+  );
+  const reorder = new PlaceReorder((ids) => {
+    void workspace.setPlaceOrder(ids).catch(() => {
+      moveError = 'The new order could not be saved.';
+    });
+  });
+  let placeList = $state<HTMLElement>();
   /** With only the cloud there is nothing to choose between: its chats are the list. */
   const cloudOnly = $derived(places.length === 1);
   // The place whose chats show: the one chosen in the panel, else the open chat's (or the new chat's).
@@ -51,9 +65,14 @@
   const chats = $derived(
     (shown?.chats ?? []).filter((session) => session.title.toLowerCase().includes(words)),
   );
-  const listed = $derived(
-    places.filter((place) => `${place.name} ${place.machine ?? ''}`.toLowerCase().includes(words)),
-  );
+  const listed = $derived.by(() => {
+    const matching = places.filter((place) =>
+      `${place.name} ${place.machine ?? ''}`.toLowerCase().includes(words),
+    );
+    const live = reorder.live;
+    if (!live) return matching;
+    return live.flatMap((id) => matching.filter((place) => place.id === id));
+  });
   // While a chat is dragged, the other places show above the chats, as places to drop it.
   let dragging = $state<{ id: string; from: string }>();
   let over = $state('');
@@ -196,14 +215,38 @@
         <p class="place-empty">{words ? 'No chats match.' : 'No chats here yet.'}</p>
       {/each}
     {:else}
-      {#each listed as place (place.id)}
-        <PlaceRow
-          {place}
-          open={() => choose(place.id)}
-          over={over === place.id}
-          drop={dropZone(place.id)}
-        />
-      {/each}
+      <div class="place-list" bind:this={placeList}>
+        {#each listed as place (place.id)}
+          <div animate:flip={{ duration: 150 }}>
+            <PlaceRow
+              {place}
+              open={() => choose(place.id)}
+              over={over === place.id}
+              drop={dropZone(place.id)}
+              {...words
+                ? {}
+                : {
+                    reorder: {
+                      moving: reorder.moving === place.id,
+                      grab: (event: PointerEvent) =>
+                        reorder.start(
+                          event,
+                          place.id,
+                          places.map((entry) => entry.id),
+                          placeList!,
+                        ),
+                      key: (event: KeyboardEvent) =>
+                        reorder.key(
+                          event,
+                          place.id,
+                          places.map((entry) => entry.id),
+                        ),
+                    },
+                  }}
+            />
+          </div>
+        {/each}
+      </div>
     {/if}
   </nav>
   <footer class="sidebar-footer">

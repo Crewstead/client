@@ -36,9 +36,19 @@ export class Workspace {
 
   /** How tool calls are approved, in all chats of this account. */
   async setApprovalMode(mode: ApprovalMode) {
-    const result = await request<{ approvalMode: ApprovalMode }>('/preferences', {
+    const result = await request<Catalog['preferences']>('/preferences', {
       method: 'PATCH',
-      body: JSON.stringify({ approvalMode: mode }),
+      body: JSON.stringify({ approvalMode: mode, context: this.context }),
+    });
+    if (this.catalog) this.catalog.preferences = result;
+  }
+
+  /** The left panel's order of places in this workspace; shown at once, saved for every device. */
+  async setPlaceOrder(ids: string[]) {
+    if (this.catalog) this.catalog.preferences = { ...this.catalog.preferences, placeOrder: ids };
+    const result = await request<Catalog['preferences']>('/preferences', {
+      method: 'PATCH',
+      body: JSON.stringify({ placeOrder: ids, context: this.context }),
     });
     if (this.catalog) this.catalog.preferences = result;
   }
