@@ -1,7 +1,7 @@
 <script lang="ts">
   import { resolve } from '$app/paths';
   import { goto } from '$app/navigation';
-  import { ChevronsUpDown, Settings2, LogOut, Check, Plus } from '@lucide/svelte';
+  import { ChartColumn, ChevronsUpDown, Settings2, LogOut, Check, Plus } from '@lucide/svelte';
   import { useAuthentication } from '#lib/auth/auth.svelte.ts';
   import SavedAccounts from '#lib/auth/SavedAccounts.svelte';
   import '@crewstead/ui/account-menu.css';
@@ -104,6 +104,9 @@
       settings();
       auth.openAccount();
     }}><Plus size={16} />Add account</button
+  >
+  <a class="account-menu-action" href={resolve('/usage')} onclick={settings}
+    ><ChartColumn size={16} />Usage</a
   >
   <a class="account-menu-action" href={resolve('/settings')} onclick={settings}
     ><Settings2 size={16} />Settings</a

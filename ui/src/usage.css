@@ -1,0 +1,333 @@
+/* The usage page: totals, a day-by-day chart, and ranked lists in a two-column grid. */
+.usage-page {
+  width: min(100%, 1080px);
+}
+.usage-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-4);
+  margin: var(--space-3) 0 var(--space-6);
+}
+.usage-head h1 {
+  margin: 0;
+}
+.usage-sub {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+.usage-toggle {
+  display: inline-flex;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+.usage-toggle button {
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+.usage-toggle button:hover {
+  color: var(--text);
+}
+.usage-toggle button[aria-pressed='true'] {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+.usage-body {
+  display: grid;
+  gap: var(--space-4);
+  transition: opacity 0.15s;
+}
+.usage-body.loading {
+  opacity: 0.6;
+}
+.usage-totals {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+}
+.usage-total {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.usage-total dt {
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+.usage-total dd {
+  margin: 2px 0 0;
+  font-size: 22px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.3px;
+}
+.usage-total .usage-total-detail {
+  color: var(--faint);
+  font-size: var(--text-xs);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.usage-card {
+  min-width: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--line-subtle);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.usage-card-title {
+  margin: 0 0 var(--space-3);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+.usage-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+.usage-empty,
+.usage-note {
+  margin: 0;
+  color: var(--faint);
+  font-size: var(--text-sm);
+}
+.usage-note {
+  margin-top: var(--space-3);
+}
+.usage-error {
+  color: var(--danger);
+}
+/* Ranked lists: a quiet bar behind each row, its length the share of the largest. */
+.bar-list {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--text-sm);
+}
+.bar-list li {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 28px;
+  padding: 0 var(--space-2);
+  overflow: hidden;
+  border-radius: 6px;
+}
+.bar-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--chart-2);
+  opacity: 0.2;
+}
+.bar-label {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+a.bar-label:hover {
+  text-decoration: underline;
+}
+.bar-detail {
+  position: relative;
+  color: var(--faint);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+}
+.bar-value {
+  position: relative;
+  min-width: 44px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.usage-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2) var(--space-4);
+  margin: var(--space-4) 0 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--line-subtle);
+  font-size: var(--text-sm);
+}
+.usage-facts dt {
+  color: var(--faint);
+  font-size: var(--text-xs);
+}
+.usage-facts dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+/* Day by day: one column a day, stacked by model; the hovered day's numbers sit above. */
+.daily-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.daily-head .usage-card-title {
+  margin: 0;
+}
+.daily-focus {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  min-height: 22px;
+  margin: var(--space-3) 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+.daily-focus strong {
+  color: var(--text);
+}
+.daily-part {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.daily-part i,
+.daily-legend i {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+.daily-hint {
+  color: var(--faint);
+}
+.daily-chart {
+  position: relative;
+  height: 180px;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(
+    to bottom,
+    transparent calc(50% - 0.5px),
+    var(--line-subtle) 50%,
+    transparent calc(50% + 0.5px)
+  );
+}
+.daily-axis {
+  position: absolute;
+  top: -2px;
+  left: 0;
+  color: var(--faint);
+  font-size: 11px;
+}
+.daily-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 100%;
+  padding-top: 16px;
+}
+.daily-chart.dense .daily-bars {
+  gap: 1px;
+}
+.daily-bar {
+  display: flex;
+  flex: 1;
+  align-items: flex-end;
+  min-width: 1px;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 3px 3px 0 0;
+  background: none;
+  cursor: default;
+}
+.daily-bar:hover,
+.daily-bar.active,
+.daily-bar:focus-visible {
+  background: var(--surface-hover);
+}
+.daily-stack {
+  display: flex;
+  flex-direction: column-reverse;
+  width: 100%;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 3px 3px 0 0;
+}
+.daily-stack i {
+  flex-basis: 0;
+}
+.daily-dates {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  color: var(--faint);
+  font-size: 11px;
+}
+.daily-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+.daily-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+/* When you chat: 7 rows of 24 hours. */
+.heatmap {
+  display: grid;
+  grid-template-columns: 30px repeat(24, minmax(0, 1fr));
+  gap: 2px;
+  align-items: center;
+}
+.heatmap i {
+  aspect-ratio: 1;
+  border-radius: 2px;
+  background: var(--chart-3);
+}
+.heatmap i.none {
+  background: var(--line-subtle);
+}
+.heatmap-day,
+.heatmap-hour {
+  color: var(--faint);
+  font-size: 11px;
+}
+.heatmap-hour {
+  grid-row: 8;
+}
+@media (max-width: 760px) {
+  .usage-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .usage-totals {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .usage-head {
+    align-items: flex-start;
+  }
+  .usage-toggle.period {
+    width: 100%;
+    overflow-x: auto;
+  }
+  .usage-toggle.period button {
+    flex: 1;
+    white-space: nowrap;
+  }
+}

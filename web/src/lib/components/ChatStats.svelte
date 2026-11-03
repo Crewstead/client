@@ -4,6 +4,7 @@
   import { request, scoped } from '#lib/api.ts';
   import { useWorkspace } from '#lib/workspace.svelte.ts';
   import { chatStats, compact, percent, plural } from './chat-stats.ts';
+  import ContextBreakdown from './ContextBreakdown.svelte';
   import '@crewstead/ui/dialogs.css';
   import '@crewstead/ui/stats.css';
   let { session, models }: { session: Session; models: Model[] } = $props();
@@ -35,11 +36,16 @@
 <!-- Opened from the context meter in the prompt box. -->
 <dialog bind:this={dialog} class="dialog-content stats-dialog" aria-labelledby={`${id}-title`}>
   <header class="stats-head">
-    <h2 id={`${id}-title`} class="dialog-title">Chat statistics</h2>
+    <h2 id={`${id}-title`} class="dialog-title">Context and statistics</h2>
     <button class="icon-button" aria-label="Close" onclick={() => dialog?.close()}
       ><X size={16} /></button
     >
   </header>
+  {#if session.contextUsed}<ContextBreakdown
+      parts={session.contextParts}
+      used={session.contextUsed}
+      window={contextWindow ?? 128_000}
+    />{/if}
   <dl class="stats-grid">
     <div>
       <dt>Messages</dt>

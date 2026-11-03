@@ -119,8 +119,10 @@ export class Conversation {
         if (update.event.title) this.session.title = update.event.title;
         if (update.event.named) this.session.named = true;
       } else if (update.event.type === 'session.model') this.session.modelId = update.event.modelId;
-      else if (update.event.type === 'session.context')
+      else if (update.event.type === 'session.context') {
         this.session.contextUsed = update.event.tokens;
+        this.session.contextParts = update.event.parts;
+      }
       else if (update.event.type === 'session.usage')
         this.session.usage = addUsage(
           this.session.usage,

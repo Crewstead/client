@@ -22,7 +22,7 @@
     type="button"
     class="context-meter"
     class:high={share >= 0.6}
-    aria-label={`Context ${shown} full. Show chat statistics`}
+    aria-label={`Context ${shown} full. Show what fills it`}
     aria-describedby={`${id}-card`}
     onclick={() => details?.()}
   >
@@ -52,6 +52,6 @@
     {#if total}<span class="context-row"
         ><span>Tokens in this chat</span><span>{compact(total)}</span></span
       >{/if}
-    <small>Send /compact to summarize now. Click for chat statistics.</small>
+    <small>Send /compact to summarize now. Click to see what fills it.</small>
   </span>
 </span>

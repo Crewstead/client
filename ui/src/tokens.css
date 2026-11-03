@@ -25,6 +25,14 @@
   --danger: #f87171;
   --danger-solid: #e5484d;
   --danger-solid-hover: #ec5d5e;
+  /* Categories in charts (context parts, models): muted hues that read apart on the dark ground. */
+  --chart-1: #8f89e6;
+  --chart-2: #6ea8e6;
+  --chart-3: #4fb89a;
+  --chart-4: #e08a5e;
+  --chart-5: #d77fa6;
+  --chart-6: #c7b46a;
+  --chart-7: #a8a59c;
   --radius: 10px;
   --text-xs: 12px;
   --text-sm: 13px;

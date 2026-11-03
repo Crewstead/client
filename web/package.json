@@ -9,7 +9,7 @@
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json"
   },
   "dependencies": {
-    "@crewstead/core": "git+ssh://git@github.com/Crewstead/core.git#v0.1.8",
+    "@crewstead/core": "git+ssh://git@github.com/Crewstead/core.git#v0.1.9",
     "@crewstead/ui": "workspace:*",
     "@lucide/svelte": "1.62.0",
     "@tanstack/svelte-query": "6.3.6"
