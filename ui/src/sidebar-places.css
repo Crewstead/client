@@ -113,8 +113,8 @@
   box-shadow: inset 0 0 0 1px #8fb6ff88;
 }
 /*
- * Reordering: the row's icon is its handle. With a mouse the icon turns into a grip on hover; on touch
- * screens dragging the icon moves the row (the rest of the row still scrolls the list).
+ * Reordering: the whole row drags. A mouse drags once it moves a little; a finger holds the row first,
+ * so a swipe still scrolls the list. Held rows select no text and open no menu.
  */
 .place-item {
   position: relative;
@@ -123,86 +123,14 @@
   display: inline-flex;
   flex: none;
 }
-.place-handle {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 1;
-  display: grid;
-  place-items: center;
-  width: calc(var(--sidebar-inset) + 22px);
-  padding-left: var(--sidebar-inset);
-  color: var(--muted);
-  opacity: 0;
-  cursor: grab;
-  touch-action: none;
-}
-.place-handle:active {
-  cursor: grabbing;
-}
-.place-item:hover .place-handle,
-.place-handle:focus-visible,
-.place-item.moving .place-handle {
-  opacity: 1;
-}
-.place-item:hover .place-icon,
-.place-item:has(.place-handle:focus-visible) .place-icon,
-.place-item.moving .place-icon {
-  visibility: hidden;
-}
-.place-handle:focus-visible {
-  outline: none;
-}
-.place-item:has(.place-handle:focus-visible) .place-row {
-  box-shadow: inset 0 0 0 1px var(--line);
+.place-row.movable {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 .place-item.moving .place-row {
   background: var(--surface-raised);
   box-shadow: 0 4px 14px #0006;
   color: var(--text);
-}
-/* Edit order: every row shows its grip; the rows themselves do not open. */
-.place-item.arranging .place-handle {
-  opacity: 1;
-}
-.place-item.arranging .place-icon {
-  visibility: hidden;
-}
-.place-item.arranging .place-row {
-  cursor: default;
-}
-.place-item.arranging .place-chevron {
-  visibility: hidden;
-}
-.place-arrange {
-  margin-left: auto;
-  padding: 2px 8px;
-  border: 0;
-  border-radius: 6px;
-  background: none;
-  color: var(--faint);
-  font: inherit;
-  font-size: var(--text-xs);
-  cursor: pointer;
-}
-.place-arrange:hover {
-  background: var(--surface);
-  color: var(--text);
-}
-.place-arrange[aria-pressed='true'] {
-  background: var(--surface-hover);
-  color: var(--text);
-}
-/* Touch screens reorder only in Edit order, so a swipe over an icon always scrolls the list. */
-@media (hover: none) {
-  .place-handle {
-    display: none;
-  }
-  .place-item.arranging .place-handle {
-    display: grid;
-  }
-  .place-item:hover:not(.arranging) .place-icon {
-    visibility: visible;
-  }
+  cursor: grabbing;
 }

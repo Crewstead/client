@@ -12,6 +12,12 @@
 }
 .provider-groups {
   overflow: hidden;
+  /* The layout follows the card's own width: the settings column is narrow beside two side panels. */
+  container-type: inline-size;
+}
+/* A name never squeezes below a word or so; the spend wraps under it first. */
+.provider-head > .row-text {
+  min-width: min(9rem, 40%);
 }
 .provider-group > ul {
   list-style: none;
@@ -121,7 +127,7 @@
   min-height: 30px;
   padding: 4px 8px;
 }
-@media (max-width: 560px) {
+@container (max-width: 520px) {
   .provider-head {
     flex-wrap: wrap;
   }

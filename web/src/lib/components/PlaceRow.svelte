@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Attachment } from 'svelte/attachments';
-  import { ChevronRight, Cloud, Folder, GripVertical, Monitor } from '@lucide/svelte';
+  import { ChevronRight, Cloud, Folder, Monitor } from '@lucide/svelte';
   import { useWorkspace } from '#lib/workspace.svelte.ts';
   import type { Place } from './sidebar-places.ts';
   import '@crewstead/ui/chat-row.css';
@@ -11,21 +11,18 @@
     over,
     drop,
     reorder,
-    arranging = false,
   }: {
     place: Place;
     open: () => void;
     /** A dragged chat is over this place. */
     over: boolean;
     drop: Attachment<HTMLElement>;
-    /** Rearranging the list: a drag or arrow keys on the row's icon. Absent where order is fixed. */
+    /** Rearranging the list: dragging the row, or Alt with the arrow keys. Absent where order is fixed. */
     reorder?: {
-      grab: (event: PointerEvent) => void;
+      press: (event: PointerEvent) => void;
       key: (event: KeyboardEvent) => void;
       moving: boolean;
     };
-    /** Edit order is on: the grip shows, and the row does not open. */
-    arranging?: boolean;
   } = $props();
   const workspace = useWorkspace();
   /** The most pressing state among its chats, as the chat rows show it. */
@@ -42,27 +39,16 @@
 </script>
 
 <!--
-  A place in the list: opens its chats in the panel, and takes a chat dropped on it. Its icon is also
-  the handle that moves it in the list (it turns into a grip on hover).
+  A place in the list: opens its chats in the panel, and takes a chat dropped on it. Dragging the row
+  (holding it first on a touch screen) moves it in the list.
 -->
-<div
-  class="place-item"
-  class:moving={reorder?.moving}
-  class:arranging={arranging && !!reorder}
-  data-place={place.id}
->
-  {#if reorder}<span
-      class="place-handle"
-      role="button"
-      tabindex="0"
-      aria-label={`Move ${place.name}`}
-      title="Drag to reorder, or use the arrow keys"
-      onpointerdown={reorder.grab}
-      onkeydown={reorder.key}><GripVertical size={14} /></span
-    >{/if}
+<div class="place-item" class:moving={reorder?.moving} data-place={place.id}>
   <button
     class="place-row"
     class:drop-over={over}
+    class:movable={!!reorder}
+    onpointerdown={reorder?.press}
+    onkeydown={reorder?.key}
     aria-label={`${place.name}${place.machine ? ` on ${place.machine}` : ''}, ${place.chats.length} ${place.chats.length === 1 ? 'chat' : 'chats'}`}
     onclick={open}
     {@attach drop}
