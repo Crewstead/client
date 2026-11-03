@@ -4,6 +4,7 @@
   import { mcpServers } from './api.ts';
   import McpServerDialog from './McpServerDialog.svelte';
   import McpServerRow from './McpServerRow.svelte';
+  import { McpSignIn } from './sign-in.svelte.ts';
   import '@crewstead/ui/switch.css';
   import '@crewstead/ui/skills.css';
   import '@crewstead/ui/mcp.css';
@@ -18,6 +19,16 @@
     }
   }
   $effect(() => void refresh());
+  const signIn = new McpSignIn();
+  $effect(() => () => signIn.stop());
+  function startSignIn(id: string) {
+    error = '';
+    signIn
+      .start(id, () => !!list?.find((server) => server.id === id)?.signIn?.signedIn, refresh)
+      .catch((cause: unknown) => {
+        error = cause instanceof Error ? cause.message : 'Could not start the sign-in.';
+      });
+  }
   async function act(action: () => Promise<unknown>) {
     error = '';
     try {
@@ -39,13 +50,22 @@
   <p class="muted-text">
     Other services’ tools for your Personal chats, through the Model Context Protocol. Models see
     each server’s tool names and read a server’s full list only when they need it. Every call asks
-    first unless you allow that tool; a tool you switch off is never offered.
+    first unless you allow that tool; a tool you switch off is never offered. Servers that sign you
+    in through their own page (Notion, Linear and others) need no headers: add the address, then
+    Sign in.
   </p>
   {#if error}<p class="error-banner" role="alert">{error}</p>{/if}
   {#if list?.length}
     <ul class="skill-list" aria-label="Your MCP servers">
       {#each list as server (server.id)}
-        <McpServerRow {server} {act} edit={() => (editing = { server })} />
+        <McpServerRow
+          {server}
+          {act}
+          edit={() => (editing = { server })}
+          signIn={() => startSignIn(server.id)}
+          waiting={signIn.waiting === server.id}
+          link={signIn.waiting === server.id ? signIn.link : ''}
+        />
       {/each}
     </ul>
   {:else if list}<p class="skill-empty">No MCP servers yet.</p>{/if}

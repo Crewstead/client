@@ -114,43 +114,43 @@
         >A Streamable HTTP MCP server on the internet. The hub connects to it, not this device.</small
       >
     </label>
-    <fieldset class="mcp-headers" disabled={busy}>
-      <legend>Headers</legend>
-      {#each headers as header, index (index)}
-        <div class="mcp-header-row">
-          <input
-            bind:value={header.name}
-            readonly={header.saved}
-            aria-label="Header name"
-            placeholder="Authorization"
-            autocomplete="off"
-            spellcheck="false"
-          />
-          <input
-            bind:value={header.value}
-            type="password"
-            aria-label={`Value of ${header.name || 'header'}`}
-            placeholder={header.saved ? 'Saved · type to replace' : 'Bearer …'}
-            autocomplete="off"
-          />
-          <button
+    {#if !server?.signIn}<fieldset class="mcp-headers" disabled={busy}>
+        <legend>Headers</legend>
+        {#each headers as header, index (index)}
+          <div class="mcp-header-row">
+            <input
+              bind:value={header.name}
+              readonly={header.saved}
+              aria-label="Header name"
+              placeholder="Authorization"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <input
+              bind:value={header.value}
+              type="password"
+              aria-label={`Value of ${header.name || 'header'}`}
+              placeholder={header.saved ? 'Saved · type to replace' : 'Bearer …'}
+              autocomplete="off"
+            />
+            <button
+              type="button"
+              class="icon-button"
+              aria-label={`Remove ${header.name || 'header'}`}
+              onclick={() => headers.splice(index, 1)}><X size={14} /></button
+            >
+          </div>
+        {/each}
+        {#if headers.length < 5}<button
             type="button"
-            class="icon-button"
-            aria-label={`Remove ${header.name || 'header'}`}
-            onclick={() => headers.splice(index, 1)}><X size={14} /></button
-          >
-        </div>
-      {/each}
-      {#if headers.length < 5}<button
-          type="button"
-          class="button subtle small"
-          onclick={() => headers.push({ name: '', value: '' })}><Plus size={14} /> Header</button
-        >{/if}
-      <small
-        >For a server that needs a token, e.g. <code>Authorization: Bearer …</code>. Kept on the
-        hub, never shown again, never given to models.</small
-      >
-    </fieldset>
+            class="button subtle small"
+            onclick={() => headers.push({ name: '', value: '' })}><Plus size={14} /> Header</button
+          >{/if}
+        <small
+          >For a server that needs a token, e.g. <code>Authorization: Bearer …</code>. Kept on the
+          hub, never shown again, never given to models.</small
+        >
+      </fieldset>{/if}
     {#if error}<p class="error-banner" role="alert">{error}</p>{/if}
     <div class="dialog-actions">
       <button

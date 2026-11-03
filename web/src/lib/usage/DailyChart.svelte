@@ -63,7 +63,12 @@
   </p>
   <div class="daily-chart" class:dense={daily.length > 60}>
     <span class="daily-axis">{compact(top)}</span>
-    <div class="daily-bars" role="group" aria-label="Days" onmouseleave={() => (hovered = undefined)}>
+    <div
+      class="daily-bars"
+      role="group"
+      aria-label="Days"
+      onmouseleave={() => (hovered = undefined)}
+    >
       {#each daily as day, index (day.day)}
         <button
           class="daily-bar"

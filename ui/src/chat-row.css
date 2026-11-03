@@ -15,7 +15,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px var(--sidebar-inset);
+  padding: 7px var(--sidebar-inset);
   font-size: var(--text-sm);
   line-height: 20px;
   color: var(--nav-text);

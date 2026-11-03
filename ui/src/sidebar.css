@@ -1,6 +1,7 @@
 .sidebar {
   --sidebar-inset: 10px;
-  --sidebar-row-height: 36px;
+  /* One height for every row in the panel: links, places and chats. */
+  --sidebar-row-height: 34px;
   /* Never so wide that the page beside it (and the details panel) leave the conversation under 440px. */
   --sidebar-width: clamp(
     200px,
@@ -44,7 +45,7 @@
   display: flex;
   align-items: center;
   gap: 9px;
-  min-height: 34px;
+  min-height: var(--sidebar-row-height);
   margin: 0 0 12px;
   padding: 0 var(--sidebar-inset);
   color: var(--nav-text);

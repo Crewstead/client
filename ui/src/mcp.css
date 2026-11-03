@@ -144,3 +144,8 @@
     padding-left: 14px;
   }
 }
+/* A server that signs its users in: its Sign in button sits beside the row's ⋯. */
+.mcp-sign-in {
+  flex: none;
+  white-space: nowrap;
+}

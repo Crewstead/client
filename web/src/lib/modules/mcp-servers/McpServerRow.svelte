@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ChevronDown } from '@lucide/svelte';
+  import { ChevronDown, LogIn } from '@lucide/svelte';
   import type { McpServer, McpToolRule } from '@crewstead/core/protocol';
   import OptionPicker from '#lib/components/OptionPicker.svelte';
   import RowMenu, { type MenuItem } from '#lib/components/RowMenu.svelte';
@@ -8,12 +8,22 @@
     server,
     edit,
     act,
+    signIn,
+    waiting,
+    link,
   }: {
     server: McpServer;
     edit: () => void;
     /** Runs a change, then reloads the list (showing any error). */
     act: (action: () => Promise<unknown>) => Promise<void>;
+    /** Opens the server's own sign-in page, for servers that sign their users in. */
+    signIn: () => void;
+    /** A sign-in is open in another window and being waited for. */
+    waiting: boolean;
+    /** The sign-in page, when it could not be opened in a new tab. */
+    link: string;
   } = $props();
+  const needsSignIn = $derived(!!server.signIn && !server.signIn.signedIn);
   let open = $state(false);
   let checking = $state(false);
   const rules: Array<{ value: McpToolRule; label: string; hint: string }> = [
@@ -39,7 +49,23 @@
         checking = false;
       },
     },
-    { label: 'Edit', hint: 'Name, address and headers', run: edit },
+    ...(server.signIn
+      ? server.signIn.signedIn
+        ? [
+            { label: 'Sign in again', hint: 'Through the service’s own page', run: signIn },
+            {
+              label: 'Sign out',
+              hint: 'Crewstead forgets the sign-in',
+              run: () => act(() => mcpServers.signOut(server.id)),
+            },
+          ]
+        : [{ label: 'Sign in', hint: 'Through the service’s own page', run: signIn }]
+      : []),
+    {
+      label: 'Edit',
+      hint: server.signIn ? 'Name and address' : 'Name, address and headers',
+      run: edit,
+    },
     {
       label: 'Remove',
       confirm: 'Remove? Click again to confirm.',
@@ -62,16 +88,33 @@
           >{server.name}{#if !server.enabled}<span class="pill">Off</span>{/if}</span
         >
         <span class="skill-row-description" title={server.url}>{server.url}</span>
-        <span class="mcp-server-count" class:problem={!!server.problem}
-          >{server.problem
-            ? 'Not reachable'
-            : `${usable} of ${server.tools.length} tools in use`}</span
+        <span class="mcp-server-count" class:problem={!!server.problem && !needsSignIn}
+          >{needsSignIn
+            ? waiting
+              ? 'Waiting for the sign-in…'
+              : 'Sign in to use it'
+            : server.problem
+              ? 'Not reachable'
+              : `${server.signIn ? 'Signed in · ' : ''}${usable} of ${server.tools.length} tools in use`}</span
         >
       </span>
     </button>
+    {#if needsSignIn}<button class="button small mcp-sign-in" disabled={waiting} onclick={signIn}
+        ><LogIn size={14} /> {waiting ? 'Waiting…' : 'Sign in'}</button
+      >{/if}
     <RowMenu label={`Settings for ${server.name}`} title={server.name} {items} />
   </div>
-  {#if server.problem}<p class="mcp-problem" role="status">{server.problem}</p>{/if}
+  {#if link}<p class="mcp-problem" role="status">
+      Your browser blocked the new tab.
+      <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- the service's own page -->
+      <a href={link} target="_blank" rel="noopener">Open the sign-in page</a>.
+    </p>
+  {:else if server.problem && !(needsSignIn && server.problem === 'Sign in to use this server.')}<p
+      class="mcp-problem"
+      role="status"
+    >
+      {server.problem}
+    </p>{/if}
   {#if open}
     {#if server.tools.length}
       <ul class="mcp-tools" aria-label={`${server.name} tools`}>

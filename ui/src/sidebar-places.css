@@ -4,8 +4,9 @@
   align-items: center;
   gap: 8px;
   width: 100%;
-  min-height: 34px;
-  padding: 5px 8px 5px var(--sidebar-inset);
+  min-height: var(--sidebar-row-height);
+  padding: 7px 8px 7px var(--sidebar-inset);
+  line-height: 20px;
   border: 0;
   border-radius: 6px;
   background: none;
