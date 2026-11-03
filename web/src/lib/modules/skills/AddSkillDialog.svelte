@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { closeOutside } from '#lib/close-outside.ts';
   import { Check, Plus, Search, User, Users, X } from '@lucide/svelte';
   import type { Skill } from '@crewstead/core/protocol';
   import '@crewstead/ui/dialogs.css';
@@ -84,14 +85,12 @@
 </script>
 
 <dialog
+  {@attach closeOutside}
   class="dialog-content add-skill-dialog"
   aria-labelledby={`${id}-title`}
   aria-describedby={`${id}-note`}
   {@attach (node) => node.showModal()}
   onclose={close}
-  onclick={(event) => {
-    if (event.target === event.currentTarget) event.currentTarget.close();
-  }}
 >
   <header class="add-skill-header">
     <div>

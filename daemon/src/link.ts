@@ -1,12 +1,14 @@
 import { randomUUID } from 'node:crypto';
 import { hostname } from 'node:os';
 import { serverEvents } from '@crewstead/core/provider-kit';
-import type {
-  MachineActionResult,
-  MachineChunk,
-  MachineCommand,
-  MachineHello,
-  MachineReport,
+import {
+  DEFAULT_CLAUDE_ACCOUNT,
+  type MachineActionResult,
+  type MachineChunk,
+  type MachineCommand,
+  type MachineHello,
+  type MachineReport,
+  type PlanLimits,
 } from '@crewstead/core/protocol';
 import { detectClaudeCode, runClaude } from './claude.ts';
 import {
@@ -229,7 +231,11 @@ async function linkOnce(options: LinkOptions, connected: () => void) {
           review: !!command.review,
         };
         runs.set(command.runId, run);
-        void execute(options, command, report, run).finally(() => runs.delete(command.runId));
+        const limits = (body: { account: string; limits: PlanLimits }) =>
+          call('/api/machine/plan-limits', body).catch(() => {});
+        void execute(options, command, report, run, limits).finally(() =>
+          runs.delete(command.runId),
+        );
       }
     }
   } finally {
@@ -263,6 +269,8 @@ async function execute(
   run: Extract<MachineCommand, { type: 'run' }>,
   report: (body: MachineReport) => Promise<unknown>,
   active: ActiveRun,
+  /** Tells the hub the account's usage limits (older hubs ignore it). */
+  limits: (body: { account: string; limits: PlanLimits }) => Promise<unknown>,
 ) {
   const signal = active.controller.signal;
   let pending: MachineChunk[] = [];
@@ -292,6 +300,7 @@ async function execute(
       signal,
       onToolCall,
       accountEnvironment(accountFor(options.tools.home, run.account)),
+      (found) => void limits({ account: run.account ?? DEFAULT_CLAUDE_ACCOUNT, limits: found }),
     );
     clearInterval(timer);
     await flush({ done: true });

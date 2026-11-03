@@ -41,6 +41,11 @@ export async function runProcess(
     const child = spawn(file, argv, { ...options, stdio: ['ignore', 'pipe', 'pipe'] });
     // A detached program leads its own process group; stopping it stops everything it started.
     const stop = () => {
+      // Windows has no process groups: its own tool stops the program and all it started.
+      if (process.platform === 'win32' && child.pid) {
+        spawn('taskkill', ['/pid', String(child.pid), '/T', '/F'], { windowsHide: true });
+        return;
+      }
       if (options.detached && child.pid) {
         try {
           process.kill(-child.pid, 'SIGKILL');

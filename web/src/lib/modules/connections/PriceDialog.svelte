@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { closeOutside } from '#lib/close-outside.ts';
   import type { ModelEntryView } from '@crewstead/core/protocol';
   import { discounted, fullPrices } from './format.ts';
   import '@crewstead/ui/dialogs.css';
@@ -84,6 +85,7 @@
 </script>
 
 <dialog
+  {@attach closeOutside}
   bind:this={dialog}
   class="dialog-content"
   aria-labelledby={`${id}-title`}

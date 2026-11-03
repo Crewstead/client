@@ -2,13 +2,14 @@
   import ResizeHandle from './ResizeHandle.svelte';
   import { sidebarWidth } from '#lib/panel-widths.svelte.ts';
   import { resolve } from '$app/paths';
-  import { ChevronLeft, MonitorPlay, Plus, Search } from '@lucide/svelte';
+  import { ChevronLeft, Laptop, MonitorPlay, Plus, Search } from '@lucide/svelte';
   import { page } from '$app/state';
   import { busy, useWorkspace } from '#lib/workspace.svelte.ts';
   import { notifier } from '#lib/notifications.svelte.ts';
   import ChatRow from './ChatRow.svelte';
   import PlaceRow from './PlaceRow.svelte';
-  import { CLOUD, placesOf } from './sidebar-places.ts';
+  import AddProject from './AddProject.svelte';
+  import { CLOUD, groupsOf, placesOf, rearranged } from './sidebar-places.ts';
   import { PlaceReorder } from './place-reorder.svelte.ts';
   import { flip } from 'svelte/animate';
   import AccountMenu from './AccountMenu.svelte';
@@ -34,12 +35,16 @@
       workspace.catalog?.preferences.placeOrder,
     ),
   );
+  // Places move among their own computer's; the saved order is the whole list.
   const reorder = new PlaceReorder((ids) => {
-    void workspace.setPlaceOrder(ids).catch(() => {
+    const order = rearranged(
+      places.map((place) => place.id),
+      ids,
+    );
+    void workspace.setPlaceOrder(order).catch(() => {
       moveError = 'The new order could not be saved.';
     });
   });
-  let placeList = $state<HTMLElement>();
   /** With only the cloud there is nothing to choose between: its chats are the list. */
   const cloudOnly = $derived(places.length === 1);
   // The place whose chats show: the one chosen in the panel, else the open chat's (or the new chat's).
@@ -71,8 +76,13 @@
     );
     const live = reorder.live;
     if (!live) return matching;
-    return live.flatMap((id) => matching.filter((place) => place.id === id));
+    const order = rearranged(
+      matching.map((place) => place.id),
+      live,
+    );
+    return order.flatMap((id) => matching.filter((place) => place.id === id));
   });
+  const groups = $derived(groupsOf(listed));
   // While a chat is dragged, the other places show above the chats, as places to drop it.
   let dragging = $state<{ id: string; from: string }>();
   let over = $state('');
@@ -177,13 +187,17 @@
   {:else}
     <div class="sessions-heading">
       <h2>{cloudOnly ? 'Chats' : 'Projects'}</h2>
-      <a
-        class="new-session"
-        href={resolve('/new')}
-        onclick={close}
-        aria-label="New chat"
-        title="New chat"><Plus size={16} /></a
-      >
+      {#if cloudOnly}<a
+          class="new-session"
+          href={resolve('/new')}
+          onclick={close}
+          aria-label="New chat"
+          title="New chat"><Plus size={16} /></a
+        >{:else}<AddProject
+          added={(id) => choose(id)}
+          problem={(text) => (moveError = text)}
+          {close}
+        />{/if}
     </div>
   {/if}
   {#if (shown ? shown.chats.length : places.length) > 8}<div class="sidebar-search">
@@ -215,36 +229,43 @@
         <p class="place-empty">{words ? 'No chats match.' : 'No chats here yet.'}</p>
       {/each}
     {:else}
-      <div class="place-list" bind:this={placeList}>
-        {#each listed as place (place.id)}
-          <div animate:flip={{ duration: 150 }}>
-            <PlaceRow
-              {place}
-              open={() => choose(place.id)}
-              over={over === place.id}
-              drop={dropZone(place.id)}
-              {...words
-                ? {}
-                : {
-                    reorder: {
-                      moving: reorder.moving === place.id,
-                      press: (event: PointerEvent) =>
-                        reorder.press(
-                          event,
-                          place.id,
-                          places.map((entry) => entry.id),
-                          placeList!,
-                        ),
-                      key: (event: KeyboardEvent) =>
-                        reorder.key(
-                          event,
-                          place.id,
-                          places.map((entry) => entry.id),
-                        ),
-                    },
-                  }}
-            />
-          </div>
+      <div class="place-list">
+        {#each groups as group (group.machine ?? CLOUD)}
+          {@const ids = group.places.map((place) => place.id)}
+          <section
+            class="place-group"
+            aria-label={group.machine ? `Projects on ${group.machine}` : 'Cloud'}
+          >
+            {#if group.machine}<h3 class="place-group-heading">
+                <Laptop size={12} aria-hidden="true" />{group.machine}
+              </h3>{/if}
+            {#each group.places as place (place.id)}
+              <div animate:flip={{ duration: 150 }}>
+                <PlaceRow
+                  {place}
+                  machineShown={false}
+                  open={() => choose(place.id)}
+                  over={over === place.id}
+                  drop={dropZone(place.id)}
+                  {...words || ids.length < 2
+                    ? {}
+                    : {
+                        reorder: {
+                          moving: reorder.moving === place.id,
+                          press: (event: PointerEvent) =>
+                            reorder.press(
+                              event,
+                              place.id,
+                              ids,
+                              (event.currentTarget as HTMLElement).closest('.place-group')!,
+                            ),
+                          key: (event: KeyboardEvent) => reorder.key(event, place.id, ids),
+                        },
+                      }}
+                />
+              </div>
+            {/each}
+          </section>
         {/each}
       </div>
     {/if}

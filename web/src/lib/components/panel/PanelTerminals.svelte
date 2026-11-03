@@ -1,4 +1,5 @@
 <script lang="ts">
+  import PanelSection from './PanelSection.svelte';
   import { Plus, SquareTerminal } from '@lucide/svelte';
   import { useTerminals } from '#lib/terminals/terminals.svelte.ts';
   const terminals = useTerminals();
@@ -7,10 +8,12 @@
 
 <!-- Shells opened from this chat, on its computer; and the way to open one. -->
 {#if terminals && terminals.unavailable !== 'Terminals are for chats on a computer.'}
-  <section class="panel-section" aria-label="Terminals">
-    <h3>
-      <SquareTerminal size={13} />Terminals{#if shells.length}<span>{shells.length}</span>{/if}
-    </h3>
+  <PanelSection
+    id="terminals"
+    label="Terminals"
+    icon={SquareTerminal}
+    count={shells.length || undefined}
+  >
     {#if shells.length}<ul class="panel-list panel-watches">
         {#each shells as shell (shell.id)}
           <li>
@@ -27,5 +30,5 @@
         onclick={() => terminals.open({ cols: 120, rows: 30 })}
         ><Plus size={14} /> New terminal</button
       >{:else if terminals.unavailable}<p class="panel-empty">{terminals.unavailable}</p>{/if}
-  </section>
+  </PanelSection>
 {/if}

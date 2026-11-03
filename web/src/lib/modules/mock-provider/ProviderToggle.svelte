@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { closeOutside } from '#lib/close-outside.ts';
   import { useWorkspace } from '#lib/workspace.svelte.ts';
   import { request } from '#lib/api.ts';
   let { enabled }: { enabled: boolean } = $props();
@@ -28,6 +29,7 @@
 {#if enabled}
   <button class="button subtle" onclick={() => dialog?.showModal()}>Turn off</button>
   <dialog
+    {@attach closeOutside}
     bind:this={dialog}
     class="dialog-content"
     aria-labelledby={`${id}-title`}

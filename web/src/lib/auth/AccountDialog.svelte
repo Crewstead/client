@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { closeOutside } from '#lib/close-outside.ts';
   import { onMount, onDestroy } from 'svelte';
   import { X } from '@lucide/svelte';
   import { useAuthentication } from './auth.svelte.ts';
@@ -30,6 +31,7 @@
 </script>
 
 <dialog
+  {@attach closeOutside}
   bind:this={dialog}
   class="dialog-content account-dialog"
   aria-labelledby={`${id}-title`}

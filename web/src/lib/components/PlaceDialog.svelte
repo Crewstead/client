@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { closeOutside } from '#lib/close-outside.ts';
   import {
     Check,
     Cloud,
@@ -102,6 +103,7 @@
 
 {#snippet choice(id: string, name: string, detail: string, kind: 'cloud' | 'computer' | 'project')}
   <button
+    type="button"
     class="place-choice"
     class:active={choices[active] === id}
     role="option"
@@ -120,14 +122,12 @@
 
 <!-- Where a chat works, chosen from a list that stays readable with many projects. -->
 <dialog
+  {@attach closeOutside}
   class="dialog-content place-dialog"
   aria-label="Where the chat works"
   bind:this={dialog}
   {@attach (node) => node.showModal()}
   onclose={close}
-  onclick={(event) => {
-    if (event.target === event.currentTarget) dialog.close();
-  }}
 >
   <div class="search-field">
     <Search size={16} aria-hidden="true" />
@@ -142,6 +142,7 @@
     />
     {#if desktop?.addProject}
       <button
+        type="button"
         class="icon-button place-add"
         aria-label="Add project"
         title="Add project: pick a folder on this computer"

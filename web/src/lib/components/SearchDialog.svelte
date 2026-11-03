@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { closeOutside } from '#lib/close-outside.ts';
   import { goto } from '$app/navigation';
   import { resolve } from '$app/paths';
   import { Archive, Bot, MessageSquare, Search, User } from '@lucide/svelte';
@@ -87,13 +88,11 @@
       >{:else}{part.text}{/if}{/each}{/snippet}
 
 <dialog
+  {@attach closeOutside}
   class="dialog-content search-dialog"
   aria-label="Search chats"
   {@attach (node) => node.showModal()}
   onclose={close}
-  onclick={(event) => {
-    if (event.target === event.currentTarget) event.currentTarget.close();
-  }}
 >
   <div class="search-field">
     <Search size={16} aria-hidden="true" />

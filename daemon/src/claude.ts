@@ -9,7 +9,12 @@ import {
   parseClaudeStream,
   streamJsonInput,
 } from '@crewstead/core/adapter-claude-code';
-import type { MachineChunk, MachineCommand, MachineHello } from '@crewstead/core/protocol';
+import type {
+  MachineChunk,
+  MachineCommand,
+  MachineHello,
+  PlanLimits,
+} from '@crewstead/core/protocol';
 import { openToolBridge, type ToolAnswer } from './tool-bridge.ts';
 
 type Run = Extract<MachineCommand, { type: 'run' }>;
@@ -45,6 +50,8 @@ export async function runClaude(
   onToolCall: (name: string, args: string) => Promise<ToolAnswer>,
   /** Claude Code's environment, which names the account's folder. */
   env: NodeJS.ProcessEnv = claudeEnvironment(process.env),
+  /** The account's usage limits, when Claude Code reports them. */
+  onLimits?: (limits: PlanLimits) => void,
 ) {
   const bridge = run.tools.length ? await openToolBridge(cwd, run.tools, onToolCall) : undefined;
   const child = spawn(binary, claudeArgs(run, bridge?.config), {
@@ -77,7 +84,7 @@ export async function runClaude(
   for (const pipe of [child.stdin, child.stdout, child.stderr]) pipe.on('error', () => {});
   child.stdin.end(run.images?.length ? streamJsonInput(run.prompt, run.images) : run.prompt);
   try {
-    for await (const chunk of parseClaudeStream(lines(child.stdout))) emit(chunk);
+    for await (const chunk of parseClaudeStream(lines(child.stdout), onLimits)) emit(chunk);
   } catch (error) {
     const code = await exited;
     if (signal.aborted) throw new Error('Stopped.', { cause: error });

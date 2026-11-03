@@ -147,7 +147,7 @@ function status(home: string, { browserInstalled }: BrowserModule) {
     log(
       `    ${project.name}  ${project.path}${project.rules.commands ? '' : '  (no commands)'}${
         project.rules.commands && !project.rules.network ? '  (no network)' : ''
-      }`,
+      }${project.rules.commands && project.rules.git ? '  (Git)' : ''}`,
     );
   log(`  Computer:  ${describeComputer(computerSettings(home))}`);
   const folders = listFolders(home);

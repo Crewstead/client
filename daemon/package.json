@@ -7,7 +7,7 @@
     "crewstead": "./src/main.ts"
   },
   "dependencies": {
-    "@crewstead/core": "git+ssh://git@github.com/Crewstead/core.git#v0.1.14"
+    "@crewstead/core": "git+ssh://git@github.com/Crewstead/core.git#v0.1.18"
   },
   "optionalDependencies": {
     "node-pty": "1.1.0"

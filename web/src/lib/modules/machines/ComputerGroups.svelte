@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { closeOutside } from '#lib/close-outside.ts';
   import { onMount } from 'svelte';
   import type { MachineView } from '@crewstead/core/protocol';
   import type { SlotProps } from '../types.ts';
@@ -133,7 +134,12 @@
     }}
   />{/if}
 
-<dialog bind:this={dialog} class="dialog-content" aria-labelledby={`${id}-remove`}>
+<dialog
+  {@attach closeOutside}
+  bind:this={dialog}
+  class="dialog-content"
+  aria-labelledby={`${id}-remove`}
+>
   <h2 id={`${id}-remove`} class="dialog-title">Disconnect Claude Code on {removing?.name}?</h2>
   <p class="dialog-description">
     The computer is disconnected at once and its Claude Code models stop working here. Chats stay

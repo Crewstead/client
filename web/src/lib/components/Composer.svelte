@@ -4,6 +4,8 @@
   import type { Snippet } from 'svelte';
   import ApprovalPicker from './ApprovalPicker.svelte';
   import ContextMeter from './ContextMeter.svelte';
+  import PlanMeter from './PlanMeter.svelte';
+  import type { PlanLimits } from '@crewstead/core/protocol';
   import CommandMenu from './CommandMenu.svelte';
   import AttachmentTray from './attachments/AttachmentTray.svelte';
   import { matchCommand, suggestCommands, type Command } from '#lib/commands.ts';
@@ -25,6 +27,8 @@
     modelLabel = 'Test model',
     unavailable = 'Turn on test replies in Settings to continue.',
     context,
+    usage,
+    editLast,
     commands = [],
     images = true,
     offline = !connected,
@@ -44,6 +48,10 @@
     modelLabel?: string;
     /** Placeholder shown when sending is not possible. */
     unavailable?: string;
+    /** Opens the last message sent for editing; false when there is none to edit. */
+    editLast?: () => boolean;
+    /** The model's subscription limits ("Claude", "ChatGPT"), as its last reply reported them. */
+    usage?: { limits: PlanLimits; plan: string };
     /** How full the model's context is, once a reply has reported it. */
     context?: {
       used: number;
@@ -202,6 +210,18 @@
         return;
       }
     }
+    // Up in an empty box edits the last message sent, as in other chat apps.
+    if (
+      event.key === 'ArrowUp' &&
+      !text &&
+      !event.shiftKey &&
+      !event.altKey &&
+      !event.isComposing &&
+      editLast?.()
+    ) {
+      event.preventDefault();
+      return;
+    }
     if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
       event.preventDefault();
       void submit();
@@ -273,6 +293,7 @@
         <ApprovalPicker failed={(message) => (failure = message)} />
       </div>
       <div class="composer-send">
+        {#if usage}<PlanMeter {...usage} />{/if}
         {#if context?.used}<ContextMeter {...context} used={context.used} />{/if}
         {#if busy && queue && ready}<button
             class="send-button"

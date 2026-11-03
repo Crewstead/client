@@ -29,6 +29,7 @@
   <span class="model-label">{label}</span>
 {:else}
   <button
+    type="button"
     bind:this={trigger}
     class="place-trigger project-picker"
     class:offline={value && !chosen}

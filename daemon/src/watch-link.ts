@@ -8,7 +8,7 @@ import {
 import { computerSettings } from './computer.ts';
 import { openProject } from './projects.ts';
 import { sandboxArguments } from './tools/command.ts';
-import { chatFolder, computerHidden, ownerEnv, SHELL } from './tools/computer.ts';
+import { chatFolder, computerHidden, ownerEnv, ownerShell } from './tools/computer.ts';
 import type { ToolHost } from './tools/run.ts';
 import { plainLines, type terminalLink } from './terminal-link.ts';
 
@@ -64,14 +64,14 @@ function launch(host: ToolHost, command: WatchCommand, terminal: boolean) {
     const cwd = chatFolder(host, command.session);
     if (command.approval)
       return {
-        file: SHELL,
-        argv: ['-c', command.command],
+        ...ownerShell(command.command),
         cwd,
         env: ownerEnv(terminal),
-        group: true,
+        // Windows has no process groups (and a detached program there opens a console window).
+        group: process.platform !== 'win32',
       };
     if (!host.sandbox) throw new Error('This command needs the owner’s approval.');
-    const argv = [...sandboxArguments(cwd, false, computerHidden(host), terminal), '--'];
+    const argv = [...sandboxArguments(cwd, false, computerHidden(host), { terminal }), '--'];
     return { file: host.bwrap ?? 'bwrap', argv: [...argv, '/bin/sh', '-c', command.command] };
   }
   const project = openProject(host.home, command.projectId);
@@ -79,7 +79,13 @@ function launch(host: ToolHost, command: WatchCommand, terminal: boolean) {
   if (command.network && !project.rules.network)
     throw new Error('Network access is turned off for this project.');
   if (!host.sandbox) throw new Error('Commands cannot run on this computer (no sandbox).');
-  const argv = [...sandboxArguments(project.path, !!command.network, host.hidden, terminal), '--'];
+  const argv = [
+    ...sandboxArguments(project.path, !!command.network, host.hidden, {
+      terminal,
+      git: !!project.rules.git,
+    }),
+    '--',
+  ];
   return { file: host.bwrap ?? 'bwrap', argv: [...argv, '/bin/sh', '-c', command.command] };
 }
 
@@ -94,6 +100,7 @@ function start(
   if (terminals?.available) return inTerminal(command, how, post, done, terminals);
   const child: ChildProcess = spawn(how.file, how.argv, {
     stdio: ['ignore', 'pipe', 'pipe'],
+    windowsHide: true,
     ...('cwd' in how ? { cwd: how.cwd, env: how.env, detached: how.group } : {}),
   });
   let lines: string[] = [];
@@ -111,6 +118,10 @@ function start(
     createInterface({ input: stream }).on('line', add);
   const kill = () => {
     if (child.exitCode !== null) return;
+    if (process.platform === 'win32' && child.pid) {
+      spawn('taskkill', ['/pid', String(child.pid), '/T', '/F'], { windowsHide: true });
+      return;
+    }
     if ('group' in how && how.group && child.pid) {
       try {
         process.kill(-child.pid, 'SIGKILL');

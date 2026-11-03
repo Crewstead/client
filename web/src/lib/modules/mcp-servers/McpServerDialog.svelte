@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { closeOutside } from '#lib/close-outside.ts';
   import { Plus, X } from '@lucide/svelte';
   import type { McpServer } from '@crewstead/core/protocol';
   import { mcpServers } from './api.ts';
@@ -76,6 +77,7 @@
 </script>
 
 <dialog
+  {@attach closeOutside}
   class="dialog-content mcp-dialog"
   aria-labelledby={`${id}-title`}
   {@attach (node) => node.showModal()}

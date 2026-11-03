@@ -1,0 +1,16 @@
+/* Adding a project from a browser: how to do it on the computer the folder is on. */
+.add-project-dialog p {
+  margin: 0 0 10px;
+}
+.add-project-dialog pre {
+  margin: 0;
+  padding: 10px 12px;
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  font-size: var(--text-sm);
+}
+.add-project-dialog .dialog-actions {
+  flex-wrap: wrap;
+}

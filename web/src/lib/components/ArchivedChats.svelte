@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { closeOutside } from '#lib/close-outside.ts';
   import { resolve } from '$app/paths';
   import { ArchiveRestore, Trash2 } from '@lucide/svelte';
   import { useWorkspace } from '#lib/workspace.svelte.ts';
@@ -77,7 +78,12 @@
 </section>
 {#if error}<p class="error-banner" role="alert">{error}</p>{/if}
 
-<dialog bind:this={dialog} class="dialog-content" aria-labelledby={`${id}-delete`}>
+<dialog
+  {@attach closeOutside}
+  bind:this={dialog}
+  class="dialog-content"
+  aria-labelledby={`${id}-delete`}
+>
   <h2 id={`${id}-delete`} class="dialog-title">
     {target === 'all'
       ? `Delete ${archived.length} archived chat${archived.length === 1 ? '' : 's'}?`

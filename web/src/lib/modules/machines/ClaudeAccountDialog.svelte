@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { closeOutside } from '#lib/close-outside.ts';
   import type { ClaudeAccount, MachineView } from '@crewstead/core/protocol';
   import { claudeAccounts } from './api.ts';
   import '@crewstead/ui/dialogs.css';
@@ -44,6 +45,7 @@
 </script>
 
 <dialog
+  {@attach closeOutside}
   class="dialog-content claude-account-dialog"
   aria-labelledby={`${id}-title`}
   {@attach (node) => node.showModal()}

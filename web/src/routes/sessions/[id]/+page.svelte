@@ -37,6 +37,9 @@
   import '@crewstead/ui/conversation.css';
   import '@crewstead/ui/tools.css';
   import '@crewstead/ui/composer.css';
+  import { usageOf } from '#lib/components/plan-usage.ts';
+  /** The message being edited in the timeline (Up in an empty message box opens the last one). */
+  let editing = $state<string>();
   const workspace = useWorkspace();
   const conversation = new Conversation();
   const terminals = provideTerminals(new ChatTerminals());
@@ -58,15 +61,11 @@
   const chosen = $derived(picked || conversation.session?.modelId || '');
   const model = $derived(models.find((entry) => entry.id === chosen));
   /**
-   * A model picked here becomes the chat's model at once, so its scheduled tasks use it too; during
-   * a reply it switches with the next message instead.
+   * A model picked here answers from the next message on: the chat switches (with its "Switched to"
+   * divider) when that message is sent, not on picking, so nothing appears in the chat before then.
    */
   function pickModel(id: string) {
     picked = id;
-    const session = conversation.session;
-    if (!session || id === session.modelId) return;
-    if (session.status === 'running' || session.status === 'awaiting_approval') return;
-    void workspace.setPreferences(session.id, { modelId: id }).catch(() => {});
   }
   // The project for the next message, likewise: '' is none, undefined keeps the chat's own.
   let pickedProject = $state<string>();
@@ -279,6 +278,7 @@
         {...session.branches ? { branches: session.branches } : {}}
         {actions}
         {decide}
+        bind:editing
         running={session.status === 'running' || session.status === 'awaiting_approval'}
         focus={page.url.searchParams.get('item') ?? undefined}
       />
@@ -290,6 +290,14 @@
           {offline}
           paused={switching}
           enabled={!!model}
+          {...usageOf(model)}
+          editLast={() => {
+            const last = session.items.findLast((item) => item.role === 'user');
+            if (!last || session.status === 'running' || session.status === 'awaiting_approval')
+              return false;
+            editing = last.id;
+            return true;
+          }}
           unavailable={session.modelId.startsWith('mock-') && !mockEnabled
             ? 'Turn on test replies in Settings to continue.'
             : 'This model is not available in this workspace any more.'}

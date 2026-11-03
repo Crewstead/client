@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { closeOutside } from '#lib/close-outside.ts';
   import { Check, Cloud, Folder, Laptop, Monitor } from '@lucide/svelte';
   import type { Session } from '@crewstead/core/protocol';
   import { useWorkspace } from '#lib/workspace.svelte.ts';
@@ -32,6 +33,7 @@
 
 <!-- Where a chat works, changed without sending a message; the keyboard way to do what dragging does. -->
 <dialog
+  {@attach closeOutside}
   class="dialog-content move-chat"
   aria-labelledby={`${id}-title`}
   {@attach (node) => node.showModal()}

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { closeOutside } from '#lib/close-outside.ts';
   import { onMount, untrack } from 'svelte';
   import type { ConnectionView, ContextId, ProviderInfo } from '@crewstead/core/protocol';
   import type { ConnectOption } from '#lib/modules/types.ts';
@@ -103,6 +104,7 @@
 </script>
 
 <dialog
+  {@attach closeOutside}
   bind:this={dialog}
   class="dialog-content wide-dialog"
   aria-labelledby={`${id}-title`}

@@ -63,3 +63,28 @@ export function placesOf(chats: Chat[], projects: Project[], order: string[] = [
   // A stable sort: places not in the saved order keep their busiest-first order after the rest.
   return all.sort((a, b) => rank(a) - rank(b));
 }
+
+/** Places on one computer (or the cloud), as the left panel lists them. */
+export interface PlaceGroup {
+  /** The computer's name; none for the cloud. */
+  machine?: string;
+  places: Place[];
+}
+
+/** Places under the computer they are on, computers in the order their first place comes. */
+export function groupsOf(places: Place[]): PlaceGroup[] {
+  const groups: PlaceGroup[] = [];
+  for (const place of places) {
+    const group = groups.find((entry) => entry.machine === place.machine);
+    if (group) group.places.push(place);
+    else groups.push({ ...(place.machine ? { machine: place.machine } : {}), places: [place] });
+  }
+  return groups;
+}
+
+/** `ids` in order, with those in `part` rearranged among their own positions as `part` lists them. */
+export function rearranged(ids: string[], part: string[]) {
+  const moved = new Set(part);
+  let next = 0;
+  return ids.map((id) => (moved.has(id) ? part[next++]! : id));
+}

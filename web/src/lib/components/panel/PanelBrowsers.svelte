@@ -1,4 +1,5 @@
 <script lang="ts">
+  import PanelSection from './PanelSection.svelte';
   import { Globe, Maximize2 } from '@lucide/svelte';
   import { resolve } from '$app/paths';
   import type { LiveEvent, Session } from '@crewstead/core/protocol';
@@ -48,10 +49,12 @@
 </script>
 
 {#if open.length || used.length}
-  <section class="panel-section" aria-label="Browsers">
-    <h3>
-      <Globe size={13} />Browsers{#if open.length}<span>{open.length} open</span>{/if}
-    </h3>
+  <PanelSection
+    id="browsers"
+    label="Browsers"
+    icon={Globe}
+    count={open.length ? `${open.length} open` : undefined}
+  >
     {#if open.length}
       <!-- A small browser window: the chat's sessions as tabs in a slim bar on top of the page. -->
       <div class="panel-live">
@@ -89,5 +92,5 @@
             <code>{state.url}</code>{/if}{/each}
       </p>
     {/if}
-  </section>
+  </PanelSection>
 {/if}

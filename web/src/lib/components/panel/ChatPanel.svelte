@@ -11,10 +11,12 @@
   import { changedFiles } from '../timeline-entries.ts';
   import ChangeList from '../ChangeList.svelte';
   import { chatFiles } from './chat-facts.ts';
+  import { planName, shownWindows } from '../plan-usage.ts';
   import PanelBrowsers from './PanelBrowsers.svelte';
   import PanelSubagents from './PanelSubagents.svelte';
   import PanelWatches from './PanelWatches.svelte';
   import PanelTerminals from './PanelTerminals.svelte';
+  import PanelSection from './PanelSection.svelte';
   import '@crewstead/ui/chat-panel.css';
   let {
     session,
@@ -72,35 +74,44 @@
     <button class="icon-button" aria-label="Close details" onclick={close}><X size={16} /></button>
   </header>
   <div class="chat-panel-body">
-    <ModuleSlot slot="chat-panel" props={{ session }} />
+    <!-- What is going on now first, then what the chat touched, then the chat itself. -->
     <PanelSubagents {session} />
     <PanelWatches {session} />
     <PanelTerminals />
     <PanelBrowsers {session} />
 
-    <section class="panel-section" aria-label="Files in this chat">
-      <h3>
-        <Paperclip size={13} />Files{#if files.length}<span>{files.length}</span>{/if}
-      </h3>
+    <PanelSection
+      id="changes"
+      label="Files changed in this chat"
+      title="Changed files"
+      icon={FileDiff}
+      count={changes.length || undefined}
+      empty={!changes.length}
+    >
+      {#if changes.length}<ChangeList files={changes} />
+      {:else}<p class="panel-empty">No files changed in this chat.</p>{/if}
+    </PanelSection>
+
+    <PanelSection
+      id="files"
+      label="Files in this chat"
+      title="Files"
+      icon={Paperclip}
+      count={files.length || undefined}
+      empty={!files.length}
+    >
       {#if files.length}<div class="panel-files"><Attachments {files} /></div>
       {:else}<p class="panel-empty">Attached files and screenshots show here.</p>{/if}
-    </section>
-
-    <section class="panel-section" aria-label="Files changed in this chat">
-      <h3>
-        <FileDiff size={13} />Changed files{#if changes.length}<span>{changes.length}</span>{/if}
-      </h3>
-      {#if changes.length}
-        <ChangeList files={changes} />
-      {:else}<p class="panel-empty">No files changed in this chat.</p>{/if}
-    </section>
+    </PanelSection>
 
     {#if session.projectId}
       {@const whole = project?.kind === 'computer' || session.projectId.endsWith(':computer')}
-      <section class="panel-section" aria-label={whole ? 'Whole computer' : 'Project'}>
-        <h3>
-          {#if whole}<Monitor size={13} />Whole computer{:else}<Folder size={13} />Project{/if}
-        </h3>
+      <PanelSection
+        id="place"
+        label={whole ? 'Whole computer' : 'Project'}
+        icon={whole ? Monitor : Folder}
+        count={project ? undefined : 'Offline'}
+      >
         <dl class="panel-facts">
           {#if !whole}<dt>Folder</dt>
             <dd title={project?.path}>{project?.name ?? session.projectName ?? 'Project'}</dd>{/if}
@@ -111,11 +122,17 @@
             <dt>Allowed</dt>
             <dd>{rules.length ? rules.join(', ') : 'files only'}</dd>{/if}
         </dl>
-      </section>
+      </PanelSection>
     {/if}
 
-    <section class="panel-section" aria-label="Usage">
-      <h3><ChartNoAxesColumn size={13} />Usage</h3>
+    <PanelSection
+      id="usage"
+      label="Usage"
+      icon={ChartNoAxesColumn}
+      count={session.contextUsed && model?.contextTokens
+        ? percent(session.contextUsed, model.contextTokens)
+        : undefined}
+    >
       {#if session.contextUsed && model?.contextTokens}
         <div
           class="panel-meter"
@@ -145,7 +162,20 @@
             ${cost.usd.toFixed(cost.usd < 1 ? 4 : 2)}{cost.estimated ? ' (estimated)' : ''}
           </dd>{/if}
       </dl>
+      {#if model?.limits}
+        <!-- The subscription's limits, as on the meter in the message box. -->
+        <dl class="panel-facts panel-plan">
+          {#each shownWindows(model.limits) as window (window.label)}
+            <dt>{planName(model.provider)} · {window.label}</dt>
+            <dd class={window.level} title={window.resets}>
+              {window.level === 'full' && !window.reset ? 'Limit reached' : `${window.used}% used`}
+            </dd>
+          {/each}
+        </dl>
+      {/if}
       <button class="panel-link" onclick={details}>All statistics</button>
-    </section>
+    </PanelSection>
+
+    <ModuleSlot slot="chat-panel" props={{ session }} />
   </div>
 </aside>

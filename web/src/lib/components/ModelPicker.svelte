@@ -29,6 +29,7 @@
 
 {#if (models.length > 1 || effort) && !disabled}
   <button
+    type="button"
     bind:this={trigger}
     class="place-trigger model-picker"
     aria-haspopup="dialog"

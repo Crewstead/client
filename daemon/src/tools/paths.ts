@@ -23,7 +23,9 @@ export async function projectPath(root: string, path: string, options: { write?:
       existing = await realpath(existing);
       break;
     } catch {
-      if (existing === root) throw new Error('The project folder is missing.');
+      // Up to the root of a drive that is not there (Windows): nothing exists to resolve.
+      if (existing === root || dirname(existing) === existing)
+        throw new Error('The project folder is missing.');
       missing.unshift(relative(dirname(existing), existing));
       existing = dirname(existing);
     }
@@ -40,5 +42,7 @@ export async function projectPath(root: string, path: string, options: { write?:
 }
 
 export function within(root: string, path: string) {
+  // The whole computer holds every path, on every drive (Windows has no single "/").
+  if (root === '/') return true;
   return path === root || path.startsWith(root === sep ? root : root + sep);
 }

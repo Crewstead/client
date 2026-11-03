@@ -25,6 +25,7 @@
     decide,
     running = false,
     focus,
+    editing = $bindable(),
   }: {
     items: TimelineItem[];
     /** Other versions of the chat from its prompts on. */
@@ -36,10 +37,10 @@
     /** A message to scroll to and mark once, e.g. one a search found. */
     focus?: string | undefined;
     decide: (id: string, decision: 'approve' | 'reject' | 'approve-all') => Promise<boolean>;
+    /** The prompt being edited. */
+    editing?: string | undefined;
   } = $props();
   let viewport: HTMLDivElement;
-  /** The prompt being edited. */
-  let editing = $state<string>();
   // Each prompt that has versions: the first prompt after where they are kept (notices come first).
   const versions = $derived.by(() => {
     const found: Record<string, Versions> = {};

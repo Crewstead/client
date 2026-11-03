@@ -1,0 +1,134 @@
+/*
+ * A subscription's usage limits beside the context meter: two thin bars (the short window over the
+ * weekly one) and the fullest share, with a card that lists each window and its reset.
+ */
+.plan-meter-wrap {
+  position: relative;
+}
+.plan-meter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.plan-meter:hover,
+.plan-meter:focus-visible,
+.plan-meter-wrap.open .plan-meter {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+.plan-meter.high {
+  color: var(--amber);
+}
+.plan-meter.full {
+  color: var(--danger);
+}
+.plan-bars {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 16px;
+}
+.plan-bars i,
+.plan-bar {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--line);
+}
+.plan-bars i {
+  height: 3px;
+}
+.plan-bars b,
+.plan-bar i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: inherit;
+  background: var(--muted);
+}
+.plan-bars .high b,
+.plan-window.high .plan-bar i {
+  background: var(--amber);
+}
+.plan-bars .full b,
+.plan-window.full .plan-bar i {
+  background: var(--danger);
+}
+/* Opens above on hover or keyboard focus, and stays open after a tap. */
+.plan-card {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 10px);
+  z-index: 12;
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  width: 250px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-raised);
+  box-shadow: 0 8px 24px #0003;
+  color: var(--text);
+  font-size: 12px;
+  text-align: left;
+}
+.plan-meter-wrap:hover .plan-card,
+.plan-meter:focus-visible + .plan-card,
+.plan-meter-wrap.open .plan-card {
+  display: flex;
+}
+.plan-card strong {
+  font-weight: 550;
+}
+.plan-window {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.plan-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.plan-row > span:first-child {
+  color: var(--muted);
+}
+.plan-window.full .plan-row > span:last-child {
+  color: var(--danger);
+}
+.plan-bar {
+  height: 6px;
+  border-radius: 3px;
+}
+.plan-card small {
+  color: var(--faint);
+}
+.plan-card .plan-note {
+  padding-top: 8px;
+  border-top: 1px solid var(--line-subtle);
+}
+/* In the model menu: the short window's share beside each model with plan limits. */
+.place-choice .model-usage {
+  flex: none;
+  margin-left: auto;
+  color: var(--faint);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+}
+.place-choice .model-usage.high {
+  color: var(--amber);
+}
+.place-choice .model-usage.full {
+  color: var(--danger);
+}

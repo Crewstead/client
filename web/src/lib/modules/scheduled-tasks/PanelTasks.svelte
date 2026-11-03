@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { CalendarClock, Plus } from '@lucide/svelte';
+  import PanelSection from '#lib/components/panel/PanelSection.svelte';
+  import { CalendarClock } from '@lucide/svelte';
   import { resolve } from '$app/paths';
   import type { ScheduledTask, Session } from '@crewstead/core/protocol';
   import { tasks } from './api.ts';
@@ -28,10 +29,15 @@
   });
 </script>
 
-<section class="panel-section" aria-label="Scheduled tasks">
-  <h3>
-    <CalendarClock size={13} />Scheduled{#if list.length}<span>{list.length}</span>{/if}
-  </h3>
+<PanelSection
+  id="scheduled"
+  label="Scheduled tasks"
+  title="Scheduled"
+  icon={CalendarClock}
+  count={list.length || undefined}
+  empty={!list.length}
+  add={{ label: 'Schedule a task', run: () => (editing = {}) }}
+>
   {#if list.length}
     <TaskList
       {list}
@@ -46,12 +52,9 @@
     </p>{/if}
   {#if error}<p class="panel-empty failed" role="alert">{error}</p>{/if}
   <div class="panel-actions">
-    <button class="button subtle small" onclick={() => (editing = {})}
-      ><Plus size={13} /> Schedule</button
-    >
     <a class="panel-link" href={resolve('/settings?tab=scheduled')}>All tasks</a>
   </div>
-</section>
+</PanelSection>
 {#if editing}<TaskDialog
     chatId={session.id}
     {...editing.task ? { task: editing.task } : {}}

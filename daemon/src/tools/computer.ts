@@ -25,6 +25,16 @@ type FileTool = Exclude<ProjectToolName, 'run_command' | `browser_${string}`>;
 /** The owner's shell for approved commands; bash, which models write best, where there is one. */
 export const SHELL = existsSync('/bin/bash') ? '/bin/bash' : '/bin/sh';
 
+/** How a command line runs as the owner: PowerShell on Windows, else the shell above. */
+export function ownerShell(command: string) {
+  return process.platform === 'win32'
+    ? {
+        file: 'powershell.exe',
+        argv: ['-NoProfile', '-NonInteractive', '-Command', command],
+      }
+    : { file: SHELL, argv: ['-c', command] };
+}
+
 /**
  * Runs a file tool or command in a whole-computer chat. The owner's switches here hold whatever the hub
  * asks: private places need the owner's own approval, checked on the real path (after links), and only
@@ -104,13 +114,14 @@ async function computerCommand(
     const hidden = computerHidden(host);
     return runCommand(cwd, { ...args, network: false }, signal, { ...host, hidden }, onOutput);
   }
+  const shell = ownerShell(args.command);
   return runProcess(
-    SHELL,
-    ['-c', args.command],
-    { cwd, env: ownerEnv(), detached: true },
+    shell.file,
+    shell.argv,
+    { cwd, env: ownerEnv(), detached: process.platform !== 'win32', windowsHide: true },
     args.timeout_seconds ?? 120,
     signal,
-    { onOutput, missing: `${SHELL} is missing on this computer.` },
+    { onOutput, missing: `${shell.file} is missing on this computer.` },
   );
 }
 

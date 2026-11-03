@@ -1,4 +1,5 @@
 <script lang="ts">
+  import PanelSection from './PanelSection.svelte';
   import { Bot } from '@lucide/svelte';
   import { resolve } from '$app/paths';
   import type { Session } from '@crewstead/core/protocol';
@@ -49,8 +50,7 @@
 
 <!-- Subagents this chat's model started: each its own chat, which belongs here rather than the chat list. -->
 {#if subagents.length}
-  <section class="panel-section" aria-label="Subagents">
-    <h3><Bot size={13} />Subagents<span>{subagents.length}</span></h3>
+  <PanelSection id="subagents" label="Subagents" icon={Bot} count={subagents.length}>
     <ul class="panel-list panel-subagents">
       {#each subagents as agent (agent.id)}
         <li>
@@ -76,5 +76,5 @@
         </li>
       {/each}
     </ul>
-  </section>
+  </PanelSection>
 {/if}

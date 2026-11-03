@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { closeOutside } from '#lib/close-outside.ts';
   import { goto } from '$app/navigation';
   import type { ConnectionView } from '@crewstead/core/protocol';
   import { useWorkspace } from '#lib/workspace.svelte.ts';
@@ -143,7 +144,12 @@
   {#if error}<p class="error-banner" role="alert">{error}</p>{/if}
 </section>
 
-<dialog bind:this={dialog} class="dialog-content" aria-labelledby={`${id}-remove`}>
+<dialog
+  {@attach closeOutside}
+  bind:this={dialog}
+  class="dialog-content"
+  aria-labelledby={`${id}-remove`}
+>
   <h2 id={`${id}-remove`} class="dialog-title">Disconnect {connection.label}?</h2>
   <p class="dialog-description">
     The saved API key is deleted and its models stop working at once. Past chats stay readable.

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { closeOutside } from '#lib/close-outside.ts';
   import { FileUp } from '@lucide/svelte';
   import { parseSkillFile, type Skill, type SkillScope } from '@crewstead/core/protocol';
   import { skills, type SkillFields } from './api.ts';
@@ -59,6 +60,7 @@
 </script>
 
 <dialog
+  {@attach closeOutside}
   class="dialog-content skill-editor"
   aria-labelledby={`${id}-title`}
   {@attach (node) => node.showModal()}

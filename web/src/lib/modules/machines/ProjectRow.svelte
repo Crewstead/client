@@ -33,9 +33,10 @@
   const commands = $derived(sandbox && project.rules.commands);
   const browsing = $derived(browser && project.rules.browser);
   const network = $derived(project.rules.network && (commands || browsing));
-  /** What the project allows, as quiet text: "Files, commands, browser, network". */
+  const git = $derived(commands && !!project.rules.git);
+  /** What the project allows, as quiet text: "Files, commands, Git, browser, network". */
   const allowed = $derived(
-    ['Files', commands && 'commands', browsing && 'browser', network && 'network']
+    ['Files', commands && 'commands', git && 'Git', browsing && 'browser', network && 'network']
       .filter(Boolean)
       .join(', '),
   );
@@ -47,6 +48,15 @@
             checked: project.rules.commands,
             hint: 'In the sandbox, each one approved or reviewed',
             run: () => setRule('commands', !project.rules.commands),
+          },
+          {
+            label: 'Git',
+            checked: git,
+            disabled: !commands,
+            hint: commands
+              ? 'Commands may commit and branch; hooks and Git config stay read-only'
+              : 'Turn on commands first',
+            run: () => setRule('git', !project.rules.git),
           },
         ]
       : []),

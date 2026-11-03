@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { closeOutside } from '#lib/close-outside.ts';
   import { onMount } from 'svelte';
   import { Check, Copy } from '@lucide/svelte';
   import type { MachineView } from '@crewstead/core/protocol';
@@ -49,6 +50,7 @@
 </script>
 
 <dialog
+  {@attach closeOutside}
   bind:this={dialog}
   class="dialog-content wide-dialog"
   aria-labelledby={`${id}-title`}

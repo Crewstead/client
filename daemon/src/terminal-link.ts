@@ -163,7 +163,10 @@ function shellLaunch(
   const project = openProject(host.home, command.projectId);
   if (!project.rules.commands) throw new Error('Commands are turned off for this project.');
   if (!host.sandbox) throw new Error('Commands cannot run on this computer (no sandbox).');
-  const argv = sandboxArguments(project.path, project.rules.network, host.hidden, true);
+  const argv = sandboxArguments(project.path, project.rules.network, host.hidden, {
+    terminal: true,
+    git: !!project.rules.git,
+  });
   // The owner's own shell may not exist inside the sandbox's view; a standard one always does.
   return { file: host.bwrap ?? 'bwrap', argv: [...argv, '--', SHELL, '-i'], cwd: project.path };
 }

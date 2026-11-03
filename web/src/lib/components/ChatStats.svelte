@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { closeOutside } from '#lib/close-outside.ts';
   import { X } from '@lucide/svelte';
   import type { Model, Session } from '@crewstead/core/protocol';
   import { request, scoped } from '#lib/api.ts';
@@ -34,7 +35,12 @@
 </script>
 
 <!-- Opened from the context meter in the prompt box. -->
-<dialog bind:this={dialog} class="dialog-content stats-dialog" aria-labelledby={`${id}-title`}>
+<dialog
+  {@attach closeOutside}
+  bind:this={dialog}
+  class="dialog-content stats-dialog"
+  aria-labelledby={`${id}-title`}
+>
   <header class="stats-head">
     <h2 id={`${id}-title`} class="dialog-title">Context and statistics</h2>
     <button class="icon-button" aria-label="Close" onclick={() => dialog?.close()}

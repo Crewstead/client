@@ -68,7 +68,7 @@ export async function runProjectTool(
         ? {
             id: COMPUTER_PLACE,
             path: '/',
-            rules: { commands: false, network: true, browser: true },
+            rules: { commands: false, network: true, browser: true, git: false },
           }
         : openProject(host.home, command.projectId);
     const root = project.path;
@@ -120,7 +120,7 @@ export async function runProjectTool(
             root,
             args as ProjectToolArguments<'run_command'>,
             signal,
-            host,
+            { ...host, git: !!project.rules.git },
             onOutput,
           );
     }

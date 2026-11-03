@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { closeOutside } from '#lib/close-outside.ts';
   import type { ScheduledTask, TaskSchedule } from '@crewstead/core/protocol';
   import { browserZone, tasks } from './api.ts';
   import '@crewstead/ui/dialogs.css';
@@ -85,6 +86,7 @@
 </script>
 
 <dialog
+  {@attach closeOutside}
   class="dialog-content task-dialog"
   aria-labelledby={`${id}-title`}
   {@attach (node) => node.showModal()}

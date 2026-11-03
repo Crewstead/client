@@ -6,6 +6,7 @@
   import { request, scoped } from '#lib/api.ts';
   import { useWorkspace } from '#lib/workspace.svelte.ts';
   import Composer from './Composer.svelte';
+  import { usageOf } from './plan-usage.ts';
   import ModelPicker from './ModelPicker.svelte';
   import PlacePicker from './PlacePicker.svelte';
   import { effortSetting } from '#lib/effort.svelte.ts';
@@ -98,6 +99,7 @@
       connected={workspace.ready}
       enabled={!!model}
       images={!!selected?.images}
+      {...usageOf(selected)}
       {sending}
       {send}
       stop={async () => {}}

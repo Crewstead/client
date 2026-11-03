@@ -1,10 +1,13 @@
 <script lang="ts">
+  import { closeOutside } from '#lib/close-outside.ts';
   import { Check, Search } from '@lucide/svelte';
   import type { Model } from '@crewstead/core/protocol';
   import { effortSetting, efforts } from '#lib/effort.svelte.ts';
   import '@crewstead/ui/dialogs.css';
   import '@crewstead/ui/search.css';
   import '@crewstead/ui/place-dialog.css';
+  import '@crewstead/ui/plan-meter.css';
+  import { shownWindows, tightest } from './plan-usage.ts';
   let {
     models,
     value,
@@ -66,14 +69,12 @@
 
 <!-- Which model answers, chosen from a list grouped by where each comes from. -->
 <dialog
+  {@attach closeOutside}
   class="dialog-content place-dialog"
   aria-label="Choose a model"
   bind:this={dialog}
   {@attach (node) => node.showModal()}
   onclose={close}
-  onclick={(event) => {
-    if (event.target === event.currentTarget) dialog.close();
-  }}
 >
   <div class="search-field">
     <Search size={16} aria-hidden="true" />
@@ -92,6 +93,7 @@
       {#if group.name}<p class="place-heading">{group.name}</p>{/if}
       {#each group.models as model (model.id)}
         <button
+          type="button"
           class="place-choice model-choice"
           class:active={shown[active]?.id === model.id}
           role="option"
@@ -102,6 +104,11 @@
           onmouseenter={() => (active = shown.indexOf(model))}
         >
           <span><strong>{group.name ? (model.short ?? model.label) : model.label}</strong></span>
+          {#if model.limits}{@const top = tightest(shownWindows(model.limits))}{#if top}<span
+                class="model-usage {top.level}"
+                title={`${top.label}: ${top.used}% used${top.resets ? ` · ${top.resets}` : ''}`}
+                >{top.label} {top.used}%</span
+              >{/if}{/if}
           {#if value === model.id}<Check size={15} />{/if}
         </button>
       {/each}
@@ -113,6 +120,7 @@
       <span>Effort</span>
       {#each efforts as option (option.value)}
         <button
+          type="button"
           aria-pressed={effortSetting.value === option.value}
           title={option.hint}
           onclick={() => effortSetting.set(option.value)}>{option.label}</button

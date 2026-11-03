@@ -1,4 +1,5 @@
 <script lang="ts">
+  import PanelSection from './PanelSection.svelte';
   import { Radar, Square, SquareTerminal } from '@lucide/svelte';
   import { useTerminals } from '#lib/terminals/terminals.svelte.ts';
   import type { Session } from '@crewstead/core/protocol';
@@ -49,8 +50,13 @@
 
 <!-- Background commands this chat's model started; their output comes back to the chat. -->
 {#if watches.length}
-  <section class="panel-section" aria-label="Watches">
-    <h3><Radar size={13} />Watches<span>{watches.length}</span></h3>
+  <PanelSection
+    id="watches"
+    label="Watches"
+    title="Background commands"
+    icon={Radar}
+    count={watches.length}
+  >
     <ul class="panel-list panel-watches">
       {#each watches as watch (watch.id)}
         <li title={watch.command}>
@@ -77,5 +83,5 @@
         </li>
       {/each}
     </ul>
-  </section>
+  </PanelSection>
 {/if}

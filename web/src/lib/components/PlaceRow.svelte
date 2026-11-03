@@ -11,6 +11,7 @@
     over,
     drop,
     reorder,
+    machineShown = true,
   }: {
     place: Place;
     open: () => void;
@@ -23,6 +24,8 @@
       key: (event: KeyboardEvent) => void;
       moving: boolean;
     };
+    /** Its computer's name beside it; off where the list is already grouped by computer. */
+    machineShown?: boolean;
   } = $props();
   const workspace = useWorkspace();
   /** The most pressing state among its chats, as the chat rows show it. */
@@ -59,7 +62,7 @@
         />{:else}<Folder size={15} />{/if}</span
     >
     <span class="place-name">{place.name}</span>
-    {#if place.machine}<span class="place-machine">{place.machine}</span>{/if}
+    {#if place.machine && machineShown}<span class="place-machine">{place.machine}</span>{/if}
     {#if state}<i class="chat-state {state.kind}" title={state.text}
         ><span class="sr-only">{state.text}</span></i
       >{/if}

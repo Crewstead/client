@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Plus, Sparkles, X } from '@lucide/svelte';
+  import PanelSection from '#lib/components/panel/PanelSection.svelte';
+  import { Sparkles, X } from '@lucide/svelte';
   import AddSkillDialog from './AddSkillDialog.svelte';
   import { resolve } from '$app/paths';
   import { mentionedSkills, type Session } from '@crewstead/core/protocol';
@@ -41,10 +42,14 @@
   let adding = $state(false);
 </script>
 
-<section class="panel-section" aria-label="Active skills">
-  <h3>
-    <Sparkles size={13} />Active skills{#if active.length}<span>{active.length}</span>{/if}
-  </h3>
+<PanelSection
+  id="skills"
+  label="Active skills"
+  icon={Sparkles}
+  count={active.length || undefined}
+  empty={!active.length}
+  add={{ label: 'Add skill', run: () => (adding = true) }}
+>
   {#if active.length}
     <!-- A long list scrolls within its section. -->
     <ul class="panel-list panel-skill-list" aria-label="Active skills in this chat">
@@ -68,12 +73,9 @@
     </p>{/if}
   {#if chatSkills.error}<p class="panel-empty failed" role="alert">{chatSkills.error}</p>{/if}
   <div class="panel-actions">
-    <button class="button subtle small" onclick={() => (adding = true)}
-      ><Plus size={13} /> Add skill</button
-    >
     <a class="panel-link" href={resolve('/settings?tab=skills')}>Manage skills</a>
   </div>
-</section>
+</PanelSection>
 {#if adding}<AddSkillDialog
     skills={chatSkills.available}
     added={chosen}
