@@ -1,15 +1,22 @@
 <script lang="ts">
   import '@crewstead/ui/attachments.css';
   import { FileText } from '@lucide/svelte';
-  import { isImage, type Attachment } from '@crewstead/core/protocol';
+  import { DOCUMENT_TYPES, isImage, type Attachment } from '@crewstead/core/protocol';
   import { attachmentUrl, formatSize } from '#lib/attachments.ts';
   import ImageViewer from './ImageViewer.svelte';
   let { files, align = 'start' }: { files: Attachment[]; align?: 'start' | 'end' } = $props();
   const images = $derived(files.filter(isImage));
   const others = $derived(files.filter((file) => !isImage(file)));
   let viewing = $state<Attachment>();
-  /** Text files open in a new tab, as plain text. */
+  /** Text files and PDFs open in a new tab; other documents download under their own name. */
   async function open(file: Attachment) {
+    if (DOCUMENT_TYPES[file.type] && file.type !== 'application/pdf') {
+      const link = document.createElement('a');
+      link.href = await attachmentUrl(file.id);
+      link.download = file.name;
+      link.click();
+      return;
+    }
     const tab = window.open('', '_blank');
     try {
       if (tab) tab.location.href = await attachmentUrl(file.id);
@@ -40,7 +47,11 @@
       <span class="attachment-icon"><FileText size={16} /></span>
       <span class="attachment-text">
         <span class="attachment-name" title={file.name}>{file.name}</span>
-        <span class="attachment-note">{formatSize(file.size)}</span>
+        <span class="attachment-note"
+          >{DOCUMENT_TYPES[file.type] ? `${DOCUMENT_TYPES[file.type]} · ` : ''}{formatSize(
+            file.size,
+          )}</span
+        >
       </span>
     </button>
   {/each}

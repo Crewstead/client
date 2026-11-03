@@ -18,7 +18,7 @@ export async function uploadAttachment(file: File, signal?: AbortSignal): Promis
   });
   const body = await response.json().catch(() => ({}));
   if (response.status === 413 && !body.message)
-    throw new Error('That file is too large. Images can be up to 5 MB.');
+    throw new Error('That file is too large. Documents can be up to 20 MB, images up to 5 MB.');
   if (!response.ok) throw new Error(body.message ?? `Upload failed (${response.status})`);
   return body as Attachment;
 }
