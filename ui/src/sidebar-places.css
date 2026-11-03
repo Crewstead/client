@@ -162,11 +162,47 @@
   box-shadow: 0 4px 14px #0006;
   color: var(--text);
 }
+/* Edit order: every row shows its grip; the rows themselves do not open. */
+.place-item.arranging .place-handle {
+  opacity: 1;
+}
+.place-item.arranging .place-icon {
+  visibility: hidden;
+}
+.place-item.arranging .place-row {
+  cursor: default;
+}
+.place-item.arranging .place-chevron {
+  visibility: hidden;
+}
+.place-arrange {
+  margin-left: auto;
+  padding: 2px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--faint);
+  font: inherit;
+  font-size: var(--text-xs);
+  cursor: pointer;
+}
+.place-arrange:hover {
+  background: var(--surface);
+  color: var(--text);
+}
+.place-arrange[aria-pressed='true'] {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+/* Touch screens reorder only in Edit order, so a swipe over an icon always scrolls the list. */
 @media (hover: none) {
-  .place-item:hover .place-handle {
-    opacity: 0;
+  .place-handle {
+    display: none;
   }
-  .place-item:hover .place-icon {
+  .place-item.arranging .place-handle {
+    display: grid;
+  }
+  .place-item:hover:not(.arranging) .place-icon {
     visibility: visible;
   }
 }

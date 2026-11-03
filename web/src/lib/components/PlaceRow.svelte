@@ -11,6 +11,7 @@
     over,
     drop,
     reorder,
+    arranging = false,
   }: {
     place: Place;
     open: () => void;
@@ -23,6 +24,8 @@
       key: (event: KeyboardEvent) => void;
       moving: boolean;
     };
+    /** Edit order is on: the grip shows, and the row does not open. */
+    arranging?: boolean;
   } = $props();
   const workspace = useWorkspace();
   /** The most pressing state among its chats, as the chat rows show it. */
@@ -42,7 +45,12 @@
   A place in the list: opens its chats in the panel, and takes a chat dropped on it. Its icon is also
   the handle that moves it in the list (it turns into a grip on hover).
 -->
-<div class="place-item" class:moving={reorder?.moving} data-place={place.id}>
+<div
+  class="place-item"
+  class:moving={reorder?.moving}
+  class:arranging={arranging && !!reorder}
+  data-place={place.id}
+>
   {#if reorder}<span
       class="place-handle"
       role="button"

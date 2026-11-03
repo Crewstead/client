@@ -40,6 +40,8 @@
     });
   });
   let placeList = $state<HTMLElement>();
+  /** Edit order: every row shows its grip (the way to reorder on touch screens), and taps do not open. */
+  let arranging = $state(false);
   /** With only the cloud there is nothing to choose between: its chats are the list. */
   const cloudOnly = $derived(places.length === 1);
   // The place whose chats show: the one chosen in the panel, else the open chat's (or the new chat's).
@@ -58,6 +60,7 @@
   const shownId = $derived(cloudOnly ? CLOUD : chosen !== undefined ? chosen : following);
   const shown = $derived(places.find((place) => place.id === shownId));
   function choose(id: string | null) {
+    arranging = false;
     chosen = id;
     search = '';
   }
@@ -177,6 +180,11 @@
   {:else}
     <div class="sessions-heading">
       <h2>{cloudOnly ? 'Chats' : 'Projects'}</h2>
+      {#if !cloudOnly && !words}<button
+          class="place-arrange"
+          aria-pressed={arranging}
+          onclick={() => (arranging = !arranging)}>{arranging ? 'Done' : 'Edit order'}</button
+        >{/if}
       <a
         class="new-session"
         href={resolve('/new')}
@@ -220,7 +228,8 @@
           <div animate:flip={{ duration: 150 }}>
             <PlaceRow
               {place}
-              open={() => choose(place.id)}
+              open={() => (arranging ? undefined : choose(place.id))}
+              {arranging}
               over={over === place.id}
               drop={dropZone(place.id)}
               {...words

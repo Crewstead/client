@@ -8,7 +8,7 @@ export class PlaceReorder {
 
   constructor(private save: (ids: string[]) => void) {}
 
-  /** Starts a drag of `id` among `ids`; rows are the elements with `data-place` inside `list`. */
+  /** Starts a drag of `id` among `ids` (in the order shown); rows are `data-place` elements in `list`. */
   start(event: PointerEvent, id: string, ids: string[], list: HTMLElement) {
     if (event.button !== 0) return;
     event.preventDefault();
@@ -17,15 +17,18 @@ export class PlaceReorder {
     const before = ids.join();
     this.live = [...ids];
     this.moving = id;
+    // Where each row sits now, before anything moves: rows animate aside while dragging, so their
+    // live positions would lag behind. The dragged place goes to the slot nearest the pointer.
+    const slots = [...list.querySelectorAll<HTMLElement>('[data-place]')].map((row) => {
+      const box = row.getBoundingClientRect();
+      return box.top + box.height / 2;
+    });
     const move = (next: PointerEvent) => {
-      const rows = [...list.querySelectorAll<HTMLElement>('[data-place]')];
-      const others = rows.filter((row) => row.dataset.place !== id);
-      let index = others.findIndex((row) => {
-        const box = row.getBoundingClientRect();
-        return next.clientY < box.top + box.height / 2;
+      let index = 0;
+      slots.forEach((middle, at) => {
+        if (Math.abs(next.clientY - middle) < Math.abs(next.clientY - slots[index]!)) index = at;
       });
-      if (index < 0) index = others.length;
-      const order = others.map((row) => row.dataset.place!);
+      const order = ids.filter((place) => place !== id);
       order.splice(index, 0, id);
       if (order.join() !== this.live?.join()) this.live = order;
     };
