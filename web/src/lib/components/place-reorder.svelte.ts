@@ -18,7 +18,7 @@ export class PlaceReorder {
   /** A press on `id`'s row among `ids` (in the order shown); rows are `data-place` elements in `list`. */
   press(event: PointerEvent, id: string, ids: string[], list: HTMLElement) {
     if (event.button !== 0 || this.moving) return;
-    const row = event.currentTarget as HTMLElement;
+    const pointer = event.pointerId;
     const touch = event.pointerType !== 'mouse';
     const from = { x: event.clientX, y: event.clientY };
     let slots: number[] = [];
@@ -26,7 +26,6 @@ export class PlaceReorder {
     let timer: ReturnType<typeof setTimeout> | undefined;
     const begin = () => {
       started = true;
-      row.setPointerCapture(event.pointerId);
       this.live = [...ids];
       this.moving = id;
       // Where each row sits now, before anything moves: rows animate aside while dragging, so their
@@ -38,10 +37,11 @@ export class PlaceReorder {
       if (touch) navigator.vibrate?.(10);
     };
     const move = (next: PointerEvent) => {
+      if (next.pointerId !== pointer) return;
       if (!started) {
         const far = Math.hypot(next.clientX - from.x, next.clientY - from.y);
         if (touch) {
-          if (far > TOUCH_SLOP) end();
+          if (far > TOUCH_SLOP) end(next);
         } else if (far > MOUSE_SLOP) begin();
         if (!started) return;
       }
@@ -61,28 +61,31 @@ export class PlaceReorder {
       next.preventDefault();
       next.stopImmediatePropagation();
     };
-    const end = () => {
+    const end = (next?: PointerEvent) => {
+      if (next && next.pointerId !== pointer) return;
       clearTimeout(timer);
-      row.removeEventListener('pointermove', move);
-      row.removeEventListener('pointerup', end);
-      row.removeEventListener('pointercancel', end);
-      row.removeEventListener('touchmove', hold);
-      row.removeEventListener('contextmenu', quiet);
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', end);
+      window.removeEventListener('pointercancel', end);
+      window.removeEventListener('touchmove', hold);
+      window.removeEventListener('contextmenu', quiet);
       if (!started) return;
       // The release that ends a drag is not a click on the row.
-      row.addEventListener('click', quiet, { capture: true });
-      setTimeout(() => row.removeEventListener('click', quiet, { capture: true }));
+      window.addEventListener('click', quiet, { capture: true });
+      setTimeout(() => window.removeEventListener('click', quiet, { capture: true }));
       const order = this.live;
       this.live = null;
       this.moving = '';
       if (order && order.join() !== ids.join()) this.save(order);
     };
-    row.addEventListener('pointermove', move);
-    row.addEventListener('pointerup', end);
-    row.addEventListener('pointercancel', end);
+    // Followed on the whole window: the rows move in the page while dragging, and a moved row loses
+    // the pointer (its capture ends), so its own events would stop before the drag does.
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', end);
+    window.addEventListener('pointercancel', end);
     if (touch) {
-      row.addEventListener('touchmove', hold, { passive: false });
-      row.addEventListener('contextmenu', quiet);
+      window.addEventListener('touchmove', hold, { passive: false });
+      window.addEventListener('contextmenu', quiet);
       timer = setTimeout(begin, HOLD_MS);
     }
   }
