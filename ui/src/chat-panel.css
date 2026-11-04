@@ -26,11 +26,13 @@
   font-size: var(--text-sm);
   font-weight: 600;
 }
+/* The scrollbar's room is always kept, inside the right padding: nothing moves when it shows. */
 .chat-panel-body {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 0 20px 24px;
+  scrollbar-gutter: stable;
+  padding: 0 10px 24px 20px;
 }
 .panel-section {
   padding: 16px 0;
@@ -82,10 +84,20 @@
   color: var(--faint);
   text-transform: none;
 }
-.panel-plan dd.high {
+/* Usage figures line up on the right; the plan's limits close the list, under a thin rule. */
+.panel-usage dd {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.panel-facts .panel-plan.first {
+  margin-top: 4px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line-subtle);
+}
+.panel-facts dd.panel-plan.high {
   color: var(--amber);
 }
-.panel-plan dd.full {
+.panel-facts dd.panel-plan.full {
   color: var(--danger);
 }
 .panel-empty {
@@ -115,7 +127,7 @@
 }
 .panel-skill-text small {
   color: var(--muted);
-  font-size: 11px;
+  font-size: var(--text-xs);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -124,8 +136,8 @@
    that room sits in the panel's right padding, so the rows line up with the rest of the panel. */
 .panel-skill-list {
   max-height: 232px;
-  margin: 0 -14px 0 -4px;
-  padding: 0 4px;
+  margin: 0 -10px 0 -4px;
+  padding: 0 0 0 4px;
   scrollbar-gutter: stable;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -166,7 +178,8 @@
   white-space: nowrap;
 }
 .panel-facts code {
-  font-size: 12px;
+  font-family: inherit;
+  font-size: inherit;
 }
 .panel-meter {
   height: 4px;
@@ -275,7 +288,7 @@
   opacity: 1;
 }
 .panel-empty code {
-  font-size: 11px;
+  font-size: var(--text-xs);
   word-break: break-all;
 }
 /* Subagents: one row each, its state as a dot like the chat list's; the row opens it. */
@@ -311,7 +324,7 @@
   overflow: hidden;
   color: var(--faint);
   font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
-  font-size: 11px;
+  font-size: var(--text-xs);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -336,7 +349,7 @@
 }
 .panel-terminal small {
   color: var(--muted);
-  font-size: 11px;
+  font-size: var(--text-xs);
 }
 .panel-terminal:hover .panel-subagent-title {
   text-decoration: underline;

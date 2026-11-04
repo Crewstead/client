@@ -89,6 +89,8 @@ export class Workspace {
     const before = this.sessions.find((session) => session.id === id);
     if (before && before.status !== status)
       notifier.changed({ ...before, status }, before, this.context, this.open);
+    // A reply that ended reported the plan's limits on its way: show them now, not at the next check.
+    if (before && busy(before.status) && !busy(status)) void this.refreshCatalog();
     if (this.sessions.some((session) => session.id === id && session.status !== status))
       this.sessions = this.sessions.map((session) =>
         session.id === id ? { ...session, status } : session,

@@ -78,3 +78,10 @@
 .panel-section h3 .panel-title + .panel-add {
   margin-left: auto;
 }
+/* Two sizes only: rows and figures at the small size, headings, notes and links at the extra small. */
+.chat-panel-body .change-list {
+  font-size: var(--text-sm);
+}
+.chat-panel-body .change-name {
+  font-family: inherit;
+}

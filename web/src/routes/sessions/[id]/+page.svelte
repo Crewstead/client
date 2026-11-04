@@ -12,7 +12,6 @@
     MessageSquare,
     Monitor,
     PanelRight,
-    Plus,
   } from '@lucide/svelte';
   import { useWorkspace } from '#lib/workspace.svelte.ts';
   import { downloadChat } from '#lib/components/chat-export.ts';
@@ -262,7 +261,6 @@
             downloadChat(session, (id) => models.find((entry) => entry.id === id)?.label ?? id)}
           ><Download size={18} /></button
         >
-        <a href={resolve('/new')} class="icon-button" aria-label="New chat"><Plus size={18} /></a>
         <button
           class="icon-button"
           class:active={chatPanel.open}

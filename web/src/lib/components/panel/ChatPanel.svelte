@@ -178,7 +178,7 @@
             ></span>
           </div>
         {/if}
-        <dl class="panel-facts">
+        <dl class="panel-facts panel-usage">
           <dt>Context</dt>
           <dd>
             {session.contextUsed
@@ -193,20 +193,24 @@
             <dd>
               ${cost.usd.toFixed(cost.usd < 1 ? 4 : 2)}{cost.estimated ? ' (estimated)' : ''}
             </dd>{/if}
-        </dl>
-        {#if model?.limits}
-          <!-- The subscription's limits, as on the meter in the message box. -->
-          <dl class="panel-facts panel-plan">
-            {#each shownWindows(model.limits) as window (window.label)}
-              <dt>{planName(model.provider)} · {window.label}</dt>
-              <dd class={window.level} title={window.resets}>
+          {#if model?.limits}
+            <!-- The subscription's limits, as on the meter in the message box, in the same list. -->
+            {#each shownWindows(model.limits) as window, index (window.label)}
+              <dt class="panel-plan" class:first={index === 0}>
+                {planName(model.provider)} · {window.label}
+              </dt>
+              <dd
+                class={`panel-plan ${window.level}`}
+                class:first={index === 0}
+                title={window.resets}
+              >
                 {window.level === 'full' && !window.reset
                   ? 'Limit reached'
                   : `${window.used}% used`}
               </dd>
             {/each}
-          </dl>
-        {/if}
+          {/if}
+        </dl>
         <button class="panel-link" onclick={details}>All statistics</button>
       </PanelSection>
 
