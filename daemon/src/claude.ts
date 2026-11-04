@@ -8,6 +8,7 @@ import {
   lines,
   parseClaudeStream,
   streamJsonInput,
+  streamJsonParts,
 } from '@crewstead/core/adapter-claude-code';
 import type {
   MachineChunk,
@@ -82,7 +83,13 @@ export async function runClaude(
   signal.addEventListener('abort', stop, { once: true });
   // Pipes may reset when Claude Code is stopped; how it ended comes from its exit, below.
   for (const pipe of [child.stdin, child.stdout, child.stderr]) pipe.on('error', () => {});
-  child.stdin.end(run.images?.length ? streamJsonInput(run.prompt, run.images) : run.prompt);
+  child.stdin.end(
+    run.parts?.length
+      ? streamJsonParts(run.parts, run.images ?? [])
+      : run.images?.length
+        ? streamJsonInput(run.prompt, run.images)
+        : run.prompt,
+  );
   try {
     for await (const chunk of parseClaudeStream(lines(child.stdout), onLimits)) emit(chunk);
   } catch (error) {
