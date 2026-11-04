@@ -34,12 +34,14 @@ jobs:
       - run: pnpm build
       - name: Pack the web app
         run: tar -czf crewstead-web-${{ github.ref_name }}.tar.gz -C web/build .
-      # A version tag publishes a release with the compiled web app (desktop apps join it later).
+      # A version tag starts a draft release with the compiled web app. It is published once every
+      # desktop app has joined it: the apps' updater reads the latest published release, and one
+      # without its system's latest*.yml fails their update check.
       - name: Release
         if: startsWith(github.ref, 'refs/tags/v')
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${{ github.ref_name }}" crewstead-web-*.tar.gz --generate-notes --verify-tag
+        run: gh release create "${{ github.ref_name }}" crewstead-web-*.tar.gz --draft --generate-notes --verify-tag
 
   # The computer service's Windows-specific parts (the Claude Code tool bridge's named pipe, which
   # folders may be projects), on a real Windows machine.
@@ -92,3 +94,17 @@ jobs:
           # The installers, and what the apps' updater reads (latest*.yml, block maps).
           gh release upload "$GITHUB_REF_NAME" desktop/dist/Crewstead-*.{AppImage,exe,dmg} \
             desktop/dist/latest*.yml desktop/dist/*.blockmap --clobber
+
+  # Every installer is there: the release goes public. A failed build leaves it a draft, so the
+  # apps keep the release before it.
+  publish:
+    needs: desktop
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release edit "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --draft=false --latest
