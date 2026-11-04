@@ -234,7 +234,6 @@
 </script>
 
 <div class="composer-area">
-  {#if above}{@render above()}{/if}
   <div class="composer-frame">
     <!-- Tabs on the box's top edge: where the chat works on the left, how much it has used on the right. -->
     {#if place || usage || context?.used}<div class="composer-tabs">
@@ -265,6 +264,8 @@
           bind:active
           choose={complete}
         />{/if}
+      <!-- The reply's steps and waiting messages: the top of the box, under its tabs. -->
+      {#if above}<div class="composer-above">{@render above()}</div>{/if}
       {#if pending.files.length}<AttachmentTray {pending} />{/if}
       <label class="sr-only" for="message">Message</label><textarea
         id="message"

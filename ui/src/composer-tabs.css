@@ -27,6 +27,10 @@
 .composer-frame:focus-within :is(.composer, .composer-tab) {
   border-color: #686c7c;
 }
+/* A place slot with nothing in it (no projects to choose from) shows no tab. */
+.composer-tab:not(:has(*)) {
+  display: none;
+}
 .composer-meters {
   flex-shrink: 0;
   margin-left: auto;
@@ -47,4 +51,15 @@
 }
 .composer-place :is(svg, .place-trigger > svg) {
   flex-shrink: 0;
+}
+/* The reply's steps and the waiting messages open the box, above the text, divided by a line. */
+.composer-above:empty {
+  display: none;
+}
+.composer-above > :is(.queued, .plan-steps.docked) {
+  margin: 0;
+  border: 0;
+  border-bottom: 1px solid var(--line-subtle);
+  border-radius: 0;
+  background: transparent;
 }

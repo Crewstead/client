@@ -7,6 +7,7 @@
     remove,
     edit,
     sendNext,
+    sendOne,
   }: {
     queued: QueuedMessage[];
     /** A reply is running: the model takes them at its next step. */
@@ -15,6 +16,8 @@
     /** Takes the message out of the line and back into the box. */
     edit: (message: QueuedMessage) => void;
     sendNext: () => void;
+    /** Sends one of them now, on its own; a running reply is stopped first. */
+    sendOne: (id: string) => void;
   } = $props();
 </script>
 
@@ -26,7 +29,7 @@
         ? 'The model reads them after its current step; ones that change the model or place, or have files, go when the reply ends.'
         : undefined}>{busy ? 'Sent at the model’s next step' : 'Waiting: the reply stopped'}</span
     >
-    {#if !busy}<button class="button subtle small" onclick={sendNext}
+    {#if !busy}<button type="button" class="button subtle small" onclick={sendNext}
         ><SendHorizontal size={13} /> Send now</button
       >{/if}
   </header>
@@ -39,12 +42,21 @@
             `${message.attachments?.length ?? 0} file${message.attachments?.length === 1 ? '' : 's'}`}</span
         >
         <button
+          type="button"
+          class="icon-button"
+          aria-label="Send this message now"
+          title={busy ? 'Send now: stops the reply' : 'Send now'}
+          onclick={() => sendOne(message.id)}><SendHorizontal size={13} /></button
+        >
+        <button
+          type="button"
           class="icon-button"
           aria-label="Edit waiting message"
           title="Edit: back into the box"
           onclick={() => edit(message)}><Pencil size={13} /></button
         >
         <button
+          type="button"
           class="icon-button"
           aria-label="Remove waiting message"
           title="Remove"

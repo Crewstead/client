@@ -196,9 +196,13 @@ export class Conversation {
     return this.command(`/sessions/${this.session!.id}/queue/${id}`, context, undefined, 'DELETE');
   }
 
-  /** Sends the next waiting message now. */
-  sendQueued(context: ContextId) {
-    return this.command(`/sessions/${this.session!.id}/queue/next`, context);
+  /** Sends the waiting messages now, or just `message`, stopping a running reply first. */
+  sendQueued(context: ContextId, message?: string) {
+    return this.command(
+      `/sessions/${this.session!.id}/queue/next`,
+      context,
+      message ? { message } : {},
+    );
   }
 
   /** Sends a prompt (or the one an answer replied to) again as a new version: retried, or edited. */
