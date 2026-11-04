@@ -343,7 +343,6 @@
                   void conversation.unqueue(message.id, workspace.context);
                   composer?.fill(message.text);
                 }}
-                sendNext={() => conversation.sendQueued(workspace.context)}
                 sendOne={(id) => conversation.sendQueued(workspace.context, id)}
               />{/if}
           {/snippet}

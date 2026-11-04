@@ -6,7 +6,6 @@
     busy,
     remove,
     edit,
-    sendNext,
     sendOne,
   }: {
     queued: QueuedMessage[];
@@ -15,7 +14,6 @@
     remove: (id: string) => void;
     /** Takes the message out of the line and back into the box. */
     edit: (message: QueuedMessage) => void;
-    sendNext: () => void;
     /** Sends one of them now, on its own; a running reply is stopped first. */
     sendOne: (id: string) => void;
   } = $props();
@@ -29,9 +27,6 @@
         ? 'The model reads them after its current step; ones that change the model or place, or have files, go when the reply ends.'
         : undefined}>{busy ? 'Sent at the model’s next step' : 'Waiting: the reply stopped'}</span
     >
-    {#if !busy}<button type="button" class="button subtle small" onclick={sendNext}
-        ><SendHorizontal size={13} /> Send now</button
-      >{/if}
   </header>
   <ol>
     {#each queued as message (message.id)}
