@@ -2,6 +2,7 @@ import { spawn } from 'node:child_process';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import {
+  HUB_SERVER,
   claudeArgs,
   claudeCodeModels,
   claudeEnvironment,
@@ -37,11 +38,65 @@ export async function detectClaudeCode(binary: string): Promise<MachineHello['cl
   }
 }
 
+/** Claude Code started without the hub's tools, so the model would wrongly say it has none. */
+class NoHubTools extends Error {}
+
+/**
+ * Passes Claude Code's output on, first checking its start report: with hub tools offered, the hub's
+ * MCP server must be connected and its tools listed. Throws NoHubTools before anything is written.
+ */
+async function* withHubTools(input: AsyncIterable<string>, expected: boolean) {
+  let checked = !expected;
+  for await (const line of input) {
+    if (!checked && line.includes('"init"')) {
+      let event: {
+        subtype?: string;
+        tools?: string[];
+        mcp_servers?: { name: string; status: string }[];
+      };
+      try {
+        event = JSON.parse(line) as typeof event;
+      } catch {
+        event = {};
+      }
+      if (event.subtype === 'init') {
+        checked = true;
+        const status = event.mcp_servers?.find((server) => server.name === HUB_SERVER)?.status;
+        const listed = event.tools?.some((name) => name.startsWith(`mcp__${HUB_SERVER}__`));
+        if (status !== 'connected' || !listed)
+          throw new NoHubTools(
+            `Claude Code started without Crewstead's tools (their server was ${status ?? 'missing'}).`,
+          );
+      }
+    }
+    yield line;
+  }
+}
+
+/**
+ * Runs one reply with the unmodified program. When Claude Code starts without the hub's tools, it is
+ * stopped before it writes anything and started once more; a second miss fails the reply plainly.
+ */
+export async function runClaude(...args: Parameters<typeof runOnce>): Promise<void> {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await runOnce(...args);
+    } catch (error) {
+      if (!(error instanceof NoHubTools) || args[4].aborted) throw error;
+      if (attempt >= 2)
+        throw new Error(`${error.message} Try again; if it keeps happening, restart Crewstead.`, {
+          cause: error,
+        });
+      console.log(`[crewstead] ${error.message} Starting it again.`);
+    }
+  }
+}
+
 /**
  * Runs one reply with the unmodified program in its own process group, so stopping it stops
  * everything it started. Output is parsed as it arrives; standard error is kept for error messages.
  */
-export async function runClaude(
+async function runOnce(
   binary: string,
   cwd: string,
   run: Run,
@@ -91,8 +146,13 @@ export async function runClaude(
         : run.prompt,
   );
   try {
-    for await (const chunk of parseClaudeStream(lines(child.stdout), onLimits)) emit(chunk);
+    const output = withHubTools(lines(child.stdout), !!bridge);
+    for await (const chunk of parseClaudeStream(output, onLimits)) emit(chunk);
   } catch (error) {
+    if (error instanceof NoHubTools) {
+      stop();
+      throw error;
+    }
     const code = await exited;
     if (signal.aborted) throw new Error('Stopped.', { cause: error });
     if (code === null)

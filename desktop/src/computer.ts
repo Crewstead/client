@@ -3,6 +3,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { hostname } from 'node:os';
 import { join } from 'node:path';
 import { machineHome, readConfig } from '../../daemon/src/config.ts';
+import { stopLeftoverServices } from './leftovers.ts';
 
 export type ComputerState = 'off' | 'connecting' | 'connected' | 'removed';
 /** The service's exit code when the hub removed this computer (daemon/src/service.ts). */
@@ -32,6 +33,14 @@ export class Computer {
   /** Runs the service for the saved connection. */
   start() {
     if (this.connectedHub()) this.spawn(['run']);
+  }
+
+  /**
+   * Stops services an earlier run of this app left behind (e.g. one an update did not stop), so only
+   * this one links the computer to the hub: two would keep taking the link from each other.
+   */
+  async stopLeftovers() {
+    await stopLeftoverServices(this.child?.pid);
   }
 
   /**
@@ -88,8 +97,9 @@ export class Computer {
 
   private spawn(args: string[], env: Record<string, string> = {}) {
     const child = spawn(process.execPath, [serviceMain(), ...args], {
-      env: { ...process.env, ...env, ELECTRON_RUN_AS_NODE: '1' },
-      stdio: ['ignore', 'pipe', 'pipe'],
+      // Its standard input stays open while this app runs; the service stops once it closes.
+      env: { ...process.env, ...env, ELECTRON_RUN_AS_NODE: '1', CREWSTEAD_APP_PIPE: '1' },
+      stdio: ['pipe', 'pipe', 'pipe'],
     });
     this.child = child;
     this.set('connecting');

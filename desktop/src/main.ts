@@ -206,7 +206,9 @@ void app.whenReady().then(() => {
   addToLauncher(join(assets, 'icon-256.png'));
   openHub();
   // Only a connection made for this app's hub; a computer connected elsewhere is asked first.
-  if (computer.connectedHub() === hub()) computer.start();
+  // After any service an earlier run left behind has stopped: one computer, one link to the hub.
+  if (computer.connectedHub() === hub())
+    void computer.stopLeftovers().then(() => computer.state === 'off' && computer.start());
   refreshTray();
   // The window and tray hear of every change: a bar in the window offers the restart.
   onUpdateState((state) => {

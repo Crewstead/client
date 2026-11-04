@@ -181,6 +181,14 @@ async function run(home: string) {
   const controller = new AbortController();
   for (const signal of ['SIGINT', 'SIGTERM'] as const)
     process.once(signal, () => controller.abort());
+  // Run by the desktop app, which holds our standard input open: when the app ends, however it ends,
+  // the pipe closes and this service stops too, instead of staying behind beside the next one.
+  if (process.env.CREWSTEAD_APP_PIPE === '1') {
+    process.stdin.once('close', () => controller.abort());
+    process.stdin.resume();
+    // Stopped another way (the app's SIGTERM): the open pipe must not keep this process alive.
+    controller.signal.addEventListener('abort', () => process.stdin.destroy(), { once: true });
+  }
   const { BrowserPool, browserInstalled } = await import('@crewstead/core/browser');
   const browser = browserInstalled() ? new BrowserPool() : undefined;
   try {
