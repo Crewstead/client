@@ -25,9 +25,24 @@ export class PanelWidth {
     this.apply();
   }
 
-  set(width: number) {
+  private frame = 0;
+
+  /**
+   * A new width, applied at most once per frame: a drag reports many moves per frame (a fast mouse
+   * up to 1,000 a second), and each applied width lays the whole page out again. `save` remembers
+   * it on this device; a drag saves only when it ends.
+   */
+  set(width: number, save = true) {
     this.width = this.clamp(width);
-    this.apply();
+    if (!this.frame)
+      this.frame = requestAnimationFrame(() => {
+        this.frame = 0;
+        this.apply();
+      });
+    if (save) this.save();
+  }
+
+  save() {
     try {
       localStorage.setItem(this.key, String(this.width));
     } catch {

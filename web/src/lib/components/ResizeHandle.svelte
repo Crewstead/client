@@ -20,7 +20,8 @@
     const room = (main?.getBoundingClientRect().width ?? 0) - MAIN_MIN;
     return Math.max(panel.min, panel.width + Math.max(0, room));
   }
-  const resize = (width: number, max = widest()) => panel.set(Math.min(width, max));
+  const resize = (width: number, max = widest(), save = true) =>
+    panel.set(Math.min(width, max), save);
   let dragging = $state(false);
   const sign = $derived(edge === 'right' ? 1 : -1);
   // While dragging, the whole page shows the resize cursor and selects no text.
@@ -36,9 +37,11 @@
     (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
   }
   function move(event: PointerEvent) {
-    if (start) resize(start.width + sign * (event.clientX - start.x), start.max);
+    // Saved once, when the drag ends, not on every move.
+    if (start) resize(start.width + sign * (event.clientX - start.x), start.max, false);
   }
   function up() {
+    if (start) panel.save();
     start = undefined;
     dragging = false;
   }

@@ -61,7 +61,7 @@
     </p>{:else}
     <ul class="panel-list panel-subagents">
       {#each subagents as agent (agent.id)}
-        <li>
+        <li data-working={busy(agent.status) || undefined}>
           <a href={resolve('/sessions/[id]', { id: agent.id })} title={agent.task}>
             <span class="panel-subagent-text">
               <span class="panel-subagent-title">{agent.title}</span>

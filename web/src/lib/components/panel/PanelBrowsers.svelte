@@ -57,7 +57,7 @@
   >
     {#if open.length}
       <!-- A small browser window: the chat's sessions as tabs in a slim bar on top of the page. -->
-      <div class="panel-live">
+      <div class="panel-live" data-working>
         <div class="panel-live-tabs">
           <LiveTabs
             sessions={open}

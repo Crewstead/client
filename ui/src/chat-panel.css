@@ -56,13 +56,6 @@
   font-weight: 500;
   letter-spacing: 0;
 }
-/* The heading folds the section; folded, only it shows. */
-.panel-section.folded {
-  padding-bottom: 6px;
-}
-.panel-section.folded h3 {
-  margin-bottom: 0;
-}
 .panel-section h3 button {
   display: flex;
   flex: 1;
@@ -78,17 +71,6 @@
   letter-spacing: inherit;
   text-transform: inherit;
   cursor: pointer;
-}
-.panel-section h3 button:hover {
-  background: var(--surface-hover);
-  color: var(--text);
-}
-.panel-section h3 .panel-chevron {
-  flex: none;
-  transition: transform 0.15s;
-}
-.panel-section h3 button[aria-expanded='true'] .panel-chevron {
-  transform: rotate(90deg);
 }
 .panel-section h3 .panel-add {
   flex: none;

@@ -233,3 +233,9 @@ p {
     transition: none !important;
   }
 }
+/* Selected text: a soft blue-grey wash that keeps the text's own colour, instead of the browser's
+   solid blue block, which looked heavy and lopsided against the dark ground. */
+::selection {
+  background: #4d5d86;
+  color: inherit;
+}

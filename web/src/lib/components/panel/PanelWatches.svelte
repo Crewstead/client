@@ -59,7 +59,7 @@
   >
     <ul class="panel-list panel-watches">
       {#each watches as watch (watch.id)}
-        <li title={watch.command}>
+        <li title={watch.command} data-working>
           <span class="panel-subagent-text">
             <span class="panel-subagent-title">{watch.label}</span>
             <small

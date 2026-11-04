@@ -13,14 +13,14 @@
     label="Terminals"
     icon={SquareTerminal}
     count={shells.length || undefined}
-    empty={!shells.length}
+    empty={!shells.length && !terminals.unavailable}
     add={terminals.typing
       ? { label: 'New terminal', run: () => terminals.open({ cols: 120, rows: 30 }) }
       : undefined}
   >
     {#if shells.length}<ul class="panel-list panel-watches">
         {#each shells as shell (shell.id)}
-          <li>
+          <li data-working={!shell.ended || undefined}>
             <button class="panel-terminal" onclick={() => terminals.show(shell.id)}
               ><span class="panel-subagent-title">{shell.label}</span><small
                 >{shell.ended ? `ended: ${shell.ended}` : 'running'}</small
