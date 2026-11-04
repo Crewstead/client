@@ -1,0 +1,72 @@
+/* Tabs joined to the box's top edge, in its colours: the place on the left, the meters on the right.
+   Each overlaps the box's top border by 1px so tab and box read as one shape. */
+.composer-tabs {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  min-width: 0;
+  margin-bottom: -1px;
+  padding: 0 14px;
+}
+.composer-tab {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  height: 32px;
+  padding: 0 6px;
+  background: #23252d;
+  border: 1px solid var(--line);
+  border-bottom: 0;
+  border-radius: 10px 10px 0 0;
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+.composer-frame:focus-within :is(.composer, .composer-tab) {
+  border-color: #686c7c;
+}
+.composer-meters {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+.composer-meters .context-meter-wrap {
+  margin-right: 0;
+}
+/* A long place ("MAIN-PC / Whole computer") shortens with "…" before it reaches the meters. */
+.composer-place > * {
+  min-width: 0;
+  max-width: 100%;
+}
+.composer-place .picker-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.composer-place :is(svg, .place-trigger > svg) {
+  flex-shrink: 0;
+}
+/* The plan's usage as the box's bottom edge (the top edge has the tabs): the fullest window, filling
+   from the left; the meter's tab gives the figures. */
+.composer-edge {
+  position: absolute;
+  right: 14px;
+  bottom: -1px;
+  left: 14px;
+  height: 2px;
+  pointer-events: none;
+}
+.composer-edge i {
+  display: block;
+  height: 100%;
+  border-radius: 1px;
+  background: var(--muted);
+}
+.composer-edge.high i {
+  background: var(--amber);
+}
+.composer-edge.full i {
+  background: var(--danger);
+}

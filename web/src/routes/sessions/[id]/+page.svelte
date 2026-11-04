@@ -353,6 +353,8 @@
                 effort={!!model?.effort}
                 disabled={conversation.sending}
               />{:else}<span>Unavailable model</span>{/if}
+          {/snippet}
+          {#snippet place()}
             {#if projects.length || project}<PlacePicker
                 {projects}
                 bind:value={() => project, (id) => (pickedProject = id)}

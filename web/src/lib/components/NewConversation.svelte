@@ -111,6 +111,8 @@
           effort={!!selected?.effort}
           disabled={sending || !!pending}
         />
+      {/snippet}
+      {#snippet place()}
         {#if projects.length}<PlacePicker
             {projects}
             bind:value={project}

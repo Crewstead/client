@@ -5,6 +5,7 @@
   import ApprovalPicker from './ApprovalPicker.svelte';
   import ContextMeter from './ContextMeter.svelte';
   import PlanMeter from './PlanMeter.svelte';
+  import { shownWindows, tightest } from './plan-usage.ts';
   import type { PlanLimits } from '@crewstead/core/protocol';
   import CommandMenu from './CommandMenu.svelte';
   import AttachmentTray from './attachments/AttachmentTray.svelte';
@@ -15,6 +16,7 @@
   import { useWorkspace } from '#lib/workspace.svelte.ts';
   import { PendingFiles } from '#lib/pending-files.svelte.ts';
   import '@crewstead/ui/composer.css';
+  import '@crewstead/ui/composer-tabs.css';
   let {
     draftKey,
     busy,
@@ -24,6 +26,7 @@
     send,
     stop,
     controls,
+    place,
     modelLabel = 'Test model',
     unavailable = 'Turn on test replies in Settings to continue.',
     context,
@@ -45,6 +48,8 @@
     send: (text: string, attachments: string[]) => Promise<boolean>;
     stop: () => Promise<void>;
     controls?: Snippet;
+    /** Where the chat works, shown on a tab on the box's top edge. */
+    place?: Snippet;
     modelLabel?: string;
     /** Placeholder shown when sending is not possible. */
     unavailable?: string;
@@ -227,96 +232,109 @@
       void submit();
     }
   }
+  /** The plan window closest to its limit, drawn along the box's bottom edge. */
+  const edge = $derived(usage ? tightest(shownWindows(usage.limits)) : undefined);
 </script>
 
 <div class="composer-area">
   {#if above}{@render above()}{/if}
-  <form
-    class="composer"
-    class:dragging
-    onsubmit={submit}
-    ondragover={(event) => {
-      if (!event.dataTransfer?.types.includes('Files')) return;
-      event.preventDefault();
-      dragging = true;
-    }}
-    ondragleave={(event) => {
-      if (!event.currentTarget.contains(event.relatedTarget as Node | null)) dragging = false;
-    }}
-    ondrop={drop}
-  >
-    {#if options.length}<CommandMenu
-        id={menuId}
-        commands={options}
-        prefix={suggestions.length ? '/' : '@'}
-        bind:active
-        choose={complete}
-      />{/if}
-    {#if pending.files.length}<AttachmentTray {pending} />{/if}
-    <label class="sr-only" for="message">Message</label><textarea
-      id="message"
-      role="combobox"
-      aria-expanded={options.length > 0}
-      aria-controls={menuId}
-      aria-autocomplete="list"
-      aria-activedescendant={options.length ? `${menuId}-${options[active]?.name}` : undefined}
-      bind:this={input}
-      bind:value={text}
-      onkeydown={keydown}
-      oninput={track}
-      onkeyup={track}
-      onclick={track}
-      onpaste={paste}
-      rows="1"
-      maxlength="8000"
-      placeholder={enabled ? 'Ask anything, or describe a task…' : unavailable}></textarea>
-    <div class="composer-toolbar">
-      <div class="composer-model">
-        <input
-          bind:this={picker}
-          type="file"
-          multiple
-          hidden
-          onchange={(event) => {
-            attach(event.currentTarget.files ?? []);
-            event.currentTarget.value = '';
-          }}
-        /><button
-          type="button"
-          class="icon-button composer-attach"
-          aria-label="Attach files"
-          title="Attach images or text files (or paste, or drop them here)"
-          disabled={!enabled}
-          onclick={() => picker.click()}><Paperclip size={16} /></button
-        >
-        {#if controls}{@render controls()}{:else}<span>{modelLabel}</span>{/if}
-        <ApprovalPicker failed={(message) => (failure = message)} />
-      </div>
-      <div class="composer-send">
-        {#if usage}<PlanMeter {...usage} />{/if}
-        {#if context?.used}<ContextMeter {...context} used={context.used} />{/if}
-        {#if busy && queue && ready}<button
-            class="send-button"
-            type="submit"
-            aria-label="Queue message"
-            title="Send when the reply ends"
-            disabled={!connected || !enabled || paused || sending}><ListEnd size={17} /></button
-          >{/if}
-        {#if busy}<button
-            class="send-button stop"
+  <div class="composer-frame">
+    <!-- Tabs on the box's top edge: where the chat works on the left, how much it has used on the right. -->
+    {#if place || usage || context?.used}<div class="composer-tabs">
+        {#if place}<div class="composer-tab composer-place">{@render place()}</div>{/if}
+        {#if usage || context?.used}<div class="composer-tab composer-meters">
+            {#if usage}<PlanMeter {...usage} />{/if}
+            {#if context?.used}<ContextMeter {...context} used={context.used} />{/if}
+          </div>{/if}
+      </div>{/if}
+    <form
+      class="composer"
+      class:dragging
+      onsubmit={submit}
+      ondragover={(event) => {
+        if (!event.dataTransfer?.types.includes('Files')) return;
+        event.preventDefault();
+        dragging = true;
+      }}
+      ondragleave={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) dragging = false;
+      }}
+      ondrop={drop}
+    >
+      {#if options.length}<CommandMenu
+          id={menuId}
+          commands={options}
+          prefix={suggestions.length ? '/' : '@'}
+          bind:active
+          choose={complete}
+        />{/if}
+      {#if edge}<span class="composer-edge {edge.level}" aria-hidden="true"
+          ><i style:width="{edge.used}%"></i></span
+        >{/if}
+      {#if pending.files.length}<AttachmentTray {pending} />{/if}
+      <label class="sr-only" for="message">Message</label><textarea
+        id="message"
+        role="combobox"
+        aria-expanded={options.length > 0}
+        aria-controls={menuId}
+        aria-autocomplete="list"
+        aria-activedescendant={options.length ? `${menuId}-${options[active]?.name}` : undefined}
+        bind:this={input}
+        bind:value={text}
+        onkeydown={keydown}
+        oninput={track}
+        onkeyup={track}
+        onclick={track}
+        onpaste={paste}
+        rows="1"
+        maxlength="8000"
+        placeholder={enabled ? 'Ask anything, or describe a task…' : unavailable}></textarea>
+      <div class="composer-toolbar">
+        <div class="composer-model">
+          <input
+            bind:this={picker}
+            type="file"
+            multiple
+            hidden
+            onchange={(event) => {
+              attach(event.currentTarget.files ?? []);
+              event.currentTarget.value = '';
+            }}
+          /><button
             type="button"
-            aria-label="Stop reply"
-            onclick={stop}><Square size={13} fill="currentColor" /></button
-          >{:else}<button
-            class="send-button"
-            type="submit"
-            aria-label="Send message"
-            disabled={!ready || !connected || !enabled || paused || sending}
-            ><ArrowUp size={18} /></button
-          >{/if}
+            class="icon-button composer-attach"
+            aria-label="Attach files"
+            title="Attach images or text files (or paste, or drop them here)"
+            disabled={!enabled}
+            onclick={() => picker.click()}><Paperclip size={16} /></button
+          >
+          {#if controls}{@render controls()}{:else}<span>{modelLabel}</span>{/if}
+          <ApprovalPicker failed={(message) => (failure = message)} />
+        </div>
+        <div class="composer-send">
+          {#if busy && queue && ready}<button
+              class="send-button"
+              type="submit"
+              aria-label="Queue message"
+              title="Send when the reply ends"
+              disabled={!connected || !enabled || paused || sending}><ListEnd size={17} /></button
+            >{/if}
+          {#if busy}<button
+              class="send-button stop"
+              type="button"
+              aria-label="Stop reply"
+              onclick={stop}><Square size={13} fill="currentColor" /></button
+            >{:else}<button
+              class="send-button"
+              type="submit"
+              aria-label="Send message"
+              disabled={!ready || !connected || !enabled || paused || sending}
+              ><ArrowUp size={18} /></button
+            >{/if}
+        </div>
       </div>
-    </div>
-  </form>
+    </form>
+  </div>
   {#if failure}<p class="composer-caption failed" role="alert">{failure}</p>{/if}
   {#if hasImages && !images}<p class="composer-caption" role="status">
       This model can’t see images; it gets their names only.
