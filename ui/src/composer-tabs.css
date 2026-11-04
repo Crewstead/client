@@ -48,25 +48,3 @@
 .composer-place :is(svg, .place-trigger > svg) {
   flex-shrink: 0;
 }
-/* The plan's usage as the box's bottom edge (the top edge has the tabs): the fullest window, filling
-   from the left; the meter's tab gives the figures. */
-.composer-edge {
-  position: absolute;
-  right: 14px;
-  bottom: -1px;
-  left: 14px;
-  height: 2px;
-  pointer-events: none;
-}
-.composer-edge i {
-  display: block;
-  height: 100%;
-  border-radius: 1px;
-  background: var(--muted);
-}
-.composer-edge.high i {
-  background: var(--amber);
-}
-.composer-edge.full i {
-  background: var(--danger);
-}

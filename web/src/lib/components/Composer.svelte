@@ -5,7 +5,6 @@
   import ApprovalPicker from './ApprovalPicker.svelte';
   import ContextMeter from './ContextMeter.svelte';
   import PlanMeter from './PlanMeter.svelte';
-  import { shownWindows, tightest } from './plan-usage.ts';
   import type { PlanLimits } from '@crewstead/core/protocol';
   import CommandMenu from './CommandMenu.svelte';
   import AttachmentTray from './attachments/AttachmentTray.svelte';
@@ -232,8 +231,6 @@
       void submit();
     }
   }
-  /** The plan window closest to its limit, drawn along the box's bottom edge. */
-  const edge = $derived(usage ? tightest(shownWindows(usage.limits)) : undefined);
 </script>
 
 <div class="composer-area">
@@ -268,9 +265,6 @@
           bind:active
           choose={complete}
         />{/if}
-      {#if edge}<span class="composer-edge {edge.level}" aria-hidden="true"
-          ><i style:width="{edge.used}%"></i></span
-        >{/if}
       {#if pending.files.length}<AttachmentTray {pending} />{/if}
       <label class="sr-only" for="message">Message</label><textarea
         id="message"
