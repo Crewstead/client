@@ -1,4 +1,5 @@
 <script lang="ts">
+  import '@crewstead/ui/panel-chips.css';
   import type { Component, Snippet } from 'svelte';
   import { ChevronRight, Plus } from '@lucide/svelte';
   let {
@@ -50,7 +51,14 @@
 </script>
 
 <!-- One part of the details panel: a heading that folds it away, and what it holds. -->
-<section class="panel-section" class:folded={!open} class:empty aria-label={label}>
+<!-- Folded with nothing in it, it shrinks to a chip in the row at the panel's end. -->
+<section
+  class="panel-section"
+  class:folded={!open}
+  class:empty
+  class:chip={!open && empty}
+  aria-label={label}
+>
   <h3>
     <button type="button" aria-expanded={open} aria-controls={bodyId} onclick={toggle}
       ><ChevronRight size={13} class="panel-chevron" /><Icon size={13} />{title}{#if count}<span

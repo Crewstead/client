@@ -236,13 +236,20 @@
 <div class="composer-area">
   <div class="composer-frame">
     <!-- Tabs on the box's top edge: where the chat works on the left, how much it has used on the right. -->
-    {#if place || usage || context?.used}<div class="composer-tabs">
-        {#if place}<div class="composer-tab composer-place">{@render place()}</div>{/if}
-        {#if usage || context?.used}<div class="composer-tab composer-meters">
-            {#if usage}<PlanMeter {...usage} />{/if}
-            {#if context?.used}<ContextMeter {...context} used={context.used} />{/if}
-          </div>{/if}
-      </div>{/if}
+    <div class="composer-tabs">
+      {#if place}<div class="composer-tab composer-place">{@render place()}</div>{/if}
+      <!-- Always there: before the first reply reports anything, an empty ring says so. -->
+      <div class="composer-tab composer-meters">
+        {#if usage}<PlanMeter {...usage} />{/if}
+        {#if context?.used}<ContextMeter {...context} used={context.used} />{:else}<span
+            class="context-meter placeholder"
+            title="How full the model’s context is, after the first reply"
+            ><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"
+              ><circle cx="8" cy="8" r="6" class="track" /></svg
+            ><span>0%</span></span
+          >{/if}
+      </div>
+    </div>
     <form
       class="composer"
       class:dragging

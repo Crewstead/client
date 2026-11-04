@@ -49,8 +49,16 @@
 </script>
 
 <!-- Subagents this chat's model started: each its own chat, which belongs here rather than the chat list. -->
-{#if subagents.length}
-  <PanelSection id="subagents" label="Subagents" icon={Bot} count={subagents.length}>
+<PanelSection
+  id="subagents"
+  label="Subagents"
+  icon={Bot}
+  count={subagents.length || undefined}
+  empty={!subagents.length}
+>
+  {#if !subagents.length}<p class="panel-empty">
+      None yet. Ask for them in a message, like “use two subagents to compare these”.
+    </p>{:else}
     <ul class="panel-list panel-subagents">
       {#each subagents as agent (agent.id)}
         <li>
@@ -75,6 +83,5 @@
           </a>
         </li>
       {/each}
-    </ul>
-  </PanelSection>
-{/if}
+    </ul>{/if}
+</PanelSection>

@@ -5,8 +5,8 @@
   flex-direction: column;
   flex-shrink: 0;
   width: clamp(
-    260px,
-    var(--chat-panel-size, 320px),
+    240px,
+    var(--chat-panel-size, 280px),
     calc(100vw - 440px - var(--sidebar-room, 0px))
   );
   min-height: 0;

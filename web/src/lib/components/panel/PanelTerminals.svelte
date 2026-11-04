@@ -1,6 +1,6 @@
 <script lang="ts">
   import PanelSection from './PanelSection.svelte';
-  import { Plus, SquareTerminal } from '@lucide/svelte';
+  import { SquareTerminal } from '@lucide/svelte';
   import { useTerminals } from '#lib/terminals/terminals.svelte.ts';
   const terminals = useTerminals();
   const shells = $derived(terminals?.list.filter((entry) => entry.kind === 'shell') ?? []);
@@ -13,6 +13,10 @@
     label="Terminals"
     icon={SquareTerminal}
     count={shells.length || undefined}
+    empty={!shells.length}
+    add={terminals.typing
+      ? { label: 'New terminal', run: () => terminals.open({ cols: 120, rows: 30 }) }
+      : undefined}
   >
     {#if shells.length}<ul class="panel-list panel-watches">
         {#each shells as shell (shell.id)}
@@ -25,10 +29,8 @@
           </li>
         {/each}
       </ul>{/if}
-    {#if terminals.typing}<button
-        class="button subtle small"
-        onclick={() => terminals.open({ cols: 120, rows: 30 })}
-        ><Plus size={14} /> New terminal</button
-      >{:else if terminals.unavailable}<p class="panel-empty">{terminals.unavailable}</p>{/if}
+    {#if !terminals.typing && terminals.unavailable}<p class="panel-empty">
+        {terminals.unavailable}
+      </p>{:else if !shells.length}<p class="panel-empty">None open. + opens a shell here.</p>{/if}
   </PanelSection>
 {/if}

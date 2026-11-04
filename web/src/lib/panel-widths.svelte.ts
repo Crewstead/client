@@ -52,7 +52,7 @@ export const sidebarWidth = new PanelWidth(
 export const chatPanelWidth = new PanelWidth(
   'crewstead-chat-panel-width',
   '--chat-panel-size',
-  320,
-  260,
+  280,
+  240,
   600,
 );
