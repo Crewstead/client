@@ -1,4 +1,5 @@
 import type { ModuleInfo } from '@crewstead/core/protocol';
+import { canEmbed } from '#lib/desktop/browser-panel.ts';
 import { activeModules } from '#lib/modules/registry.ts';
 import type { SettingsGroup, SettingsTab } from '#lib/modules/types.ts';
 
@@ -38,6 +39,17 @@ const owners: SettingsTab[] = [
   },
 ];
 
+// In the desktop app: its own browser's sites and importing sign-ins into it.
+const desktop: SettingsTab[] = [
+  {
+    id: 'browser',
+    label: 'Browser',
+    group: 'tools',
+    order: 20,
+    load: () => import('./BrowserSettings.svelte'),
+  },
+];
+
 /** The Settings list's groups, in order. */
 export const settingsGroups: { id: SettingsGroup; label: string }[] = [
   { id: 'tools', label: 'Models & tools' },
@@ -50,6 +62,7 @@ export function settingsSections(modules: ModuleInfo[] | undefined, owner = fals
   return [
     ...core,
     ...(owner ? owners : []),
+    ...(canEmbed() ? desktop : []),
     ...activeModules(modules).flatMap((module) => module.tabs ?? []),
   ].sort((a, b) => groupRank(a.group) - groupRank(b.group) || a.order - b.order);
 }

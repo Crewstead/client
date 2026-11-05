@@ -1,5 +1,5 @@
 import { createServer, type Socket } from 'node:net';
-import { rm } from 'node:fs/promises';
+import { rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { createInterface } from 'node:readline';
 import { randomBytes } from 'node:crypto';
@@ -51,6 +51,8 @@ export async function openToolBridge(
     server.once('error', reject);
     server.listen({ path, readableAll: false, writableAll: false }, resolve);
   });
+  const toolsFile = join(folder, `${name}.tools.json`);
+  await writeFile(toolsFile, JSON.stringify(tools), { mode: 0o600 });
   const config = JSON.stringify({
     mcpServers: {
       hub: {
@@ -58,7 +60,7 @@ export async function openToolBridge(
         args: [fileURLToPath(new URL('./mcp-bridge.mjs', import.meta.url))],
         env: {
           HUB_BRIDGE_SOCKET: path,
-          HUB_BRIDGE_TOOLS: JSON.stringify(tools),
+          HUB_BRIDGE_TOOLS_FILE: toolsFile,
           // Inside the desktop app this program is Electron, which runs scripts only as Node.
           ...(process.versions.electron ? { ELECTRON_RUN_AS_NODE: '1' } : {}),
         },
@@ -72,6 +74,7 @@ export async function openToolBridge(
       for (const socket of sockets) socket.destroy();
       await new Promise((resolve) => server.close(resolve));
       if (!windows) await rm(path, { force: true });
+      await rm(toolsFile, { force: true });
     },
   };
 }

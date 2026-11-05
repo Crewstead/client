@@ -3,6 +3,7 @@
   import type { LiveEvent, LiveInput } from '@crewstead/core/protocol';
   import LiveControl from './LiveControl.svelte';
   import { apiUrl, withAccount } from '#lib/auth/connection.ts';
+  import { canEmbed, embedTab } from '#lib/desktop/browser-panel.ts';
   let {
     base,
     sessionKey,
@@ -59,7 +60,16 @@
   }
   let cursor = $state<{ x: number; y: number; kind: 'click' | 'type'; seq: number }>();
   let failed = $state(false);
+  // In the desktop app, a browser of this computer is the app's own: its real tab lies over this
+  // spot, and no pictures are streamed. Undefined while the app is asked.
+  let screen = $state<HTMLDivElement>();
+  let embedded = $state<boolean | undefined>(canEmbed() ? undefined : false);
   $effect(() => {
+    if (!screen || embedded === false) return;
+    return embedTab(screen, sessionKey, tab, (on) => (embedded = embedded ?? on));
+  });
+  $effect(() => {
+    if (embedded !== false) return;
     const source = new EventSource(
       withAccount(
         apiUrl(`${base}/${encodeURIComponent(sessionKey)}/stream${tab ? `?tab=${tab}` : ''}`),
@@ -93,8 +103,10 @@
 
 <!-- The page as the model sees it, with a cursor that glides to where it clicks or types. -->
 <div
+  bind:this={screen}
   class="live-screen"
   class:controlled={control}
+  class:embedded
   style:aspect-ratio={frame ? `${frame.width} / ${frame.height}` : '16 / 10'}
   style:--page-ratio={frame ? frame.width / frame.height : 1.6}
   role="region"
@@ -102,7 +114,7 @@
   data-behind={behind}
 >
   <canvas bind:this={canvas} class:hidden={!frame}></canvas>
-  {#if !frame}<p class="live-waiting">
+  {#if !frame && !embedded}<p class="live-waiting">
       {#if failed}This browser is not available.{:else}<LoaderCircle size={18} class="spin" /> Connecting
         to the browser…{/if}
     </p>{/if}

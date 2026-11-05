@@ -1,11 +1,13 @@
 #!/usr/bin/env node
-// MCP server that Claude Code starts for one reply. It offers the hub's tools (HUB_BRIDGE_TOOLS) and
+// MCP server that Claude Code starts for one reply. It offers the hub's tools (HUB_BRIDGE_TOOLS_FILE) and
 // passes every call to the daemon over a private Unix socket (HUB_BRIDGE_SOCKET); the daemon asks the
 // hub, which runs the tool after the owner's approval. Plain JavaScript, so it starts without a build.
+import { readFileSync } from 'node:fs';
 import { connect } from 'node:net';
 import { createInterface } from 'node:readline';
 
-const tools = JSON.parse(process.env.HUB_BRIDGE_TOOLS ?? '[]');
+// A file, not the environment: Windows limits a variable to 32,767 characters.
+const tools = JSON.parse(readFileSync(process.env.HUB_BRIDGE_TOOLS_FILE ?? '', 'utf8'));
 const daemon = connect(process.env.HUB_BRIDGE_SOCKET ?? '');
 const waiting = new Map();
 let next = 0;

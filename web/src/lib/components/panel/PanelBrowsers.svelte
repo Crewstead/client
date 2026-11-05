@@ -15,9 +15,11 @@
   import LiveScreen from '../live/LiveScreen.svelte';
   import LiveTabs from '../live/LiveTabs.svelte';
   import { browserState } from './chat-facts.ts';
+  import { canEmbed } from '#lib/desktop/browser-panel.ts';
   let { session }: { session: Session } = $props();
   const workspace = useWorkspace();
   const live = new LiveBrowsers();
+  const desktop = canEmbed();
   const bases = $derived(liveSources(activeModules(workspace.catalog?.modules)));
   const basesKey = $derived(bases.join());
   // Read while the panel is open, so a browser the model opens shows up here.
@@ -66,6 +68,15 @@
             {names}
             compact
           />
+          {#if desktop}
+            <!-- In the desktop app the real tab lies over the picture, so the way to full view is here. -->
+            <a
+              class="icon-button panel-live-full"
+              href={resolve(`/browsers?session=${encodeURIComponent(selectedId)}`)}
+              title="Open in full view"
+              aria-label="Full view"><Maximize2 size={14} /></a
+            >
+          {/if}
         </div>
         {#key selectedId}
           <a

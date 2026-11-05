@@ -2,6 +2,7 @@ import { app, session } from 'electron';
 import { spawn, type ChildProcess } from 'node:child_process';
 import { hostname } from 'node:os';
 import { join } from 'node:path';
+import { appLink, type AppLink, type Handler } from '../../daemon/src/app-link.ts';
 import { machineHome, readConfig } from '../../daemon/src/config.ts';
 import { stopLeftoverServices } from './leftovers.ts';
 
@@ -22,8 +23,19 @@ function serviceMain() {
 export class Computer {
   state: ComputerState = 'off';
   private child?: ChildProcess;
+  private link?: AppLink;
   private stopping = false;
-  constructor(private changed: () => void) {}
+  constructor(
+    private changed: () => void,
+    /** Answers the service's requests (the browser's tabs). */
+    private serve: Handler = () => undefined,
+  ) {}
+
+  /** Asks the running service, e.g. which tab shows a chat's browser. */
+  ask(op: string, args?: unknown) {
+    if (!this.link) return Promise.reject(new Error('This computer is not connected.'));
+    return this.link.ask(op, args);
+  }
 
   /** The hub this computer is connected to, if any. */
   connectedHub() {
@@ -98,10 +110,26 @@ export class Computer {
   private spawn(args: string[], env: Record<string, string> = {}) {
     const child = spawn(process.execPath, [serviceMain(), ...args], {
       // Its standard input stays open while this app runs; the service stops once it closes.
-      env: { ...process.env, ...env, ELECTRON_RUN_AS_NODE: '1', CREWSTEAD_APP_PIPE: '1' },
-      stdio: ['pipe', 'pipe', 'pipe'],
+      env: {
+        ...process.env,
+        ...env,
+        ELECTRON_RUN_AS_NODE: '1',
+        CREWSTEAD_APP_PIPE: '1',
+        // Where Chromium names its DevTools endpoint, which the service's browser tools use.
+        CREWSTEAD_APP_DEVTOOLS: join(app.getPath('userData'), 'DevToolsActivePort'),
+      },
+      // The fourth is the channel for requests between this app and the service (app-link.ts).
+      stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
     });
     this.child = child;
+    this.link?.drop();
+    const link = appLink((message) => child.connected && child.send(message), this.serve);
+    this.link = link;
+    child.on('message', (message) => link.receive(message));
+    child.once('exit', () => {
+      link.drop();
+      if (this.link === link) this.link = undefined;
+    });
     this.set('connecting');
     const read = (chunk: Buffer) => {
       for (const line of chunk.toString().split('\n').filter(Boolean)) {
@@ -110,8 +138,8 @@ export class Computer {
         else if (line.includes('Lost the hub connection')) this.set('connecting');
       }
     };
-    child.stdout.on('data', read);
-    child.stderr.on('data', read);
+    child.stdout?.on('data', read);
+    child.stderr?.on('data', read);
     child.once('exit', (code) => {
       if (this.child !== child || this.stopping) return;
       this.child = undefined;

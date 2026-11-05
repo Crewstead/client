@@ -250,7 +250,19 @@
 }
 .panel-live-tabs {
   --tab-row-bg: #1b1c22;
+  display: flex;
+  align-items: center;
+  gap: 4px;
   padding: 4px 4px 0;
+}
+.panel-live-tabs > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+.panel-live-full {
+  flex: none;
+  width: 26px;
+  height: 26px;
 }
 .panel-live-tabs .live-tabs {
   gap: 2px;

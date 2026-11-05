@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { join } from 'node:path';
 import { createInterface } from 'node:readline/promises';
+import { appBrowser } from './app-browser.ts';
 import { claudeBinary } from './claude.ts';
 import {
   computerCommand,
@@ -140,7 +140,7 @@ function status(home: string, { browserInstalled }: BrowserModule) {
   );
   log(`  Sandbox:   ${sandboxAvailable() ? 'bubblewrap, commands allowed' : 'none, no commands'}`);
   log(
-    `  Browser:   ${browserInstalled() ? 'Chromium (a window with kept sign-ins when run by the app; else headless)' : 'not installed (crewstead install-browser)'}`,
+    `  Browser:   ${browserInstalled() ? "Chromium (headless; the app's own browser when run by the app)" : 'not installed (crewstead install-browser)'}`,
   );
   const projects = listProjects(home);
   log(`  Projects:  ${projects.length ? '' : 'none'}`);
@@ -191,13 +191,14 @@ async function run(home: string) {
     controller.signal.addEventListener('abort', () => process.stdin.destroy(), { once: true });
   }
   const { BrowserPool, browserInstalled } = await import('@crewstead/core/browser');
-  // Run by the desktop app, someone sits at this computer: the browser is a window there, and its
-  // profile, sign-ins included, stays in this computer's folder (which file tools never show).
-  const profile =
-    process.env.CREWSTEAD_APP_PIPE === '1'
-      ? { dir: join(home, 'browser'), visible: true }
+  // Run by the desktop app, the browser is the app's: tabs in its window, sign-ins kept there.
+  const app = appBrowser();
+  const browser = app
+    ? new BrowserPool({ host: app.host })
+    : browserInstalled()
+      ? new BrowserPool()
       : undefined;
-  const browser = browserInstalled() ? new BrowserPool({ profile }) : undefined;
+  if (app && browser) app.serve(browser);
   try {
     await keepLinked({
       config,

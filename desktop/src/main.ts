@@ -1,4 +1,4 @@
-import { app, dialog, ipcMain, type BrowserWindow } from 'electron';
+import { app, dialog, ipcMain, type BrowserWindow, type Rectangle } from 'electron';
 import { join } from 'node:path';
 import { computerSettings } from '../../daemon/src/computer.ts';
 import { machineHome, readConfig } from '../../daemon/src/config.ts';
@@ -18,21 +18,51 @@ import { hubOrigin, readSettings, writeSettings } from './settings.ts';
 import { serveInterface } from './local-interface.ts';
 import { createTray } from './tray.ts';
 import { createWindow, stayOn } from './window.ts';
+import { BrowserTabs } from './browser-tabs.ts';
+import { SiteData } from './site-data/index.ts';
 
 // One app per person: a second start shows the first one's window.
 if (!app.requestSingleInstanceLock()) app.quit();
+// The browser's tabs (browser-tabs.ts) are driven by this computer's service through Chromium's
+// DevTools endpoint: on this computer only, at a port Chromium picks and names in a file in the app's
+// folder. Tabs not on screen keep working meanwhile.
+app.commandLine.appendSwitch('remote-debugging-port', '0');
+app.commandLine.appendSwitch('remote-debugging-address', '127.0.0.1');
+for (const name of [
+  'disable-renderer-backgrounding',
+  'disable-backgrounding-occluded-windows',
+  'disable-background-timer-throttling',
+])
+  app.commandLine.appendSwitch(name);
 
 const assets = join(__dirname, '..', 'assets');
 const icon = join(assets, 'icon.png');
 const trayIcon = join(assets, 'tray.png');
 let window: BrowserWindow;
+let tabs: BrowserTabs | undefined;
 let quitting = false;
 let asked = false;
 // The page hears when this computer connects, so it shows it online at once.
-const computer = new Computer(() => {
-  refreshTray();
-  if (window && !window.isDestroyed()) window.webContents.send('computer-state', computer.state);
-});
+const computer = new Computer(
+  () => {
+    refreshTray();
+    if (window && !window.isDestroyed()) window.webContents.send('computer-state', computer.state);
+  },
+  // The service's browser tools open and draw tabs here.
+  async (op, args) => {
+    if (!tabs) throw new Error('The Crewstead window is not ready yet.');
+    if (op === 'browser-open') return tabs.open();
+    if (op === 'browser-capture') {
+      const { target, quality, clip } = args as {
+        target: string;
+        quality: number;
+        clip?: Rectangle;
+      };
+      return (await tabs.capture(target, quality, clip)).toString('base64');
+    }
+    throw new Error(`Unknown request: ${op}`);
+  },
+);
 let tray: ReturnType<typeof createTray> | undefined;
 let reach: ReturnType<typeof serveInterface> | undefined;
 
@@ -151,6 +181,54 @@ ipcMain.handle('computer-setting', async (event, key: unknown, on: unknown) => {
   }
 });
 
+// The Browser panel: the page leaves room for a chat's browser and asks for it there. The service says
+// which tab is that browser's current one, when the browser is on this computer.
+ipcMain.handle('browser-show', async (event, key: unknown, bounds: unknown, tab: unknown) => {
+  if (!fromHub(event) || typeof key !== 'string' || !tabs) return false;
+  const box = bounds as Rectangle;
+  if (![box?.x, box?.y, box?.width, box?.height].every((value) => Number.isFinite(value)))
+    return false;
+  // The hub names a browser "<computer>:<key on that computer>"; only this computer's are here.
+  const here = readConfig(machineHome())?.machineId;
+  if (!here || !key.startsWith(`${here}:`)) return false;
+  const which = { key: key.slice(here.length + 1), tab: typeof tab === 'string' ? tab : undefined };
+  const target = await computer.ask('browser-current', which).catch(() => undefined);
+  // The page measures in its own pixels; the window lays views out in its, which zoom changes.
+  const zoom = window.webContents.getZoomFactor();
+  const scaled = {
+    x: box.x * zoom,
+    y: box.y * zoom,
+    width: box.width * zoom,
+    height: box.height * zoom,
+  };
+  return tabs.show(typeof target === 'string' ? target : undefined, scaled);
+});
+ipcMain.handle('browser-hide', (event) => {
+  if (fromHub(event)) void tabs?.show(undefined);
+});
+
+// Settings → Browser: the browser's sites, and importing chosen sites' sign-ins from another
+// browser here (site-data/). Answers stay in this window; an import asks its owner first.
+const siteData = new SiteData(() => window);
+ipcMain.handle('site-data', async (event, op: unknown, args: unknown) => {
+  if (!fromHub(event)) throw new Error('Not allowed.');
+  const { site, source, sites } = (args ?? {}) as {
+    site?: unknown;
+    source?: unknown;
+    sites?: unknown;
+  };
+  if (op === 'kept') return siteData.kept();
+  if (op === 'remove' && typeof site === 'string') return siteData.remove(site);
+  if (op === 'sources') return siteData.sources();
+  if (op === 'sites' && typeof source === 'string') return siteData.sites(source);
+  if (op === 'import' && typeof source === 'string' && Array.isArray(sites))
+    return siteData.import(
+      source,
+      sites.filter((entry) => typeof entry === 'string'),
+    );
+  throw new Error('Not allowed.');
+});
+
 // The first-run page's address; accepted from that page only, never from a hub page.
 ipcMain.handle('connect-hub', async (event, input: string) => {
   if (!event.senderFrame?.url.startsWith('file:')) return 'Not allowed.';
@@ -172,6 +250,7 @@ void app.whenReady().then(() => {
   process.env.PATH = terminalPath();
   window = createWindow(icon);
   stayOn(window, hub);
+  tabs = new BrowserTabs(window);
   // The interface is this app's own; only the API goes to the hub. The page hears when it cannot.
   reach = serveInterface(window.webContents.session, hub, (state) => {
     if (!window.isDestroyed()) window.webContents.send('hub-state', state);

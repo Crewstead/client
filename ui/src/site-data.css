@@ -1,0 +1,48 @@
+/* Settings → Browser in the desktop app: importing chosen sites' sign-ins from another browser. */
+.site-import {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+}
+.site-import-source {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.site-import-source select {
+  flex: 1;
+  min-width: 0;
+}
+.site-import-list {
+  max-height: 280px;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.site-import-list li {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--line-subtle);
+}
+.site-import-list li:last-child {
+  border-bottom: 0;
+}
+.site-import-list label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.site-import-list label > span:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.site-import-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+}

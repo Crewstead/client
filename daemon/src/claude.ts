@@ -1,5 +1,8 @@
 import { spawn } from 'node:child_process';
 import { execFile } from 'node:child_process';
+import { randomBytes } from 'node:crypto';
+import { rm, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import { promisify } from 'node:util';
 import {
   HUB_SERVER,
@@ -110,7 +113,10 @@ async function runOnce(
   onLimits?: (limits: PlanLimits) => void,
 ) {
   const bridge = run.tools.length ? await openToolBridge(cwd, run.tools, onToolCall) : undefined;
-  const child = spawn(binary, claudeArgs(run, bridge?.config), {
+  // In a file: on the command line a long prompt fails on Windows (spawn ENAMETOOLONG).
+  const systemFile = join(cwd, `system-${randomBytes(6).toString('hex')}.txt`);
+  await writeFile(systemFile, run.system, { mode: 0o600 });
+  const child = spawn(binary, claudeArgs(run, bridge?.config, systemFile), {
     cwd,
     env,
     stdio: ['pipe', 'pipe', 'pipe'],
@@ -168,7 +174,7 @@ async function runOnce(
     );
   } finally {
     signal.removeEventListener('abort', stop);
-    void exited.then(() => bridge?.close());
+    void exited.then(() => Promise.all([bridge?.close(), rm(systemFile, { force: true })]));
   }
   await exited;
 }

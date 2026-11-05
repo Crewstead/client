@@ -21,6 +21,25 @@ contextBridge.exposeInMainWorld('crewsteadDesktop', {
     ipcRenderer.on('computer-state', forward);
     return () => void ipcRenderer.off('computer-state', forward);
   },
+  /**
+   * The Browser panel: shows a chat's browser (by its live key, "<computer>:<key>"; its `tab`, else the
+   * current one) over `bounds`, in the page's coordinates; false when that browser is not on this
+   * computer. `hide` takes it away.
+   */
+  browserPanel: {
+    show: (
+      key: string,
+      bounds: { x: number; y: number; width: number; height: number },
+      tab?: string,
+    ) => ipcRenderer.invoke('browser-show', key, bounds, tab) as Promise<boolean>,
+    hide: () => ipcRenderer.invoke('browser-hide') as Promise<void>,
+  },
+  /**
+   * Settings → Browser: the browser's sites (`kept`, `remove`), and importing chosen sites' cookies
+   * from another browser on this computer (`sources`, `sites`, `import`, which asks first).
+   */
+  siteData: (op: 'kept' | 'remove' | 'sources' | 'sites' | 'import', args?: unknown) =>
+    ipcRenderer.invoke('site-data', op, args) as Promise<unknown>,
   /** Whether the hub answers ('online' or 'offline'; unknown before the first request), and changes. */
   hub: {
     state: () => ipcRenderer.invoke('hub-state') as Promise<string | undefined>,
