@@ -39,7 +39,7 @@
             title="Auto-review asks the chat’s own model, so each check uses a little of its allowance."
             >Tool approvals</span
           >
-          <span class="row-status">{current?.hint} · all your chats</span>
+          <span class="row-status">{current?.hint} · new chats; each chat keeps its own</span>
           {#if error}<span class="row-error" role="alert">{error}</span>{/if}
         </span>
         <ChoicePicker

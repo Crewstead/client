@@ -5,11 +5,18 @@
   import { useWorkspace } from '#lib/workspace.svelte.ts';
   import { approvalModes } from '#lib/approval-modes.ts';
   import '@crewstead/ui/model-picker.css';
-  let { failed }: { failed: (message: string) => void } = $props();
+  let {
+    failed,
+    chat,
+  }: {
+    failed: (message: string) => void;
+    /** The open chat, which keeps its own mode; without one, the mode a new chat starts with. */
+    chat?: { id: string; mode?: ApprovalMode | undefined };
+  } = $props();
   const workspace = useWorkspace();
   const id = $props.id();
-  // One account-wide setting, shared by every chat.
-  const mode = $derived(workspace.catalog?.preferences.approvalMode ?? 'ask');
+  // Chats from before per-chat modes follow the one set last.
+  const mode = $derived(chat?.mode ?? workspace.catalog?.preferences.approvalMode ?? 'ask');
   const chosen = $derived(approvalModes.find((option) => option.value === mode)!);
   const icons = { ask: ShieldQuestion, auto: ShieldCheck, all: ShieldAlert };
   const Icon = $derived(icons[mode]);
@@ -24,7 +31,8 @@
     close(true);
     if (value === mode) return;
     try {
-      await workspace.setApprovalMode(value);
+      if (chat) await workspace.setPreferences(chat.id, { approvalMode: value });
+      else await workspace.setApprovalMode(value);
     } catch (cause) {
       failed(cause instanceof Error ? cause.message : 'Could not change approvals');
     }

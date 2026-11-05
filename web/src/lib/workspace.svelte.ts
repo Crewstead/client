@@ -34,7 +34,7 @@ export class Workspace {
     this.ready = false;
   }
 
-  /** How tool calls are approved, in all chats of this account. */
+  /** How tool calls are approved in new chats; each chat keeps its own. */
   async setApprovalMode(mode: ApprovalMode) {
     const result = await request<Catalog['preferences']>('/preferences', {
       method: 'PATCH',
@@ -55,7 +55,7 @@ export class Workspace {
 
   async setPreferences(
     id: string,
-    patch: Partial<Pick<Session, 'pinned' | 'archived' | 'title' | 'modelId'>>,
+    patch: Partial<Pick<Session, 'pinned' | 'archived' | 'title' | 'modelId' | 'approvalMode'>>,
   ) {
     const context = this.context;
     const updated = await request<Session>(scoped(`/sessions/${id}`, context), {
@@ -71,9 +71,17 @@ export class Workspace {
             archived: updated.archived,
             title: updated.title,
             modelId: updated.modelId,
+            ...(updated.approvalMode ? { approvalMode: updated.approvalMode } : {}),
           }
         : session,
     );
+    // New chats start with the model and approval mode set last.
+    if (this.catalog)
+      this.catalog.preferences = {
+        ...this.catalog.preferences,
+        ...(patch.approvalMode ? { approvalMode: patch.approvalMode } : {}),
+        ...(patch.modelId ? { lastModelId: patch.modelId } : {}),
+      };
   }
 
   /** A chat open here got a new name (written by its model): the list shows it at once. */

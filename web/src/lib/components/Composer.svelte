@@ -5,7 +5,7 @@
   import ApprovalPicker from './ApprovalPicker.svelte';
   import ContextMeter from './ContextMeter.svelte';
   import PlanMeter from './PlanMeter.svelte';
-  import type { PlanLimits } from '@crewstead/core/protocol';
+  import type { ApprovalMode, PlanLimits } from '@crewstead/core/protocol';
   import CommandMenu from './CommandMenu.svelte';
   import AttachmentTray from './attachments/AttachmentTray.svelte';
   import { matchCommand, suggestCommands, type Command } from '#lib/commands.ts';
@@ -37,6 +37,7 @@
     paused = false,
     queue,
     above,
+    chat,
   }: {
     draftKey: string;
     busy: boolean;
@@ -77,6 +78,8 @@
     queue?: (text: string, attachments: string[]) => Promise<boolean>;
     /** Shown just above the box, e.g. the messages waiting to be sent. */
     above?: Snippet;
+    /** The open chat and its approval mode; a new chat has none yet. */
+    chat?: { id: string; mode?: ApprovalMode | undefined };
   } = $props();
   /** Puts text in the box, e.g. a waiting message taken back to edit. */
   export function fill(value: string) {
@@ -311,7 +314,7 @@
             onclick={() => picker.click()}><Paperclip size={16} /></button
           >
           {#if controls}{@render controls()}{:else}<span>{modelLabel}</span>{/if}
-          <ApprovalPicker failed={(message) => (failure = message)} />
+          <ApprovalPicker {chat} failed={(message) => (failure = message)} />
         </div>
         <div class="composer-send">
           {#if busy && queue && ready}<button

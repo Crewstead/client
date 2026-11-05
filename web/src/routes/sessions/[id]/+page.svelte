@@ -194,7 +194,7 @@
   });
   async function decide(id: string, decision: 'approve' | 'reject' | 'approve-all') {
     if (!conversation.session) return false;
-    // Approving everything also approves what chats are waiting on.
+    // Approving everything in this chat also approves what it is waiting on.
     if (decision === 'approve-all') return approveAll();
     return conversation.accepted(
       `/sessions/${conversation.session.id}/approvals/${id}`,
@@ -204,7 +204,7 @@
   }
   async function approveAll() {
     try {
-      await workspace.setApprovalMode('all');
+      await workspace.setPreferences(conversation.session!.id, { approvalMode: 'all' });
       return true;
     } catch (cause) {
       conversation.error = cause instanceof Error ? cause.message : 'Could not change approvals';
@@ -289,6 +289,7 @@
           paused={switching}
           enabled={!!model}
           {...usageOf(model)}
+          chat={{ id: session.id, mode: session.approvalMode }}
           editLast={() => {
             const last = session.items.findLast((item) => item.role === 'user');
             if (!last || session.status === 'running' || session.status === 'awaiting_approval')

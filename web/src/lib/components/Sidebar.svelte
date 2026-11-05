@@ -13,6 +13,7 @@
   import { PlaceReorder } from './place-reorder.svelte.ts';
   import { flip } from 'svelte/animate';
   import AccountMenu from './AccountMenu.svelte';
+  import UpdateBar from '#lib/desktop/UpdateBar.svelte';
   import WorkspaceMenu from './WorkspaceMenu.svelte';
   import { activeModules } from '#lib/modules/registry.ts';
   let {
@@ -271,6 +272,7 @@
     {/if}
   </nav>
   <footer class="sidebar-footer">
+    <UpdateBar />
     {#key open}<AccountMenu {close} />{/key}
   </footer>
 </aside>

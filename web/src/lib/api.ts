@@ -19,7 +19,13 @@ export interface Catalog {
   /** For organisation workspaces: the caller's role and the personal-model policy. */
   policy: { allowPersonal: boolean; role?: Role };
   /** The account's own choices: how tool calls are approved, how the left panel orders places. */
-  preferences: { approvalMode: ApprovalMode; placeOrder?: string[] };
+  preferences: {
+    /** The approval mode set last, which new chats start with. */
+    approvalMode: ApprovalMode;
+    placeOrder?: string[];
+    /** The model chosen last in this workspace, which a new chat starts with. */
+    lastModelId?: string;
+  };
 }
 
 /** The hub restarting (a new version going live) or its proxy unable to reach it for a moment. */

@@ -27,3 +27,45 @@
 .update-bar.hub-offline > svg {
   color: var(--muted);
 }
+/* A new version is ready: a small button at the foot of the left panel. */
+.update-chip {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-bottom: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-raised);
+}
+.update-install {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: var(--text-sm);
+  text-align: left;
+  cursor: pointer;
+}
+.update-install > svg {
+  flex: none;
+  color: var(--accent);
+}
+.update-install > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.update-install:hover {
+  color: var(--accent);
+}
+.update-later {
+  flex: none;
+  margin-right: 4px;
+  color: var(--muted);
+}

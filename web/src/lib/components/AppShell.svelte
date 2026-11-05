@@ -1,5 +1,4 @@
 <script lang="ts">
-  import UpdateBar from '#lib/desktop/UpdateBar.svelte';
   import HubReach from '#lib/desktop/HubReach.svelte';
   import { onMount, onDestroy, setContext } from 'svelte';
   import type { Snippet } from 'svelte';
@@ -75,7 +74,6 @@
       ><a href={resolve('/')}>Crewstead</a>
     </header>
     <HubReach />
-    <UpdateBar />
     <main id="main">{@render children()}</main>
   </div>
 </div>

@@ -32,11 +32,15 @@
   $effect(() => {
     const models = workspace.catalog?.models ?? [];
     if (models.some((item) => item.id === model)) return;
-    // The model of the chat used last (on any device), while it is still offered; else the first.
+    // The model chosen last (on any device), while it is still offered; else that of the chat used
+    // last; else the first.
+    const last = workspace.catalog?.preferences.lastModelId;
     const recent = [...workspace.sessions]
       .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
       .find((session) => models.some((item) => item.id === session.modelId));
-    model = recent?.modelId ?? models[0]?.id ?? '';
+    model = models.some((item) => item.id === last)
+      ? last!
+      : (recent?.modelId ?? models[0]?.id ?? '');
   });
   async function send(text: string, attachments: string[]) {
     if (sending || !model) return false;
