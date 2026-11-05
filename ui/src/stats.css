@@ -1,9 +1,9 @@
 /* The chat statistics panel. */
 .stats-dialog {
-  width: min(600px, calc(100vw - 32px));
+  width: min(760px, calc(100vw - 32px));
   max-height: calc(100vh - 48px);
   overflow: auto;
-  padding: 22px 24px;
+  padding: 18px 22px;
 }
 .stats-head {
   display: flex;
@@ -13,27 +13,34 @@
 .stats-head .dialog-title {
   margin: 0;
 }
+/* The chat's counts as one strip: a cell each, divided by lines. */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  margin: 18px 0 0;
-}
-.stats-grid > div {
-  padding: 12px 14px;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  margin: 14px 0 0;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--surface);
+  overflow: hidden;
+}
+.stats-grid > div {
+  padding: 9px 12px;
+  box-shadow: -1px 0 0 var(--line-subtle);
 }
 .stats-grid dt {
   color: var(--muted);
   font-size: 12px;
 }
 .stats-grid dd {
-  margin: 4px 0 0;
-  font-size: 18px;
+  margin: 2px 0 0;
+  font-size: 15px;
   font-weight: 550;
   font-variant-numeric: tabular-nums;
+}
+.stats-grid small {
+  display: block;
+  margin-top: 1px;
+  line-height: 1.4;
 }
 .stats-grid small,
 .stats-table small {
@@ -42,7 +49,7 @@
   font-weight: 400;
 }
 .stats-section {
-  margin: 22px 0 10px;
+  margin: 16px 0 8px;
   font-size: 13px;
   font-weight: 550;
 }
@@ -59,7 +66,7 @@
 }
 .stats-table th,
 .stats-table td {
-  padding: 8px 12px;
+  padding: 6px 12px;
   text-align: right;
   white-space: nowrap;
 }
@@ -89,7 +96,7 @@
 }
 @media (max-width: 520px) {
   .stats-grid {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   /* On a phone the table keeps what fits: cached tokens are left out. */
   .stats-table .cached {

@@ -4,7 +4,7 @@
   import type { Model, Session } from '@crewstead/core/protocol';
   import { request, scoped } from '#lib/api.ts';
   import { useWorkspace } from '#lib/workspace.svelte.ts';
-  import { chatStats, compact, percent, plural } from './chat-stats.ts';
+  import { chatStats, compact, plural } from './chat-stats.ts';
   import ContextBreakdown from './ContextBreakdown.svelte';
   import '@crewstead/ui/dialogs.css';
   import '@crewstead/ui/stats.css';
@@ -21,7 +21,8 @@
   );
   const usd = (value: number) => (value < 0.01 ? '<$0.01' : `$${value.toFixed(2)}`);
   const date = (iso: string) =>
-    new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+    new Date(iso).toLocaleDateString(undefined, { dateStyle: 'medium' });
+  const time = (iso: string) => new Date(iso).toLocaleTimeString(undefined, { timeStyle: 'short' });
   /** Opened from the context meter in the prompt box. */
   export async function open() {
     dialog?.showModal();
@@ -57,7 +58,7 @@
       <dt>Messages</dt>
       <dd>
         {stats.messages}
-        <small>· {stats.replies === 1 ? '1 reply' : `${stats.replies} replies`}</small>
+        <small>{stats.replies === 1 ? '1 reply' : `${stats.replies} replies`}</small>
       </dd>
     </div>
     <div>
@@ -65,7 +66,7 @@
       <dd>
         {stats.tools.total}
         {#if stats.tools.total}<small
-            >· {[
+            >{[
               plural(stats.tools.reads, 'read'),
               plural(stats.tools.changes, 'change'),
               plural(stats.tools.commands, 'command'),
@@ -87,7 +88,7 @@
       <dd>
         {stats.approvals.asked} asked
         <small
-          >· {stats.approvals.reviewed} reviewed, {stats.approvals.automatic} automatic{stats.tools
+          >{stats.approvals.reviewed} reviewed, {stats.approvals.automatic} automatic{stats.tools
             .declined
             ? `, ${stats.tools.declined} declined`
             : ''}</small
@@ -95,20 +96,8 @@
       </dd>
     </div>
     <div>
-      <dt>Context now</dt>
-      <dd>
-        {session.contextUsed ? compact(session.contextUsed) : '—'}
-        {#if session.contextUsed}<small
-            >of {compact(contextWindow ?? 128_000)} ({percent(
-              session.contextUsed,
-              contextWindow ?? 128_000,
-            )})</small
-          >{/if}
-      </dd>
-    </div>
-    <div>
       <dt>Started</dt>
-      <dd>{date(session.createdAt)}</dd>
+      <dd>{date(session.createdAt)} <small>{time(session.createdAt)}</small></dd>
     </div>
   </dl>
 

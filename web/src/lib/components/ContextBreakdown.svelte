@@ -68,30 +68,35 @@
     <b style:left={`${SUMMARY_SHARE * 100}%`}></b>
   </div>
   {#if rows.length}
-    <ul class="context-parts">
-      {#each rows as row (row.key)}
-        <li>
-          <span class="context-swatch" data-part={row.key}></span>
-          <span class="context-label">{row.label}</span>
-          <span class="context-share">{percent(row.tokens, size)}</span>
-          <span class="context-tokens">{compact(row.tokens)}</span>
-        </li>
-      {/each}
-      <li class="context-free">
-        <span class="context-swatch"></span>
-        <span class="context-label">Free</span>
-        <span class="context-share">{percent(free, size)}</span>
-        <span class="context-tokens">{compact(free)}</span>
-      </li>
-    </ul>
-    {#if parts?.largest.length}
-      <p class="context-largest-title">Largest pieces</p>
-      <ol class="context-largest">
-        {#each parts.largest as piece, index (index)}
-          <li><span>{piece.label}</span><span>{compact(piece.tokens)}</span></li>
+    <!-- Parts beside the largest pieces, so the panel stays short. -->
+    <div class="context-columns">
+      <ul class="context-parts">
+        {#each rows as row (row.key)}
+          <li>
+            <span class="context-swatch" data-part={row.key}></span>
+            <span class="context-label">{row.label}</span>
+            <span class="context-share">{percent(row.tokens, size)}</span>
+            <span class="context-tokens">{compact(row.tokens)}</span>
+          </li>
         {/each}
-      </ol>
-    {/if}
+        <li class="context-free">
+          <span class="context-swatch"></span>
+          <span class="context-label">Free</span>
+          <span class="context-share">{percent(free, size)}</span>
+          <span class="context-tokens">{compact(free)}</span>
+        </li>
+      </ul>
+      {#if parts?.largest.length}
+        <div>
+          <p class="context-largest-title">Largest pieces</p>
+          <ol class="context-largest">
+            {#each parts.largest as piece, index (index)}
+              <li><span>{piece.label}</span><span>{compact(piece.tokens)}</span></li>
+            {/each}
+          </ol>
+        </div>
+      {/if}
+    </div>
     <p class="stats-note">
       Parts are estimated from their text and scaled to the {compact(used)} tokens the provider counted.
       Send /compact to summarize the chat now.

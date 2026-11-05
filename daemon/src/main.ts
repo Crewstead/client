@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { join } from 'node:path';
 import { createInterface } from 'node:readline/promises';
 import { claudeBinary } from './claude.ts';
 import {
@@ -139,7 +140,7 @@ function status(home: string, { browserInstalled }: BrowserModule) {
   );
   log(`  Sandbox:   ${sandboxAvailable() ? 'bubblewrap, commands allowed' : 'none, no commands'}`);
   log(
-    `  Browser:   ${browserInstalled() ? 'Chromium (headless)' : 'not installed (crewstead install-browser)'}`,
+    `  Browser:   ${browserInstalled() ? 'Chromium (a window with kept sign-ins when run by the app; else headless)' : 'not installed (crewstead install-browser)'}`,
   );
   const projects = listProjects(home);
   log(`  Projects:  ${projects.length ? '' : 'none'}`);
@@ -190,7 +191,11 @@ async function run(home: string) {
     controller.signal.addEventListener('abort', () => process.stdin.destroy(), { once: true });
   }
   const { BrowserPool, browserInstalled } = await import('@crewstead/core/browser');
-  const browser = browserInstalled() ? new BrowserPool() : undefined;
+  // Run by the desktop app, someone sits at this computer: the browser is a window there, and its
+  // profile, sign-ins included, stays in this computer's folder (which file tools never show).
+  const profile =
+    process.env.CREWSTEAD_APP_PIPE === '1' ? { dir: join(home, 'browser'), visible: true } : undefined;
+  const browser = browserInstalled() ? new BrowserPool({ profile }) : undefined;
   try {
     await keepLinked({
       config,

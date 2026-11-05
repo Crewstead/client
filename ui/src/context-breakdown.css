@@ -1,6 +1,6 @@
 /* The context view: one stacked bar of what fills the model's context, a legend, the largest pieces. */
 .context-breakdown {
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-3);
 }
 .context-summary {
   margin: 0 0 var(--space-2);
@@ -56,9 +56,16 @@
 [data-part='files'] {
   background: var(--chart-7);
 }
+/* Parts and the largest pieces side by side; one under the other when narrow. */
+.context-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-2) 32px;
+  margin-top: var(--space-3);
+}
 .context-parts,
 .context-largest {
-  margin: var(--space-3) 0 0;
+  margin: 0;
   padding: 0;
   list-style: none;
   font-size: var(--text-sm);
@@ -68,7 +75,7 @@
   grid-template-columns: 10px minmax(0, 1fr) 44px 52px;
   align-items: center;
   gap: var(--space-2);
-  padding: 5px 0;
+  padding: 4px 0;
   border-bottom: 1px solid var(--line-subtle);
 }
 .context-swatch {
@@ -97,7 +104,8 @@
   color: var(--text);
 }
 .context-largest-title {
-  margin: var(--space-4) 0 0;
+  margin: 0 0 2px;
+  padding: 4px 0;
   color: var(--faint);
   font-size: var(--text-xs);
   font-weight: 600;
