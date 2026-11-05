@@ -194,7 +194,9 @@ async function run(home: string) {
   // Run by the desktop app, someone sits at this computer: the browser is a window there, and its
   // profile, sign-ins included, stays in this computer's folder (which file tools never show).
   const profile =
-    process.env.CREWSTEAD_APP_PIPE === '1' ? { dir: join(home, 'browser'), visible: true } : undefined;
+    process.env.CREWSTEAD_APP_PIPE === '1'
+      ? { dir: join(home, 'browser'), visible: true }
+      : undefined;
   const browser = browserInstalled() ? new BrowserPool({ profile }) : undefined;
   try {
     await keepLinked({
