@@ -1,4 +1,5 @@
 <script lang="ts">
+  import SettingsHeading from '#lib/components/SettingsHeading.svelte';
   import DesktopAppSettings from '#lib/desktop/DesktopAppSettings.svelte';
   import { goto } from '$app/navigation';
   import { resolve } from '$app/paths';
@@ -35,7 +36,7 @@
 </script>
 
 <section class="settings-section" aria-label="Account">
-  <h2>Signed in as</h2>
+  <SettingsHeading title="Signed in as" />
   <div class="settings-card profile-card">
     <span class="profile-avatar" aria-hidden="true">{login[0]?.toUpperCase()}</span>
     <dl>

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import SettingsHeading from '#lib/components/SettingsHeading.svelte';
   import { Plus } from '@lucide/svelte';
   import RowMenu, { type MenuItem } from '#lib/components/RowMenu.svelte';
   import type { Skill, SkillScope, SkillsView } from '@crewstead/core/protocol';
@@ -65,12 +66,11 @@
 </script>
 
 <section class="settings-section" aria-label="Skills">
-  <h2>Skills</h2>
-  <p class="muted-text">
+  <SettingsHeading title="Skills">
     Instructions for particular kinds of work. Models see each skill’s name and when to use it, and
     load the whole skill when a task needs it. Mention one as <code>@name</code> in a message, or turn
     it on for a chat from the prompt box, to keep it in use there.
-  </p>
+  </SettingsHeading>
   {#if error}<p class="error-banner" role="alert">{error}</p>{/if}
   {#each sections as section (section.scope)}
     <div class="skill-section-header">

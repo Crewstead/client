@@ -20,11 +20,32 @@
   margin: 0 0 24px;
   font-weight: 600;
 }
+/* Every section's heading (SettingsHeading): the title, its note under it, the action on the right. */
+.section-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.settings-section .section-heading h2 {
+  margin: 0 0 4px;
+}
+.section-heading p {
+  margin: 0;
+  font-size: var(--text-sm);
+}
 .setting-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
+}
+/* Several switches in one card, each on its own line. */
+.setting-row + .setting-row {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line-subtle);
 }
 .setting-row strong {
   font-weight: 500;
@@ -79,15 +100,6 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 13px;
-}
-.archived-chats .section-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-.archived-chats .section-heading h2 {
-  margin: 0;
 }
 .archived-chats li .icon-button + .icon-button {
   margin-left: -12px;

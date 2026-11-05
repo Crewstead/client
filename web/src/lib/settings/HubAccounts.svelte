@@ -1,4 +1,5 @@
 <script lang="ts">
+  import SettingsHeading from '#lib/components/SettingsHeading.svelte';
   import { Check, Copy } from '@lucide/svelte';
   import { request } from '#lib/api.ts';
   import '@crewstead/ui/settings-cards.css';
@@ -68,15 +69,10 @@
 </script>
 
 <section class="settings-section" aria-label="Hub accounts">
-  <div class="section-heading">
-    <div>
-      <h2>Hub accounts</h2>
-      <p class="muted-text">
-        Everyone who can sign in to this hub. A new account gets a one-time password; its person
-        chooses their own at the first sign-in.
-      </p>
-    </div>
-  </div>
+  <SettingsHeading title="Hub accounts">
+    Everyone who can sign in to this hub. A new account gets a one-time password; its person chooses
+    their own at the first sign-in.
+  </SettingsHeading>
   {#if issued}
     <div class="settings-card issued-password" role="status">
       <p>

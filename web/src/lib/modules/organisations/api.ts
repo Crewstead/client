@@ -10,7 +10,7 @@ const send = (method: 'POST' | 'PATCH' | 'DELETE', body?: unknown): RequestInit 
 export const organisations = {
   list: () => request<Organisation[]>('/orgs'),
   create: (name: string) => request<Organisation>('/orgs', send('POST', { name })),
-  update: (id: string, patch: { name?: string; allowPersonal?: boolean }) =>
+  update: (id: string, patch: { name?: string; allowPersonal?: boolean; shareModels?: boolean }) =>
     request<Organisation>(`/orgs/${id}`, send('PATCH', patch)),
   members: (id: string) => request<Member[]>(`/orgs/${id}/members`),
   addMember: (id: string, login: string, role: Role) =>

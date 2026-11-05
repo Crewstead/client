@@ -1,4 +1,5 @@
 <script lang="ts">
+  import SettingsHeading from '#lib/components/SettingsHeading.svelte';
   import type { ScheduledTask } from '@crewstead/core/protocol';
   import { tasks } from './api.ts';
   import TaskDialog from './TaskDialog.svelte';
@@ -19,11 +20,10 @@
 </script>
 
 <section class="settings-section" aria-label="Scheduled">
-  <h2>Scheduled tasks</h2>
-  <p class="muted-text">
+  <SettingsHeading title="Scheduled tasks">
     Prompts sent into a chat at set times, where its model answers them as if you had just written
     them. Add one from a chat’s side panel, or ask the model in a chat to schedule something.
-  </p>
+  </SettingsHeading>
   {#if error}<p class="error-banner" role="alert">{error}</p>{/if}
   {#if list?.length}
     <div class="settings-card">

@@ -31,6 +31,8 @@ export const toolKinds: Record<string, ToolKind> = {
   chat_read: 'read',
   chat_wait: 'read',
   chat_create: 'chat',
+  mcp_tools: 'read',
+  mcp_servers: 'read',
   chat_send: 'chat',
   chat_rename: 'chat',
   chat_archive: 'chat',

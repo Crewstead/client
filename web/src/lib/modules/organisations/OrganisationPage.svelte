@@ -1,4 +1,5 @@
 <script lang="ts">
+  import SettingsHeading from '#lib/components/SettingsHeading.svelte';
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { resolve } from '$app/paths';
@@ -28,12 +29,13 @@
     org = (await organisations.list()).find((candidate) => candidate.id === orgId);
     loaded = true;
   }
-  async function setPolicy(allowPersonal: boolean) {
+  async function setPolicy(patch: { allowPersonal?: boolean; shareModels?: boolean }) {
     busy = true;
     error = '';
     try {
-      org = await organisations.update(orgId, { allowPersonal });
-      if (current) await workspace.refresh();
+      org = await organisations.update(orgId, patch);
+      // Sharing changes Personal's models too, wherever this page was opened from.
+      if (current || patch.shareModels !== undefined) await workspace.refresh();
     } catch (cause) {
       error = cause instanceof Error ? cause.message : 'Could not save';
     } finally {
@@ -82,7 +84,7 @@
     </header>
     <div class="settings-panel">
       <section class="settings-section" aria-label="Organisation policy">
-        <h2>Permissions</h2>
+        <SettingsHeading title="Permissions" />
         <div class="settings-card">
           <label class="setting-row"
             ><div>
@@ -94,7 +96,25 @@
               class="switch"
               checked={org.allowPersonal}
               disabled={busy || !manager}
-              onchange={(event) => setPolicy((event.target as HTMLInputElement).checked)}
+              onchange={(event) =>
+                setPolicy({ allowPersonal: (event.target as HTMLInputElement).checked })}
+            /></label
+          >
+          <label class="setting-row"
+            ><div>
+              <strong>Share models with Personal</strong>
+              <p>
+                Members may use {org.name}’s models in their own Personal chats. {org.name} pays within
+                its limits and sees only spending, never those chats.
+              </p>
+            </div>
+            <input
+              type="checkbox"
+              class="switch"
+              checked={org.shareModels}
+              disabled={busy || !manager}
+              onchange={(event) =>
+                setPolicy({ shareModels: (event.target as HTMLInputElement).checked })}
             /></label
           >
         </div>

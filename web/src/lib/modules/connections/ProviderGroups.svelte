@@ -1,4 +1,5 @@
 <script lang="ts">
+  import SettingsHeading from '#lib/components/SettingsHeading.svelte';
   import { onMount } from 'svelte';
   import { resolve } from '$app/paths';
   import { page } from '$app/state';
@@ -57,15 +58,12 @@
 </script>
 
 <section class="settings-section" aria-label={title}>
-  <div class="section-heading">
-    <div>
-      <h2>{title}</h2>
-      <p class="muted-text">{note}</p>
-    </div>
-    {#if canManage}<button class="button subtle small" onclick={() => (connecting = true)}
-        >Connect provider</button
-      >{/if}
-  </div>
+  <SettingsHeading {title}
+    >{note}{#snippet action()}{#if canManage}<button
+          class="button subtle small"
+          onclick={() => (connecting = true)}>Connect provider</button
+        >{/if}{/snippet}</SettingsHeading
+  >
   {#if list.length || personal}
     <div class="settings-card provider-groups">
       {#each list as connection (connection.id)}

@@ -2,6 +2,7 @@
   import type { Model } from '@crewstead/core/protocol';
   import { useWorkspace } from '#lib/workspace.svelte.ts';
   import ModuleSlot from '#lib/modules/ModuleSlot.svelte';
+  import SettingsHeading from '#lib/components/SettingsHeading.svelte';
   import { activeModules, panelsFor } from '#lib/modules/registry.ts';
   import '@crewstead/ui/settings-cards.css';
   const workspace = useWorkspace();
@@ -32,7 +33,7 @@
 
 {#if org}
   <section class="settings-section" aria-label="Available organisation models">
-    <h2>Available in {org.label}</h2>
+    <SettingsHeading title={`Available in ${org.label}`} />
     <div class="settings-card">
       <ul aria-label="Available organisation models">
         {#each orgModels as model (model.id)}<li>
@@ -53,6 +54,26 @@
   <section class="settings-section" aria-label="Personal models">
     <h2>Personal models</h2>
     <p class="muted-text">Personal models are turned off on this server.</p>
+  </section>
+{/if}
+
+{#if !org && orgModels.length}
+  <!-- Organisation models offered here because their organisation shares them; it pays for them. -->
+  <section class="settings-section" aria-label="Shared by your organisations">
+    <h2>Shared by your organisations</h2>
+    <p class="muted-text">
+      Your organisations let you use these in Personal chats. They pay within their limits and see
+      only spending, never your chats.
+    </p>
+    <div class="settings-card">
+      <ul aria-label="Shared organisation models">
+        {#each orgModels as model (model.id)}<li>
+            <span class="row-name">{name(model)}</span><span class="row-meta"
+              >{model.group ?? model.connection ?? model.provider}</span
+            >
+          </li>{/each}
+      </ul>
+    </div>
   </section>
 {/if}
 

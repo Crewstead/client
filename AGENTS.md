@@ -21,6 +21,8 @@ This file does not appoint an agent lead or authorize additional agents.
 - No application-level conversation encryption, custom vault, or recovery-key implementation now.
   Keep HTTPS and OS credential protection. The hub is trusted with readable transcripts.
 - Keep Personal and Organisation contexts distinct. Org admins govern org models, not users' personal credentials.
+  Owner update (2026-11-05): an org admin may share the org's models with members' Personal chats (an
+  org setting, off by default). The org pays within its limits and sees only spending, never those chats.
 - Keep authored files focused: target 100–250 lines; hard maximum 400 physical lines and 2,000 words.
   Split by responsibility before the maximum. Do not hide complexity in enormous lines or barrel files.
   Generated artifacts and dependency lockfiles are checked separately and must be labeled generated.

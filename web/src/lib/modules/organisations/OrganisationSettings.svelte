@@ -1,4 +1,5 @@
 <script lang="ts">
+  import SettingsHeading from '#lib/components/SettingsHeading.svelte';
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { resolve } from '$app/paths';
@@ -45,12 +46,9 @@
 </script>
 
 <section class="settings-section" aria-label="Organisations">
-  <div class="section-heading">
-    <div>
-      <h2>Your organisations</h2>
-      <p class="muted-text">Shared workspaces with their own members and models.</p>
-    </div>
-  </div>
+  <SettingsHeading title="Your organisations"
+    >Shared workspaces with their own members and models.</SettingsHeading
+  >
   <div class="settings-card">
     <ul aria-label="Your organisations">
       {#each list as org (org.id)}

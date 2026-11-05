@@ -1,4 +1,5 @@
 <script lang="ts">
+  import SettingsHeading from '#lib/components/SettingsHeading.svelte';
   import { onMount } from 'svelte';
   import { Plus } from '@lucide/svelte';
   import type { MachineView } from '@crewstead/core/protocol';
@@ -49,18 +50,15 @@
 </script>
 
 <section class="settings-section" aria-label="Projects">
-  <div class="projects-heading">
-    <h2>Projects</h2>
-    {#if desktop?.addProject}<button
-        class="button subtle small"
-        disabled={adding}
-        onclick={addProject}><Plus size={14} /> Add project</button
-      >{/if}
-  </div>
-  <p class="muted-text">
+  <SettingsHeading title="Projects">
     Where chats can work on your computers: a project folder (files, and commands in a sandbox), or
     the whole computer as you, when you turn that on there. Pick one in the prompt box.
-  </p>
+    {#snippet action()}{#if desktop?.addProject}<button
+          class="button subtle small"
+          disabled={adding}
+          onclick={addProject}><Plus size={14} /> Add project</button
+        >{/if}{/snippet}
+  </SettingsHeading>
   {#each list as machine (machine.id)}
     <div class="provider-group" role="group" aria-label={`Projects on ${machine.name}`}>
       <div class="provider-head">

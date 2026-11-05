@@ -1,14 +1,4 @@
 /* MCP servers: the settings tab's server rows, their tools, and the add/edit dialog. */
-.mcp-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-.settings-section .mcp-heading h2 {
-  margin: 0;
-}
 .mcp-tool-reads {
   color: var(--text);
   font-weight: 500;

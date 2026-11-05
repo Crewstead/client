@@ -1,4 +1,5 @@
 <script lang="ts">
+  import SettingsHeading from '#lib/components/SettingsHeading.svelte';
   import { Plus } from '@lucide/svelte';
   import type { McpServer } from '@crewstead/core/protocol';
   import { mcpServers } from './api.ts';
@@ -41,19 +42,16 @@
 </script>
 
 <section class="settings-section" aria-label="MCP servers">
-  <div class="mcp-heading">
-    <h2>MCP servers</h2>
-    <button class="button subtle small" onclick={() => (editing = {})}
-      ><Plus size={14} /> Add server</button
-    >
-  </div>
-  <p class="muted-text">
+  <SettingsHeading title="MCP servers">
     Other services’ tools for your Personal chats, through the Model Context Protocol. Models see
     each server’s tool names and read a server’s full list only when they need it. Every call asks
     first unless you allow that tool; a tool you switch off is never offered. Servers that sign you
     in through their own page (Notion, Linear and others) need no headers: add the address, then
     Sign in.
-  </p>
+    {#snippet action()}<button class="button subtle small" onclick={() => (editing = {})}
+        ><Plus size={14} /> Add server</button
+      >{/snippet}
+  </SettingsHeading>
   {#if error}<p class="error-banner" role="alert">{error}</p>{/if}
   {#if list?.length}
     <ul class="skill-list" aria-label="Your MCP servers">

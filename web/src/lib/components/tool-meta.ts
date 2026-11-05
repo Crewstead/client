@@ -29,6 +29,10 @@ import {
   Radar,
   ListChecks,
   CalendarClock,
+  Plug,
+  PlugZap,
+  Unplug,
+  Settings2,
 } from '@lucide/svelte';
 import { kindOf, type ToolKind } from './tool-kinds.ts';
 
@@ -58,6 +62,12 @@ const shown: Record<string, { title: string; icon: typeof Wrench }> = {
   chats_list: { title: 'List chats', icon: MessagesSquare },
   chat_read: { title: 'Read chat', icon: MessageSquareText },
   chat_create: { title: 'Start a chat', icon: MessageSquarePlus },
+  mcp_tools: { title: 'MCP tools', icon: Plug },
+  mcp_call: { title: 'MCP tool', icon: PlugZap },
+  mcp_servers: { title: 'MCP servers', icon: Plug },
+  mcp_server_add: { title: 'Add MCP server', icon: Plug },
+  mcp_server_change: { title: 'Change MCP server', icon: Settings2 },
+  mcp_server_remove: { title: 'Remove MCP server', icon: Unplug },
   chat_send: { title: 'Prompt another chat', icon: Send },
   chat_wait: { title: 'Wait for chat', icon: Hourglass },
   chat_rename: { title: 'Rename chat', icon: PencilLine },

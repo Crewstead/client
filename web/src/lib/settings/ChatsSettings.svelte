@@ -1,4 +1,5 @@
 <script lang="ts">
+  import SettingsHeading from '#lib/components/SettingsHeading.svelte';
   import type { ApprovalMode } from '@crewstead/core/protocol';
   import { useWorkspace } from '#lib/workspace.svelte.ts';
   import { approvalModes } from '#lib/approval-modes.ts';
@@ -28,7 +29,7 @@
 
 <!-- What chats can do, one row each; optional modules add their rows (search, server browser, sandbox). -->
 <section class="settings-section" aria-label="Chat tools">
-  <h2>Tools in chats</h2>
+  <SettingsHeading title="Tools in chats" />
   <div class="settings-card setting-lines">
     <ul>
       <li aria-label="Tool approvals">

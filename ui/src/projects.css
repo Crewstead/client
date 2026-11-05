@@ -1,14 +1,4 @@
 /* Settings → Projects: project rows with their rules. */
-.projects-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-.settings-section .projects-heading h2 {
-  margin: 0;
-}
 .provider-group > ul > li.project-row {
   padding-left: var(--space-4);
 }
