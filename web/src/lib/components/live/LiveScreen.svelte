@@ -11,6 +11,8 @@
     onpage,
     onclosed,
     control = false,
+    fill = false,
+    onembedded,
     send,
   }: {
     base: string;
@@ -19,6 +21,10 @@
     tab?: string | undefined;
     /** The watcher took control: their clicks, scrolling and keys go to the page. */
     control?: boolean;
+    /** The app's own tab fills the space given, its page laid out at that size (full view). */
+    fill?: boolean;
+    /** Hears whether the app shows its own tab here, which takes clicks and keys directly. */
+    onembedded?: (on: boolean) => void;
     send: (input: LiveInput) => void;
     /** The session's address and title as they change. */
     onpage: (page: Extract<LiveEvent, { type: 'page' }>) => void;
@@ -69,6 +75,9 @@
     return embedTab(screen, sessionKey, tab, (on) => (embedded = embedded ?? on));
   });
   $effect(() => {
+    if (embedded !== undefined) onembedded?.(embedded);
+  });
+  $effect(() => {
     if (embedded !== false) return;
     const source = new EventSource(
       withAccount(
@@ -107,7 +116,12 @@
   class="live-screen"
   class:controlled={control}
   class:embedded
-  style:aspect-ratio={frame ? `${frame.width} / ${frame.height}` : '16 / 10'}
+  class:fill={fill && embedded}
+  style:aspect-ratio={fill && embedded
+    ? undefined
+    : frame
+      ? `${frame.width} / ${frame.height}`
+      : '16 / 10'}
   style:--page-ratio={frame ? frame.width / frame.height : 1.6}
   role="region"
   aria-label="Live view of the browser"

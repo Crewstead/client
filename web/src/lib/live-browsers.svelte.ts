@@ -52,11 +52,19 @@ export class LiveBrowsers {
   sessions = $state<Watchable[]>([]);
   loaded = $state(false);
 
+  /** The list being fetched: a refresh while one is on its way waits for it instead. */
+  private fetching?: Promise<void>;
+
   /**
    * Reads every source again. A source that does not answer keeps its sessions for now, and the list
    * changes only when something in it did, so the tab being watched is left alone.
    */
-  async refresh(bases: string[]) {
+  refresh(bases: string[]) {
+    this.fetching ??= this.fetch(bases).finally(() => (this.fetching = undefined));
+    return this.fetching;
+  }
+
+  private async fetch(bases: string[]) {
     const found = await Promise.all(
       bases.map((base) =>
         request<LiveSession[]>(base)

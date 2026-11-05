@@ -59,6 +59,8 @@
   };
   let error = $state('');
   let controlling = $state(false);
+  /** The desktop app shows its real tab, which takes clicks and keys itself: no control to take. */
+  let direct = $state(false);
   $effect(() => {
     // Control is per session: switching tabs hands it back.
     void selectedId;
@@ -125,15 +127,15 @@
             >{state?.url ?? selected.url}</span
           >
 
-          <button
-            class="button small"
-            class:primary={controlling}
-            class:subtle={!controlling}
-            aria-pressed={controlling}
-            title="Click, scroll and type in the page yourself"
-            onclick={() => (controlling = !controlling)}
-            ><MousePointer2 size={13} />{controlling ? 'Stop control' : 'Take control'}</button
-          >
+          {#if !direct}<button
+              class="button small"
+              class:primary={controlling}
+              class:subtle={!controlling}
+              aria-pressed={controlling}
+              title="Click, scroll and type in the page yourself"
+              onclick={() => (controlling = !controlling)}
+              ><MousePointer2 size={13} />{controlling ? 'Stop control' : 'Take control'}</button
+            >{/if}
           <button
             class="button subtle small"
             onclick={() => goto(resolve('/sessions/[id]', { id: selected.chatId }))}
@@ -149,6 +151,8 @@
             onpage={(event) => (pages[selectedId] = event)}
             onclosed={() => void live.refresh(bases)}
             control={controlling}
+            fill
+            onembedded={(on) => (direct = on)}
             send={(input) => selected && send(selected, input)}
           />
           {#if controlling}<p class="live-note">

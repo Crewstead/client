@@ -162,6 +162,17 @@
   border-radius: 0;
   box-shadow: none;
 }
+.live-window:has(.live-screen.fill) {
+  flex: 1;
+  min-height: 0;
+}
+/* The desktop app's own tab lies over this spot: it takes all the room, at any width and height. */
+.live-window .live-screen.fill {
+  flex: 1;
+  width: 100%;
+  min-height: 240px;
+  background: transparent;
+}
 .live-window .live-note {
   margin: 0;
   padding: 6px;

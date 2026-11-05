@@ -17,6 +17,8 @@ const PAGES: Record<string, string> = {
     <form action="/search"><input name="q" aria-label="Search"></form>
     <script>console.error('cart failed to load'); fetch('/missing');</script>`,
   '/search': `<title>Results</title><p>Results</p>`,
+  // Its script never yields, so nothing can be read from the page.
+  '/busy': `<title>Busy</title><script>setTimeout(() => { for (;;); }, 50)</script>`,
   '/outside': `<title>Outside</title><img src="http://example.invalid/pixel.png" alt="pixel">`,
 };
 
@@ -169,6 +171,20 @@ it('refuses the browser when the project turned it off, whatever the hub sends',
     output: 'The browser is turned off for this project.',
   });
 });
+
+it.skipIf(!browserInstalled())(
+  'lists its sessions at once, even with a page that hangs',
+  async () => {
+    const tool = project();
+    await tool('browser_open', { url: `${base}/busy` });
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    const started = Date.now();
+    const busy = (await pool.sessions()).find((session) => session.url === `${base}/busy`);
+    expect(busy).toMatchObject({ title: '' });
+    expect(Date.now() - started).toBeLessThan(5_000);
+    await tool('browser_close');
+  },
+);
 
 it.skipIf(!browserInstalled())(
   'streams a session live: its page, frames, where the model clicks, and when it closes',
