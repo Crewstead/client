@@ -22,10 +22,10 @@
   $effect(() => void refresh());
   const signIn = new McpSignIn();
   $effect(() => () => signIn.stop());
-  function startSignIn(id: string) {
+  function startSignIn(id: string, here?: boolean) {
     error = '';
     signIn
-      .start(id, () => !!list?.find((server) => server.id === id)?.signIn?.signedIn, refresh)
+      .start(id, () => !!list?.find((server) => server.id === id)?.signIn?.signedIn, refresh, here)
       .catch((cause: unknown) => {
         error = cause instanceof Error ? cause.message : 'Could not start the sign-in.';
       });
@@ -60,7 +60,7 @@
           {server}
           {act}
           edit={() => (editing = { server })}
-          signIn={() => startSignIn(server.id)}
+          signIn={(here) => startSignIn(server.id, here)}
           waiting={signIn.waiting === server.id}
           link={signIn.waiting === server.id ? signIn.link : ''}
         />

@@ -40,6 +40,8 @@ contextBridge.exposeInMainWorld('crewsteadDesktop', {
    */
   siteData: (op: 'kept' | 'remove' | 'sources' | 'sites' | 'import', args?: unknown) =>
     ipcRenderer.invoke('site-data', op, args) as Promise<unknown>,
+  /** Opens this computer's return page for an MCP sign-in (oauth-return.ts): its port, or why not. */
+  oauthReturn: () => ipcRenderer.invoke('oauth-return') as Promise<number | string>,
   /** Whether the hub answers ('online' or 'offline'; unknown before the first request), and changes. */
   hub: {
     state: () => ipcRenderer.invoke('hub-state') as Promise<string | undefined>,

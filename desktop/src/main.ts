@@ -20,6 +20,7 @@ import { createTray } from './tray.ts';
 import { createWindow, stayOn } from './window.ts';
 import { BrowserTabs } from './browser-tabs.ts';
 import { SiteData } from './site-data/index.ts';
+import { openReturn, PORT } from './oauth-return.ts';
 
 // One app per person: a second start shows the first one's window.
 if (!app.requestSingleInstanceLock()) app.quit();
@@ -152,6 +153,16 @@ const fromHub = (event: Electron.IpcMainInvokeEvent) => {
   const from = event.senderFrame?.url;
   return !!address && !!from && from.startsWith('http') && new URL(from).origin === address;
 };
+// An MCP sign-in through this computer: the return page the service sends the owner's browser to.
+ipcMain.handle('oauth-return', async (event) => {
+  const address = hub();
+  if (!fromHub(event) || !address) return 'Not allowed.';
+  try {
+    return await openReturn(address);
+  } catch {
+    return `Port ${PORT} on this computer is taken by another program.`;
+  }
+});
 ipcMain.handle('hub-state', (event) => (fromHub(event) ? reach?.state() : undefined));
 ipcMain.handle('update-state', (event) => (fromHub(event) ? updateState() : undefined));
 ipcMain.handle('update-check', (event) => (fromHub(event) ? check() : undefined));
