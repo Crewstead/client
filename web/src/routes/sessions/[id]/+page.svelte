@@ -60,12 +60,22 @@
   const chosen = $derived(picked || conversation.session?.modelId || '');
   const model = $derived(models.find((entry) => entry.id === chosen));
   /**
-   * A model picked here answers from the next message on: the chat switches (with its "Switched to"
-   * divider) when that message is sent, not on picking, so nothing appears in the chat before then.
+   * A model picked here becomes the chat's model at once, so its scheduled tasks use it too; the hub
+   * adds the "Switched to" divider with the next message, not on picking. A pick during a reply is
+   * saved once the reply ends, or goes with the next message.
    */
   function pickModel(id: string) {
     picked = id;
   }
+  let saved = '';
+  $effect(() => {
+    const session = conversation.session;
+    const pick = `${session?.id} ${picked}`;
+    if (!picked || !session || picked === session.modelId || pick === saved) return;
+    if (session.status === 'running' || session.status === 'awaiting_approval') return;
+    saved = pick;
+    void workspace.setPreferences(session.id, { modelId: picked }).catch(() => {});
+  });
   // The project for the next message, likewise: '' is none, undefined keeps the chat's own.
   let pickedProject = $state<string>();
   const project = $derived(pickedProject ?? conversation.session?.projectId ?? '');
