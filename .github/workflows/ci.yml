@@ -6,22 +6,46 @@ on:
   pull_request:
 
 jobs:
+  # A release pushes main and its version tag together, and the tag's run checks that commit: the
+  # run for main stops here, so the same commit is not tested twice.
+  tagged:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    outputs:
+      tagged: ${{ steps.tag.outputs.tagged }}
+    steps:
+      - id: tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tags=$(gh api --paginate "repos/$GITHUB_REPOSITORY/tags" \
+            --jq '.[] | select(.commit.sha == env.GITHUB_SHA) | .name' | grep '^v' || true)
+          echo "tagged=$([ -n "$tags" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
   check:
+    needs: tagged
+    if: ${{ !cancelled() && needs.tagged.outputs.tagged != 'true' }}
     runs-on: ubuntu-24.04
     permissions:
       contents: write
+    outputs:
+      systems: ${{ steps.mac.outputs.systems }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          # The tags, to compare a release with the one before it.
+          fetch-depth: 0
       # Read-only deploy key of the private Crewstead/core, which pnpm fetches over SSH.
       - uses: webfactory/ssh-agent@v0.9.1
         with:
           ssh-private-key: ${{ secrets.CORE_DEPLOY_KEY }}
       # The computer service searches with ripgrep and sandboxes commands with bubblewrap; Ubuntu
       # blocks the user namespaces bubblewrap needs unless allowed.
-      - name: Tools the computer service uses
-        run: |
-          sudo apt-get update -q && sudo apt-get install -yq ripgrep bubblewrap
-          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+      - uses: ./.github/actions/apt
+        with:
+          packages: ripgrep bubblewrap
+      - name: Let bubblewrap make user namespaces
+        run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
       - uses: actions/setup-node@v4
         with:
           node-version: 24.16.0
@@ -42,10 +66,31 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release create "${{ github.ref_name }}" crewstead-web-*.tar.gz --draft --generate-notes --verify-tag
+      # macOS minutes cost ten times Linux ones, so the Mac app is built only when the app itself
+      # changed since the release before (desktop/, daemon/, dependencies). Otherwise that release's Mac
+      # installers and latest-mac.yml join this one, and Macs keep that version.
+      - name: Mac app, built or carried over
+        id: mac
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          systems='["ubuntu-24.04","windows-2025","macos-15"]'
+          previous=$(git describe --tags --abbrev=0 --match 'v*' HEAD^ 2>/dev/null || true)
+          if [ -n "$previous" ] \
+            && git diff --quiet "$previous" HEAD -- desktop daemon package.json pnpm-lock.yaml pnpm-workspace.yaml \
+            && gh release download "$previous" --dir mac --pattern 'latest-mac.yml' --pattern '*-mac-*'; then
+            gh release upload "$GITHUB_REF_NAME" mac/* --clobber
+            echo "Carried over the Mac app of $previous."
+            systems='["ubuntu-24.04","windows-2025"]'
+          fi
+          echo "systems=$systems" >> "$GITHUB_OUTPUT"
 
   # The computer service's Windows-specific parts (the Claude Code tool bridge's named pipe, which
   # folders may be projects), on a real Windows machine.
   windows:
+    needs: tagged
+    if: ${{ !cancelled() && needs.tagged.outputs.tagged != 'true' }}
     runs-on: windows-2025
     steps:
       - uses: actions/checkout@v4
@@ -62,11 +107,13 @@ jobs:
   # A version tag also builds the desktop app on each system and adds its installers to the release.
   desktop:
     needs: [check, windows]
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: >-
+      ${{ !cancelled() && startsWith(github.ref, 'refs/tags/v') && needs.check.result == 'success'
+      && needs.windows.result == 'success' }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04, windows-2025, macos-15]
+        os: ${{ fromJSON(needs.check.outputs.systems) }}
     runs-on: ${{ matrix.os }}
     permissions:
       contents: write
@@ -99,7 +146,7 @@ jobs:
   # apps keep the release before it.
   publish:
     needs: desktop
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: ${{ !cancelled() && startsWith(github.ref, 'refs/tags/v') && needs.desktop.result == 'success' }}
     runs-on: ubuntu-24.04
     permissions:
       contents: write

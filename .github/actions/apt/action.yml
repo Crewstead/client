@@ -1,0 +1,33 @@
+name: Install Ubuntu packages, kept between runs
+description: >-
+  Ubuntu's package mirror is often very slow from GitHub's machines (minutes for one package), so the
+  packages downloaded once are kept per runner image and installed from there on later runs.
+inputs:
+  packages:
+    description: The packages, separated by spaces.
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: actions/cache@v4
+      with:
+        path: ~/apt-debs
+        key: apt-${{ env.ImageOS }}-${{ env.ImageVersion }}-${{ inputs.packages }}
+    - shell: bash
+      env:
+        PACKAGES: ${{ inputs.packages }}
+      run: |
+        if dpkg -s $PACKAGES >/dev/null 2>&1; then
+          echo "Already installed."
+          exit 0
+        fi
+        if compgen -G ~/apt-debs/'*.deb' >/dev/null && sudo dpkg -i ~/apt-debs/*.deb >/dev/null; then
+          echo "Installed from the kept packages."
+          exit 0
+        fi
+        # Not kept yet (or the image changed): download them once, keep them, then install.
+        mkdir -p ~/apt-debs
+        sudo apt-get update -q
+        sudo apt-get install -yq --download-only $PACKAGES
+        cp /var/cache/apt/archives/*.deb ~/apt-debs/ 2>/dev/null || true
+        sudo apt-get install -yq $PACKAGES
