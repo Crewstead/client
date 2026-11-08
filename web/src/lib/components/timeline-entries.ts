@@ -1,4 +1,10 @@
-import { PLAN_TOOL, planSteps, type PlanStep, type TimelineItem } from '@crewstead/core/protocol';
+import {
+  PLAN_TOOL,
+  isReportCall,
+  planSteps,
+  type PlanStep,
+  type TimelineItem,
+} from '@crewstead/core/protocol';
 import { kindOf } from './tool-kinds.ts';
 
 export interface ChangedFile {
@@ -104,7 +110,8 @@ export function timelineEntries(items: TimelineItem[], running: boolean): Timeli
     // A notice (another model or place) closes the turn before it, so its divider comes after it.
     if (item.role === 'user' || item.role === 'notice') endTurn();
     turn.push(item);
-    if (isEmpty(item)) continue;
+    // A scheduled run's report call only marks the run as posted in the chat.
+    if (isEmpty(item) || isReportCall(item)) continue;
     // Plan updates show only as the turn's step list; one the model got wrong shows as a call.
     if (item.toolName === PLAN_TOOL && item.status !== 'failed' && item.status !== 'rejected') {
       const steps = item.status === 'completed' ? planSteps(item.arguments) : undefined;

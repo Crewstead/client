@@ -9,10 +9,14 @@ inputs:
 runs:
   using: composite
   steps:
+    # The runner image's name and version are shell variables, not in the `env` context here.
+    - id: image
+      shell: bash
+      run: echo "image=$ImageOS-$ImageVersion" >> "$GITHUB_OUTPUT"
     - uses: actions/cache@v4
       with:
         path: ~/apt-debs
-        key: apt-${{ env.ImageOS }}-${{ env.ImageVersion }}-${{ inputs.packages }}
+        key: apt-${{ steps.image.outputs.image }}-${{ inputs.packages }}
     - shell: bash
       env:
         PACKAGES: ${{ inputs.packages }}

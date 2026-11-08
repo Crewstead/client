@@ -160,3 +160,38 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* A task's runs: one folded line each (when, and how it went), opened to its tool calls and reply. */
+.task-runs-dialog {
+  width: min(680px, calc(100vw - 32px));
+}
+.task-runs {
+  display: grid;
+  gap: 6px;
+  max-height: 60vh;
+  margin: 0 0 12px;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+.task-run {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.task-run > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  font-size: var(--text-sm);
+}
+.task-run .pill[data-outcome='quiet'] {
+  color: var(--faint);
+}
+.task-run-items {
+  display: grid;
+  gap: 8px;
+  padding: 0 10px 10px;
+  min-width: 0;
+}

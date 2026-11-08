@@ -1,8 +1,18 @@
 <script lang="ts">
-  import { CalendarClock, MessageSquare, Pause, Pencil, Play, Send, Trash2 } from '@lucide/svelte';
+  import {
+    CalendarClock,
+    History,
+    MessageSquare,
+    Pause,
+    Pencil,
+    Play,
+    Send,
+    Trash2,
+  } from '@lucide/svelte';
   import { resolve } from '$app/paths';
   import { describeSchedule, type ScheduledTask } from '@crewstead/core/protocol';
   import { shortTime, tasks } from './api.ts';
+  import TaskRuns from './TaskRuns.svelte';
   import '@crewstead/ui/scheduled-tasks.css';
   let {
     list,
@@ -19,6 +29,7 @@
   } = $props();
   let confirming = $state('');
   let running = $state('');
+  let history = $state<ScheduledTask>();
   async function act(action: () => Promise<unknown>) {
     let error: string | undefined;
     try {
@@ -86,6 +97,12 @@
       >
       <button
         class="icon-button"
+        aria-label={`Runs of ${task.title}`}
+        title="Runs"
+        onclick={() => (history = task)}><History size={13} /></button
+      >
+      <button
+        class="icon-button"
         aria-label={`Edit ${task.title}`}
         title="Edit"
         onclick={() => edit(task)}><Pencil size={13} /></button
@@ -104,3 +121,4 @@
     </li>
   {/each}
 </ul>
+{#if history}<TaskRuns task={history} close={() => (history = undefined)} />{/if}

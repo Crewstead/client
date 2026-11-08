@@ -1,4 +1,4 @@
-import type { ScheduledTask, TaskSchedule } from '@crewstead/core/protocol';
+import type { ScheduledRun, ScheduledTask, TaskSchedule } from '@crewstead/core/protocol';
 import { request } from '#lib/api.ts';
 
 export interface TaskFields {
@@ -26,6 +26,8 @@ export const tasks = {
     request<ScheduledTask>(`/scheduled-tasks/${id}`, json('PATCH', patch)),
   run: (id: string) => request<ScheduledTask>(`/scheduled-tasks/${id}/run`, json('POST')),
   remove: (id: string) => request(`/scheduled-tasks/${id}`, json('DELETE')),
+  /** A task's runs, newest first, including those with nothing new that left the chat. */
+  runs: (id: string) => request<ScheduledRun[]>(`/scheduled-tasks/${id}/runs`),
   /** Tells the hub this browser's time zone, for tasks the chats' models schedule. */
   saveZone: () =>
     request('/scheduled-tasks/time-zone', json('PUT', { timeZone: browserZone() })).catch(

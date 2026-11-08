@@ -1,6 +1,6 @@
 import { goto } from '$app/navigation';
 import { resolve } from '$app/paths';
-import { isQuietReply, type ContextId, type Session } from '@crewstead/core/protocol';
+import { quietRunStart, type ContextId, type Session } from '@crewstead/core/protocol';
 import { getSession } from './api.ts';
 
 const KEY = 'crewstead:notifications';
@@ -22,8 +22,11 @@ const working = (status: Session['status']) =>
  */
 export async function newReply(chatId: string, context: ContextId, since: number) {
   const session = await getSession(chatId, context).catch(() => undefined);
-  const reply = session?.session.items.findLast((item) => item.role === 'assistant');
-  if (!reply || isQuietReply(reply.text) || Date.parse(reply.createdAt) <= since) return undefined;
+  const items = session?.session.items ?? [];
+  // A quiet scheduled run, read before the hub took it out.
+  if (quietRunStart(items) !== undefined) return undefined;
+  const reply = items.findLast((item) => item.role === 'assistant');
+  if (!reply || Date.parse(reply.createdAt) <= since) return undefined;
   return reply.text;
 }
 
