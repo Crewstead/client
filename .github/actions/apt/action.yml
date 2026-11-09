@@ -11,9 +11,11 @@ runs:
   steps:
     # The runner image's name and version are shell variables, not in the `env` context here.
     - id: image
+      if: runner.environment == 'github-hosted'
       shell: bash
       run: echo "image=$ImageOS-$ImageVersion" >> "$GITHUB_OUTPUT"
     - uses: actions/cache@v4
+      if: runner.environment == 'github-hosted'
       with:
         path: ~/apt-debs
         key: apt-${{ steps.image.outputs.image }}-${{ inputs.packages }}
@@ -24,6 +26,10 @@ runs:
         if dpkg -s $PACKAGES >/dev/null 2>&1; then
           echo "Already installed."
           exit 0
+        fi
+        if [ "$RUNNER_ENVIRONMENT" = self-hosted ]; then
+          echo "::error::Install $PACKAGES on this runner (server scripts/deploy/runner-setup.sh)."
+          exit 1
         fi
         if compgen -G ~/apt-debs/'*.deb' >/dev/null && sudo dpkg -i ~/apt-debs/*.deb >/dev/null; then
           echo "Installed from the kept packages."
