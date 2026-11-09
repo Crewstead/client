@@ -1,5 +1,6 @@
 <script lang="ts">
   import SettingsHeading from '#lib/components/SettingsHeading.svelte';
+  import LoadingRows from '#lib/components/LoadingRows.svelte';
   import { Check, Copy } from '@lucide/svelte';
   import { request } from '#lib/api.ts';
   import '@crewstead/ui/settings-cards.css';
@@ -68,11 +69,12 @@
   }
 </script>
 
-<section class="settings-section" aria-label="Hub accounts">
-  <SettingsHeading title="Hub accounts">
-    Everyone who can sign in to this hub. A new account gets a one-time password; its person chooses
+<section class="settings-section" aria-label="People on this hub">
+  <SettingsHeading page title="People on this hub">
+    Everyone who can sign in here. A new account gets a one-time password, and its person chooses
     their own at the first sign-in.
   </SettingsHeading>
+  {#if error}<p class="error-banner" role="alert">{error}</p>{/if}
   {#if issued}
     <div class="settings-card issued-password" role="status">
       <p>
@@ -89,6 +91,8 @@
     </div>
   {/if}
   <div class="settings-card">
+    <!-- The owner is always listed, so an empty list means it is still loading. -->
+    {#if !accounts.length}<LoadingRows label="Loading accounts" />{/if}
     <ul aria-label="Accounts">
       {#each accounts as account (account.id)}
         <li>
@@ -139,5 +143,4 @@
       >
     </form>
   </div>
-  {#if error}<p class="error-banner" role="alert">{error}</p>{/if}
 </section>

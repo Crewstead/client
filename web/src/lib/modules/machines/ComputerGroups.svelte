@@ -5,7 +5,7 @@
   import type { SlotProps } from '../types.ts';
   import { Plus } from '@lucide/svelte';
   import type { ClaudeAccount } from '@crewstead/core/protocol';
-  import { machines } from './api.ts';
+  import { machines, machineState } from './api.ts';
   import ClaudeAccountDialog from './ClaudeAccountDialog.svelte';
   import ClaudeAccountRow from './ClaudeAccountRow.svelte';
   import '@crewstead/ui/dialogs.css';
@@ -49,7 +49,7 @@
   }
   const status = (machine: MachineView) =>
     !machine.online
-      ? 'Offline'
+      ? machineState(machine)
       : machine.claudeCode
         ? `Online · version ${machine.claudeCode.version.split(' ')[0]}`
         : 'Online · Claude Code not installed';

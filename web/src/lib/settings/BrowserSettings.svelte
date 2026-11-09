@@ -1,5 +1,6 @@
 <script lang="ts">
   import SettingsHeading from '#lib/components/SettingsHeading.svelte';
+  import LoadingRows from '#lib/components/LoadingRows.svelte';
   import { siteData, type SiteCount } from '#lib/desktop/site-data.ts';
   import '@crewstead/ui/settings-cards.css';
   import '@crewstead/ui/projects.css';
@@ -75,13 +76,16 @@
 </script>
 
 <!-- The desktop app's own browser: the sites it keeps data for, and importing sign-ins into it. -->
-<section class="settings-section" aria-label="Sites in Crewstead's browser">
-  <SettingsHeading title="Crewstead's browser">
-    Chats on this computer browse in it, in the panel beside the chat. It keeps its own sign-ins,
-    apart from your other browsers.
-  </SettingsHeading>
-  {#if error}<p class="row-error" role="alert">{error}</p>{/if}
+<SettingsHeading page title="App browser">
+  The browser chats on this computer use, in the panel beside the chat. It keeps its own sign-ins,
+  apart from your other browsers.
+</SettingsHeading>
+{#if error}<p class="error-banner" role="alert">{error}</p>{/if}
+
+<section class="settings-section" aria-label="Sites in the app browser">
+  <SettingsHeading title="Sites it keeps data for" />
   <div class="settings-card setting-lines">
+    {#if !kept}<LoadingRows label="Loading sites" />{/if}
     <ul>
       {#each kept ?? [] as entry (entry.site)}
         <li aria-label={entry.site}>
@@ -92,11 +96,9 @@
           <button class="button subtle small" onclick={() => remove(entry.site)}>Remove</button>
         </li>
       {:else}
-        <li>
-          <span class="row-status"
-            >{kept ? 'No sites yet. Sign in there, or import sign-ins below.' : 'Loading…'}</span
-          >
-        </li>
+        {#if kept}<li class="provider-empty">
+            No sites yet. Sign in to one there, or import sign-ins below.
+          </li>{/if}
       {/each}
     </ul>
   </div>
@@ -104,8 +106,8 @@
 
 <section class="settings-section" aria-label="Import sign-ins">
   <SettingsHeading title="Import from another browser">
-    Copy chosen sites' cookies, sign-ins included, from a browser on this computer. They stay on
-    this computer; Crewstead asks before each import.
+    Copy chosen sites’ cookies, sign-ins included, from a browser on this computer. They stay on
+    this computer, and Crewstead asks before each import.
   </SettingsHeading>
   <div class="settings-card site-import">
     {#if sources.length}

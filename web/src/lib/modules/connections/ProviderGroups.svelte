@@ -1,5 +1,7 @@
 <script lang="ts">
   import SettingsHeading from '#lib/components/SettingsHeading.svelte';
+  import EmptyState from '#lib/components/EmptyState.svelte';
+  import LoadingRows from '#lib/components/LoadingRows.svelte';
   import { onMount } from 'svelte';
   import { resolve } from '$app/paths';
   import { page } from '$app/state';
@@ -64,7 +66,11 @@
           onclick={() => (connecting = true)}>Connect provider</button
         >{/if}{/snippet}</SettingsHeading
   >
-  {#if list.length || personal}
+  {#if error}<p class="error-banner" role="alert">{error}</p>{/if}
+  {#if !loaded}
+    <div class="settings-card"><LoadingRows label={`Loading ${title}`} /></div>
+  {/if}
+  {#if loaded && (list.length || personal)}
     <div class="settings-card provider-groups">
       {#each list as connection (connection.id)}
         <div class="provider-group" role="group" aria-label={connection.label}>
@@ -123,13 +129,10 @@
     </div>
   {/if}
   {#if loaded}
-    <p class="muted-text empty-note">
-      No providers connected yet.{canManage
-        ? ' Connect one, such as OpenAI or Anthropic, to choose its models.'
-        : ''}
-    </p>
+    <EmptyState
+      text={`No providers connected yet.${canManage ? ' Connect one, such as OpenAI or Anthropic, or Claude Code on your computer, to use its models.' : ''}`}
+    />
   {/if}
-  {#if error}<p class="error-banner" role="alert">{error}</p>{/if}
 </section>
 
 {#if connecting}

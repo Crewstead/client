@@ -38,6 +38,10 @@ interface ActiveRun {
 
 const FLUSH_MS = 100;
 const RETRY_MAX_MS = 30_000;
+/** How long an attempt may take to reach the hub before it starts over. */
+const CONNECT_MS = 60_000;
+/** How long closing the browser's sessions may hold up reconnecting. */
+const CLOSE_MS = 10_000;
 export const DAEMON_VERSION = '0.1.0';
 
 export interface LinkOptions {
@@ -48,6 +52,8 @@ export interface LinkOptions {
   signal: AbortSignal;
   /** Where project tools run, and whether commands can run in a sandbox here. */
   tools: ToolHost & { sandbox: boolean };
+  /** The deadline to connect, shorter in tests. */
+  connectMs?: number;
 }
 
 /** Thrown when the hub no longer accepts this computer's token; reconnecting cannot help. */
@@ -61,12 +67,36 @@ export class Disconnected extends Error {}
 export async function keepLinked(options: LinkOptions) {
   let delay = 1_000;
   while (!options.signal.aborted) {
+    // Each attempt has its own signal and a deadline to connect: whatever it waits on (the hub, Claude
+    // Code, the app's browser) cannot keep this computer offline for good.
+    const attempt = new AbortController();
+    const stop = () => attempt.abort();
+    options.signal.addEventListener('abort', stop, { once: true });
+    const late = setTimeout(
+      () => attempt.abort(new Error('connecting took too long')),
+      options.connectMs ?? CONNECT_MS,
+    );
+    const given = new Promise<never>((_, reject) =>
+      attempt.signal.addEventListener('abort', () => reject(attempt.signal.reason as Error), {
+        once: true,
+      }),
+    );
     try {
-      await linkOnce(options, () => (delay = 1_000));
+      await Promise.race([
+        linkOnce({ ...options, signal: attempt.signal }, () => {
+          clearTimeout(late);
+          delay = 1_000;
+        }),
+        given,
+      ]);
     } catch (error) {
       if (error instanceof Disconnected) throw error;
       if (options.signal.aborted) return;
       options.log(`Lost the hub connection (${error instanceof Error ? error.message : error}).`);
+    } finally {
+      clearTimeout(late);
+      options.signal.removeEventListener('abort', stop);
+      attempt.abort();
     }
     await new Promise((resolve) => setTimeout(resolve, delay));
     delay = Math.min(delay * 2, RETRY_MAX_MS);
@@ -245,7 +275,8 @@ async function linkOnce(options: LinkOptions, connected: () => void) {
     watches.stop();
     terminals.stop();
     unwatch();
-    await options.tools.browser?.closeAll();
+    const closed = options.tools.browser?.closeAll().catch(() => {});
+    await Promise.race([closed, new Promise((done) => setTimeout(done, CLOSE_MS).unref())]);
   }
   throw new Error('the hub closed the connection');
 }

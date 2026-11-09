@@ -1,5 +1,6 @@
 <script lang="ts">
   import SettingsHeading from '#lib/components/SettingsHeading.svelte';
+  import LoadingRows from '#lib/components/LoadingRows.svelte';
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { resolve } from '$app/paths';
@@ -46,10 +47,12 @@
 </script>
 
 <section class="settings-section" aria-label="Organisations">
-  <SettingsHeading title="Your organisations"
-    >Shared workspaces with their own members and models.</SettingsHeading
+  <SettingsHeading page title="Organisations"
+    >Shared workspaces with their own members, models and chats.</SettingsHeading
   >
+  {#if error}<p class="error-banner" role="alert">{error}</p>{/if}
   <div class="settings-card">
+    {#if !loaded}<LoadingRows label="Loading your organisations" rows={1} />{/if}
     <ul aria-label="Your organisations">
       {#each list as org (org.id)}
         <li class="link-row">
@@ -62,8 +65,9 @@
           </a>
         </li>
       {:else}
-        {#if loaded}<li>
-            <p class="muted-text empty-note">You are not in any organisation yet.</p>
+        {#if loaded}<li class="provider-empty">
+            You are not in any organisation yet. Create one below, or ask an organisation’s admin to
+            add you.
           </li>{/if}
       {/each}
     </ul>
@@ -81,5 +85,4 @@
       >
     </form>
   </div>
-  {#if error}<p class="error-banner" role="alert">{error}</p>{/if}
 </section>

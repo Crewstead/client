@@ -23,6 +23,9 @@
   --amber: #dfbd82;
   /* Errors and destructive actions: a clear red for text, a solid one behind white text. */
   --danger: #f87171;
+  /* States: working and online, or working with something to know. */
+  --success: #4ade80;
+  --warning: #fbbf24;
   --danger-solid: #e5484d;
   --danger-solid-hover: #ec5d5e;
   /* Categories in charts (context parts, models): muted hues that read apart on the dark ground. */

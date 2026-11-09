@@ -1,5 +1,6 @@
 <script lang="ts">
   import { useWorkspace } from '#lib/workspace.svelte.ts';
+  import SettingsHeading from '#lib/components/SettingsHeading.svelte';
   import ProviderToggle from './ProviderToggle.svelte';
   const workspace = useWorkspace();
   const enabled = $derived(
@@ -8,15 +9,21 @@
 </script>
 
 <section class="settings-section" aria-label="Test replies">
-  <h2>Development</h2>
-  <div class="settings-card setting-row">
-    <div>
-      <strong>Test replies</strong>
-      <p>
-        Free made-up replies for trying the app, without a real model. Turning them off keeps your
-        chats.
-      </p>
-    </div>
-    <ProviderToggle {enabled} />
+  <SettingsHeading page title="Test replies"
+    >Made-up replies for trying the app without a real model. They cost nothing.</SettingsHeading
+  >
+  <div class="settings-card setting-lines">
+    <ul>
+      <li>
+        <span class="project-text">
+          <span class="row-name">Test models in chats</span>
+          <span class="row-status"
+            >{enabled ? 'On: “Test” models are offered in chats.' : 'Off.'} Turning them off keeps your
+            chats.</span
+          >
+        </span>
+        <ProviderToggle {enabled} />
+      </li>
+    </ul>
   </div>
 </section>

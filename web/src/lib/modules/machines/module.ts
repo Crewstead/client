@@ -6,9 +6,9 @@ export const machinesClient: ClientModule = {
   tabs: [
     {
       id: 'projects',
-      label: 'Projects',
-      group: 'tools',
-      order: 15,
+      label: 'Computers',
+      group: 'computers',
+      order: 10,
       load: () => import('./ProjectsSettings.svelte'),
     },
   ],

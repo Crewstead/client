@@ -2,22 +2,26 @@
   import type { Snippet } from 'svelte';
   let {
     title,
+    page = false,
     children,
     action,
   }: {
     title: string;
-    /** What the section is for, under its title. */
+    /** The section's own title at the top of its page; otherwise a group inside it. */
+    page?: boolean;
+    /** What the section or group is for, in one sentence under its title. */
     children?: Snippet;
-    /** Its main action, e.g. "Add server", at the top right. */
+    /** Its main action, e.g. "Add server", at the right. */
     action?: Snippet;
   } = $props();
 </script>
 
-<!-- One heading for every settings section, so switching tabs never moves the title or its note. -->
-<div class="section-heading">
+<!-- Every Settings heading: the title, its note under it, the action on the right
+     (docs/plan/29-settings-design.md, Page anatomy). -->
+<div class="section-heading" class:page-heading={page}>
   <div>
-    <h2>{title}</h2>
-    {#if children}<p class="muted-text">{@render children()}</p>{/if}
+    {#if page}<h2>{title}</h2>{:else}<h3>{title}</h3>{/if}
+    {#if children}<p>{@render children()}</p>{/if}
   </div>
-  {@render action?.()}
+  {#if action}<div class="heading-action">{@render action()}</div>{/if}
 </div>

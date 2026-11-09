@@ -23,8 +23,13 @@
   letter-spacing: 0.3px;
   text-transform: uppercase;
 }
-.settings-nav-group:first-child {
+.settings-nav-group:first-child,
+.settings-nav-gap:first-child {
   margin-top: 0;
+}
+.settings-nav-gap {
+  display: block;
+  height: 12px;
 }
 .settings-tab {
   display: flex;
@@ -57,15 +62,6 @@
 .settings-columns .section-title {
   display: none;
 }
-.settings-panel .settings-section {
-  margin-top: var(--space-6);
-  padding: var(--space-6) 0 0;
-}
-.settings-panel .settings-section:first-child {
-  margin-top: 0;
-  padding-top: 0;
-  border-top: 0;
-}
 /* Phones: Settings is the list of sections; a chosen section is its own page with "‹ Settings". */
 @media (max-width: 700px) {
   .settings-layout {
@@ -83,10 +79,6 @@
   }
   .settings-columns[data-chosen='true'] .section-title {
     display: inline;
-  }
-  /* The page's title already names the section. */
-  .settings-columns[data-chosen='true'] .settings-panel > .settings-section:first-child > h2 {
-    display: none;
   }
   .settings-nav [role='tablist'] {
     position: static;

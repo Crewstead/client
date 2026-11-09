@@ -1,5 +1,6 @@
 <script lang="ts">
   import { appUpdates } from './app-updates.svelte.ts';
+  import SettingsHeading from '#lib/components/SettingsHeading.svelte';
   import '@crewstead/ui/settings-cards.css';
   import '@crewstead/ui/projects.css';
   $effect(() => appUpdates.follow());
@@ -26,7 +27,7 @@
 <!-- Only inside the desktop app: its version and updates. -->
 {#if appUpdates.available && state}
   <section class="settings-section" aria-label="Desktop app">
-    <h2>Desktop app</h2>
+    <SettingsHeading title="Desktop app" />
     <div class="settings-card setting-lines">
       <ul>
         <li aria-label="Updates">

@@ -1,0 +1,190 @@
+/* Settings sections share one anatomy (docs/plan/29-settings-design.md in the server repository):
+   the section's title, groups with sub-headings, cards of rows, one empty state, loading rows. */
+.settings-panel .settings-section {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.settings-panel .settings-section + .settings-section,
+.settings-panel .settings-section + .error-banner + .settings-section {
+  margin-top: var(--space-8);
+}
+.settings-panel .section-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-3);
+}
+.settings-panel .section-heading > div:first-child {
+  flex: 1;
+  min-width: 0;
+}
+.settings-panels .settings-panel .section-heading h2,
+.settings-panels .settings-panel .section-heading h3 {
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.settings-panels .settings-panel .section-heading h2 {
+  font-size: 18px;
+}
+.settings-panels .settings-panel .section-heading h3 {
+  font-size: 15px;
+}
+.settings-panel .section-heading p {
+  max-width: 68ch;
+  margin: var(--space-1) 0 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+.settings-panel .page-heading {
+  margin-bottom: var(--space-6);
+}
+.settings-panel .page-heading p {
+  font-size: var(--text-base);
+}
+.settings-panel .heading-action {
+  display: flex;
+  flex-shrink: 0;
+  gap: var(--space-2);
+}
+/* The one empty state. */
+.settings-empty {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 56px;
+  padding: 12px var(--space-4);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+.settings-empty p {
+  flex: 1 1 280px;
+  margin: 0;
+}
+/* Rows: name and one line under it on the left, the control on the right, centred. */
+.settings-panel .settings-card > ul > li,
+.settings-panel .settings-card > .card-footer {
+  min-height: 56px;
+  padding: 10px var(--space-4);
+  font-size: var(--text-base);
+}
+.settings-panel .row-name {
+  font-size: var(--text-base);
+  font-weight: 500;
+}
+.settings-panel .row-status,
+.settings-panel .project-path {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+/* Groups inside a card (a provider, a computer): their rows line up with the head's text. */
+.computer-list {
+  display: grid;
+  gap: var(--space-4);
+}
+.provider-head > svg {
+  flex-shrink: 0;
+  color: var(--muted);
+}
+.computer-card .provider-group > ul > li {
+  padding-left: var(--space-4);
+}
+.computer-card .provider-group > ul > li.provider-empty {
+  padding-left: 46px;
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+/* A form at the foot of a card: its field takes the room, its button stays a button. */
+.settings-panel .card-footer.inline-form input {
+  flex: 1 1 200px;
+  min-height: 34px;
+  padding: 6px 10px;
+}
+/* A note under a section's cards: how-tos that are not needed to decide anything. */
+.settings-footnote {
+  margin: var(--space-4) 0 0;
+  max-width: 76ch;
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+.settings-panel a.row-name {
+  overflow: hidden;
+  color: inherit;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.settings-panel a.row-name:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+/* Stand-in rows while a card loads. */
+.loading-rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.loading-rows > li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: 56px;
+  padding: 10px var(--space-4);
+}
+.loading-rows > li + li {
+  border-top: 1px solid var(--line-subtle);
+}
+.loading-text {
+  display: grid;
+  flex: 1;
+  gap: 8px;
+}
+.loading-bar {
+  display: block;
+  width: 40%;
+  height: 10px;
+  border-radius: 5px;
+  background: var(--surface-hover);
+  animation: loading-pulse 1.4s ease-in-out infinite;
+}
+.project-text > .loading-bar + .loading-bar {
+  margin-top: 8px;
+}
+.loading-bar.short {
+  width: 64%;
+  height: 8px;
+  opacity: 0.7;
+}
+.loading-bar.control {
+  flex: 0 0 72px;
+  width: 72px;
+  height: 34px;
+  border-radius: 7px;
+}
+@keyframes loading-pulse {
+  50% {
+    opacity: 0.45;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loading-bar {
+    animation: none;
+  }
+}
+@media (max-width: 700px) {
+  /* The page's own title names the section; its note stays. */
+  .settings-columns[data-chosen='true'] .page-heading h2 {
+    display: none;
+  }
+  .settings-panel .section-heading {
+    flex-wrap: wrap;
+  }
+}

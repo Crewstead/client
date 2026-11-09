@@ -15,7 +15,7 @@
   min-height: 1.6em;
 }
 .diff-view > .add {
-  background: color-mix(in srgb, #4ade80 13%, transparent);
+  background: color-mix(in srgb, var(--success) 13%, transparent);
   color: #bbf7d0;
 }
 .diff-view > .del {

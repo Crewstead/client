@@ -3,6 +3,7 @@
   import { useWorkspace } from '#lib/workspace.svelte.ts';
   import ModuleSlot from '#lib/modules/ModuleSlot.svelte';
   import SettingsHeading from '#lib/components/SettingsHeading.svelte';
+  import EmptyState from '#lib/components/EmptyState.svelte';
   import { activeModules, panelsFor } from '#lib/modules/registry.ts';
   import '@crewstead/ui/settings-cards.css';
   const workspace = useWorkspace();
@@ -19,7 +20,7 @@
   );
   const note = $derived(
     !org
-      ? 'Your own models. Anyone can connect a provider and use them in their Personal workspace.'
+      ? 'Your own providers and computers, for your Personal chats. Only you can use them.'
       : allowed
         ? `Your own models. ${org.label} allows using them here too.`
         : `Your own models, for your Personal workspace. ${org.label} does not allow them here.`,
@@ -31,6 +32,10 @@
       : model.label;
 </script>
 
+<SettingsHeading page title="Models"
+  >The models your chats can use{org ? ` in ${org.label}` : ''}, and where they come from.</SettingsHeading
+>
+
 {#if org}
   <section class="settings-section" aria-label="Available organisation models">
     <SettingsHeading title={`Available in ${org.label}`} />
@@ -40,9 +45,7 @@
             <span class="row-name">{name(model)}</span><span class="row-meta"
               >{model.connection ?? model.provider}</span
             >
-          </li>{:else}<li>
-            <p class="muted-text empty-note">No models in {org.label} yet.</p>
-          </li>{/each}
+          </li>{:else}<li class="provider-empty">No models in {org.label} yet.</li>{/each}
       </ul>
     </div>
   </section>
@@ -52,19 +55,18 @@
   <ModuleSlot slot="personal-models" props={{ note }} />
 {:else}
   <section class="settings-section" aria-label="Personal models">
-    <h2>Personal models</h2>
-    <p class="muted-text">Personal models are turned off on this server.</p>
+    <SettingsHeading title="Personal models" />
+    <EmptyState text="Personal models are turned off on this hub." />
   </section>
 {/if}
 
 {#if !org && orgModels.length}
   <!-- Organisation models offered here because their organisation shares them; it pays for them. -->
   <section class="settings-section" aria-label="Shared by your organisations">
-    <h2>Shared by your organisations</h2>
-    <p class="muted-text">
-      Your organisations let you use these in Personal chats. They pay within their limits and see
-      only spending, never your chats.
-    </p>
+    <SettingsHeading title="Shared by your organisations"
+      >Yours to use in Personal chats. Your organisations pay within their limits and see only
+      spending, never your chats.</SettingsHeading
+    >
     <div class="settings-card">
       <ul aria-label="Shared organisation models">
         {#each orgModels as model (model.id)}<li>

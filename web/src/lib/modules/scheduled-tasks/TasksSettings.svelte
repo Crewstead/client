@@ -1,5 +1,7 @@
 <script lang="ts">
   import SettingsHeading from '#lib/components/SettingsHeading.svelte';
+  import EmptyState from '#lib/components/EmptyState.svelte';
+  import LoadingRows from '#lib/components/LoadingRows.svelte';
   import type { ScheduledTask } from '@crewstead/core/protocol';
   import { tasks } from './api.ts';
   import TaskDialog from './TaskDialog.svelte';
@@ -20,9 +22,9 @@
 </script>
 
 <section class="settings-section" aria-label="Scheduled">
-  <SettingsHeading title="Scheduled tasks">
-    Prompts sent into a chat at set times, where its model answers them as if you had just written
-    them. Add one from a chat’s side panel, or ask the model in a chat to schedule something.
+  <SettingsHeading page title="Scheduled tasks">
+    Prompts sent into a chat at set times. A run is posted in its chat only when it has something to
+    tell you; every run is kept in the task’s history.
   </SettingsHeading>
   {#if error}<p class="error-banner" role="alert">{error}</p>{/if}
   {#if list?.length}
@@ -37,7 +39,13 @@
         }}
       />
     </div>
-  {:else if list}<p class="empty-note">No scheduled tasks yet.</p>{/if}
+  {:else if list}
+    <EmptyState
+      text="No scheduled tasks yet. Add one from a chat’s side panel, or ask a chat to schedule something."
+    />
+  {:else}
+    <div class="settings-card"><LoadingRows label="Loading scheduled tasks" /></div>
+  {/if}
 </section>
 {#if editing}<TaskDialog
     chatId={editing.chatId}

@@ -1,5 +1,6 @@
 import type { MachineView, ProjectRules } from '@crewstead/core/protocol';
 import { request } from '#lib/api.ts';
+import { ago } from '#lib/components/plan-usage.ts';
 
 /** Computers connected through the Crewstead app on them. The token is returned only once. */
 export const machines = {
@@ -45,3 +46,11 @@ export const claudeAccounts = {
   remove: (machineId: string, account: string) =>
     request(`/machines/${machineId}/claude-accounts/${account}`, { method: 'DELETE' }),
 };
+
+/** A computer's state in a few words: "Online", or "Offline · last seen 3 h ago". */
+export function machineState(machine: MachineView, now = new Date()) {
+  if (machine.online) return 'Online';
+  return machine.lastSeen
+    ? `Offline · last seen ${ago(machine.lastSeen, now)}`
+    : 'Offline · never connected';
+}

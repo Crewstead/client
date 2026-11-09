@@ -34,7 +34,10 @@
 <nav class="settings-nav" aria-label="Settings">
   <div role="tablist" aria-orientation="vertical" aria-label="Settings categories">
     {#each groups as group (group.id)}
-      <p class="settings-nav-group" role="presentation">{group.label}</p>
+      <!-- A group of one section is named by that section; only larger groups get a label. -->
+      {#if group.tabs.length > 1}<p class="settings-nav-group" role="presentation">
+          {group.label}
+        </p>{:else}<span class="settings-nav-gap" role="presentation"></span>{/if}
       {#each group.tabs as tab (tab.id)}
         <button
           class="settings-tab"

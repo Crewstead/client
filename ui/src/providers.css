@@ -2,13 +2,14 @@
 .provider-group + .provider-group {
   border-top: 1px solid var(--line-subtle);
 }
+/* A group's own row (a provider, a computer): the same surface as its rows, its name in bold. */
 .provider-head {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: 12px var(--space-4);
-  background: var(--surface-raised);
-  font-size: var(--text-sm);
+  min-height: 56px;
+  padding: 10px var(--space-4);
+  font-size: var(--text-base);
 }
 .provider-groups {
   overflow: hidden;
@@ -174,11 +175,11 @@
   background: var(--muted);
 }
 .status-dot.online {
-  background: #4ade80;
+  background: var(--success);
 }
 /* Working, with something to know (some search engines refusing, or still starting). */
 .status-dot.warning {
-  background: #fbbf24;
+  background: var(--warning);
 }
 .status-dot.failed {
   background: var(--danger);
@@ -215,6 +216,6 @@
 .provider-groups:not(:has(.provider-group)) {
   display: none;
 }
-.provider-groups:has(.provider-group) + .empty-note {
+.provider-groups:has(.provider-group) + .settings-empty {
   display: none;
 }

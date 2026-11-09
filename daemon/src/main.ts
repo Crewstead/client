@@ -247,4 +247,7 @@ async function ask(question: string) {
 main(process.argv.slice(2)).catch((error: unknown) => {
   console.error(error instanceof Error ? error.message : error);
   process.exitCode ||= 1;
+  // Run by the desktop app, its open pipe and channel would keep a failed service alive and silent;
+  // ending lets the app start it again.
+  if (process.env.CREWSTEAD_APP_PIPE === '1') process.exit();
 });

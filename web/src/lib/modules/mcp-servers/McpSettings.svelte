@@ -1,5 +1,7 @@
 <script lang="ts">
   import SettingsHeading from '#lib/components/SettingsHeading.svelte';
+  import EmptyState from '#lib/components/EmptyState.svelte';
+  import LoadingRows from '#lib/components/LoadingRows.svelte';
   import { Plus } from '@lucide/svelte';
   import type { McpServer } from '@crewstead/core/protocol';
   import { mcpServers } from './api.ts';
@@ -42,19 +44,16 @@
 </script>
 
 <section class="settings-section" aria-label="MCP servers">
-  <SettingsHeading title="MCP servers">
-    Other services’ tools for your Personal chats, through the Model Context Protocol. Models see
-    each server’s tool names and read a server’s full list only when they need it. Every call asks
-    first unless you allow that tool; a tool you switch off is never offered. Servers that sign you
-    in through their own page (Notion, Linear and others) need no headers: add the address, then
-    Sign in.
+  <SettingsHeading page title="MCP servers">
+    Other services’ tools for your Personal chats, through the Model Context Protocol. Each call
+    asks you first unless you allow that tool.
     {#snippet action()}<button class="button subtle small" onclick={() => (editing = {})}
-        ><Plus size={14} /> Add server</button
+        ><Plus size={14} aria-hidden="true" />Add server</button
       >{/snippet}
   </SettingsHeading>
   {#if error}<p class="error-banner" role="alert">{error}</p>{/if}
   {#if list?.length}
-    <ul class="skill-list" aria-label="Your MCP servers">
+    <ul class="settings-card skill-list" aria-label="Your MCP servers">
       {#each list as server (server.id)}
         <McpServerRow
           {server}
@@ -66,7 +65,13 @@
         />
       {/each}
     </ul>
-  {:else if list}<p class="skill-empty">No MCP servers yet.</p>{/if}
+  {:else if list}
+    <EmptyState
+      text="No MCP servers yet. Add one by its address; services that sign you in on their own page, such as Notion or Linear, need nothing else."
+    />
+  {:else}
+    <div class="settings-card"><LoadingRows label="Loading MCP servers" /></div>
+  {/if}
 </section>
 {#if editing}<McpServerDialog
     {...editing.server ? { server: editing.server } : {}}

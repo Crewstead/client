@@ -78,7 +78,7 @@
   color: var(--text);
 }
 .approval-picker[data-mode='all'] summary {
-  color: #fbbf24;
+  color: var(--warning);
 }
 .model-options fieldset {
   margin: 0;

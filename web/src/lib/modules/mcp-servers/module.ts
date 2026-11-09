@@ -7,7 +7,7 @@ export const mcpServersClient: ClientModule = {
       id: 'mcp',
       label: 'MCP servers',
       group: 'tools',
-      order: 19,
+      order: 30,
       load: () => import('./McpSettings.svelte'),
     },
   ],

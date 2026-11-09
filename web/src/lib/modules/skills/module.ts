@@ -8,7 +8,7 @@ export const skillsClient: ClientModule = {
       id: 'skills',
       label: 'Skills',
       group: 'tools',
-      order: 18,
+      order: 20,
       load: () => import('./SkillsSettings.svelte'),
     },
   ],

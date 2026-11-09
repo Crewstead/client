@@ -16,21 +16,22 @@ export interface SlotProps {
   models: Record<string, never>;
   /** A shared workspace's settings page, below its members. */
   workspace: { context: ContextId; name: string; canManage: boolean };
-  /** Settings → Chats: each panel renders one `<li>` row (name, status, control) in the shared card. */
-  chats: Record<string, never>;
+  /** Settings → Built-in tools: each panel renders one `<li>` row (name, status, control) in the shared card. */
+  tools: Record<string, never>;
   /** A chat's side panel, above the core sections (e.g. the skills in use). */
   'chat-panel': { session: Session };
 }
 export type SlotName = keyof SlotProps;
 
-/** Where a section sits in the Settings list: models and what chats can use, chats, or people. */
-export type SettingsGroup = 'tools' | 'chats' | 'people';
+/** Where a section sits in the Settings list (docs/plan/29-settings-design.md in the server repository). */
+export type SettingsGroup =
+  'general' | 'models' | 'tools' | 'computers' | 'chats' | 'account' | 'developer';
 
 export interface SettingsTab {
   id: string;
   label: string;
   group: SettingsGroup;
-  /** Position among all Settings tabs; core tabs use 10, 30, 40. */
+  /** Position inside its group. */
   order: number;
   load: Lazy<Record<string, never>>;
 }

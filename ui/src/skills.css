@@ -1,7 +1,6 @@
 /* Skills: the Skills settings tab and its editor. */
+/* One card of rows, like every Settings list. */
 .skill-list {
-  display: grid;
-  gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -9,11 +8,12 @@
 .skill-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--surface);
+  gap: var(--space-3);
+  min-height: 56px;
+  padding: 10px var(--space-4);
+}
+.skill-row + .skill-row {
+  border-top: 1px solid var(--line-subtle);
 }
 .skill-row-text {
   display: grid;
@@ -21,48 +21,24 @@
   flex: 1;
   min-width: 0;
 }
+/* A skill's name is what people type after "@", so it reads as code. */
 .skill-row-name {
   display: flex;
   align-items: center;
   gap: 8px;
   font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
   font-size: var(--text-sm);
+  font-weight: 500;
 }
 .skill-row-description {
   overflow: hidden;
   color: var(--muted);
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .skill-row[data-enabled='false'] .skill-row-text {
   opacity: 0.55;
-}
-.skill-section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin: 24px 0 10px;
-}
-.skill-section-header:first-child {
-  margin-top: 0;
-}
-.skill-section-header h3 {
-  margin: 0;
-  font-size: var(--text-base);
-}
-.skill-section-header p {
-  margin: 2px 0 0;
-  color: var(--muted);
-  font-size: var(--text-xs);
-}
-.skill-empty {
-  padding: 14px;
-  border: 1px dashed var(--line);
-  border-radius: var(--radius);
-  color: var(--muted);
-  font-size: var(--text-sm);
 }
 .skill-editor {
   width: min(720px, calc(100vw - 32px));

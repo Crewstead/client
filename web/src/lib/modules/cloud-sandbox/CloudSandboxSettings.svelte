@@ -29,7 +29,17 @@
   }
 </script>
 
-{#if view}
+<!-- Drawn at once, so the row never appears late; its state fills in when it arrives. -->
+{#if !view}
+  <li aria-label="Code sandbox on the server" aria-busy="true">
+    <span class="project-text">
+      <span class="row-name">Code sandbox</span>
+      <span class="row-status"><span class="status-dot"></span>Checking…</span>
+      {#if error}<span class="row-error" role="alert">{error}</span>{/if}
+    </span>
+    <span class="loading-bar control" aria-hidden="true"></span>
+  </li>
+{:else}
   <li aria-label="Code sandbox on the server">
     <span class="project-text">
       <span
@@ -42,15 +52,15 @@
           class="status-dot"
           class:online={view.enabled && !view.missing.length}
           class:failed={view.enabled && view.missing.length > 0}
-        ></span>For chats without a project · {busy && !view.enabled
-          ? 'setting up (the first time downloads gVisor)'
+        ></span>{busy && !view.enabled
+          ? 'Setting up (the first time downloads gVisor)'
           : view.enabled && view.missing.length
-            ? `on, but not working: needs ${view.missing.join(', ')} on the server`
+            ? `On, but not working: needs ${view.missing.join(', ')} on the server`
             : view.enabled
-              ? `on, ${view.sandboxes} of ${view.limit} in use`
+              ? `On · ${view.sandboxes} of ${view.limit} in use`
               : view.missing.length
-                ? `needs ${view.missing.join(', ')} on the server`
-                : 'off'}</span
+                ? `Needs ${view.missing.join(', ')} on the server`
+                : 'Off'} · for chats without a project</span
       >
       {#if error}<span class="row-error" role="alert">{error}</span>{/if}
     </span>

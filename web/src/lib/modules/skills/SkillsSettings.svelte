@@ -1,5 +1,7 @@
 <script lang="ts">
   import SettingsHeading from '#lib/components/SettingsHeading.svelte';
+  import EmptyState from '#lib/components/EmptyState.svelte';
+  import LoadingRows from '#lib/components/LoadingRows.svelte';
   import { Plus } from '@lucide/svelte';
   import RowMenu, { type MenuItem } from '#lib/components/RowMenu.svelte';
   import type { Skill, SkillScope, SkillsView } from '@crewstead/core/protocol';
@@ -65,26 +67,25 @@
   ]);
 </script>
 
-<section class="settings-section" aria-label="Skills">
-  <SettingsHeading title="Skills">
-    Instructions for particular kinds of work. Models see each skill’s name and when to use it, and
-    load the whole skill when a task needs it. Mention one as <code>@name</code> in a message, or turn
-    it on for a chat from the prompt box, to keep it in use there.
-  </SettingsHeading>
-  {#if error}<p class="error-banner" role="alert">{error}</p>{/if}
-  {#each sections as section (section.scope)}
-    <div class="skill-section-header">
-      <div>
-        <h3>{section.title}</h3>
-        <p>{section.note}</p>
-      </div>
-      {#if section.canAdd}<button
-          class="button subtle small"
-          onclick={() => (editing = { scope: section.scope })}><Plus size={14} /> New skill</button
-        >{/if}
-    </div>
-    {#if section.list.length}
-      <ul class="skill-list" aria-label={section.title}>
+<SettingsHeading page title="Skills">
+  Instructions for particular kinds of work, which models load when a task needs them. Mention one
+  as
+  <code>@name</code> in a message, or keep it on for a chat from the prompt box.
+</SettingsHeading>
+{#if error}<p class="error-banner" role="alert">{error}</p>{/if}
+{#each sections as section (section.scope)}
+  <section class="settings-section" aria-label={section.title}>
+    <SettingsHeading title={section.title}
+      >{section.note}{#snippet action()}{#if section.canAdd}<button
+            class="button subtle small"
+            onclick={() => (editing = { scope: section.scope })}
+            ><Plus size={14} aria-hidden="true" />New skill</button
+          >{/if}{/snippet}</SettingsHeading
+    >
+    {#if !view}
+      <div class="settings-card"><LoadingRows label={`Loading ${section.title}`} /></div>
+    {:else if section.list.length}
+      <ul class="settings-card skill-list" aria-label={section.title}>
         {#each section.list as skill (skill.id)}
           <li class="skill-row" data-enabled={skill.enabled}>
             <span class="skill-row-text">
@@ -107,9 +108,11 @@
           </li>
         {/each}
       </ul>
-    {:else}<p class="skill-empty">No skills yet.</p>{/if}
-  {/each}
-</section>
+    {:else}<EmptyState
+        text={section.canAdd ? 'No skills yet. New skill writes one.' : 'No skills here yet.'}
+      />{/if}
+  </section>
+{/each}
 {#if editing}<SkillEditor
     scope={editing.scope}
     {...editing.skill ? { skill: editing.skill } : {}}

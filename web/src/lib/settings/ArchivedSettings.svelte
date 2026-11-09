@@ -2,8 +2,11 @@
   import { closeOutside } from '#lib/close-outside.ts';
   import { resolve } from '$app/paths';
   import { ArchiveRestore, Trash2 } from '@lucide/svelte';
+  import SettingsHeading from '#lib/components/SettingsHeading.svelte';
+  import EmptyState from '#lib/components/EmptyState.svelte';
   import { useWorkspace } from '#lib/workspace.svelte.ts';
   import '@crewstead/ui/dialogs.css';
+  import '@crewstead/ui/projects.css';
   const workspace = useWorkspace();
   const id = $props.id();
   const archived = $derived(workspace.sessions.filter((session) => session.archived));
@@ -27,7 +30,7 @@
     run(
       sessionId,
       () => workspace.setPreferences(sessionId, { archived: false }),
-      'Could not restore chat',
+      'Could not restore the chat.',
     );
   function confirm(chosen: { id: string; title: string } | 'all') {
     target = chosen;
@@ -40,43 +43,62 @@
     void run(
       chosen === 'all' ? 'all' : chosen.id,
       () => workspace.deleteArchived(chosen === 'all' ? undefined : chosen.id),
-      'Could not delete',
+      'Could not delete.',
     );
   };
+  const day = (value: string) =>
+    new Date(value).toLocaleDateString(undefined, {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
 </script>
 
-<section class="settings-section archived-chats" aria-label="Archived chats">
-  <div class="section-heading">
-    <h2>Archived chats</h2>
-    {#if archived.length}<button
-        class="button subtle small"
-        disabled={!!busy}
-        onclick={() => confirm('all')}>Delete all</button
-      >{/if}
-  </div>
+<section class="settings-section" aria-label="Archived chats">
+  <SettingsHeading page title="Archived chats">
+    Chats you archived stay here until you restore or delete them.
+    {#snippet action()}{#if archived.length}<button
+          class="button subtle small"
+          disabled={!!busy}
+          onclick={() => confirm('all')}>Delete all…</button
+        >{/if}{/snippet}
+  </SettingsHeading>
+  {#if error}<p class="error-banner" role="alert">{error}</p>{/if}
   {#if archived.length}
-    <ul>
-      {#each archived as session (session.id)}
-        <li>
-          <a href={resolve('/sessions/[id]', { id: session.id })}>{session.title}</a><button
-            class="icon-button"
-            aria-label={`Restore ${session.title}`}
-            title="Restore chat"
-            disabled={!!busy}
-            onclick={() => restore(session.id)}><ArchiveRestore size={16} /></button
-          ><button
-            class="icon-button danger-icon"
-            aria-label={`Delete ${session.title}`}
-            title="Delete for good"
-            disabled={!!busy}
-            onclick={() => confirm(session)}><Trash2 size={16} /></button
-          >
-        </li>
-      {/each}
-    </ul>
-  {:else}<p class="muted-text">No archived chats.</p>{/if}
+    <div class="settings-card">
+      <ul aria-label="Archived chats">
+        {#each archived as session (session.id)}
+          <li>
+            <span class="project-text">
+              <a class="row-name" href={resolve('/sessions/[id]', { id: session.id })}
+                >{session.title}</a
+              >
+              <span class="row-status">Last active {day(session.updatedAt)}</span>
+            </span>
+            <button
+              class="button subtle small"
+              aria-label={`Restore ${session.title}`}
+              disabled={!!busy}
+              onclick={() => restore(session.id)}
+              ><ArchiveRestore size={15} aria-hidden="true" />Restore</button
+            >
+            <button
+              class="icon-button danger-icon"
+              aria-label={`Delete ${session.title}`}
+              title="Delete for good"
+              disabled={!!busy}
+              onclick={() => confirm(session)}><Trash2 size={16} /></button
+            >
+          </li>
+        {/each}
+      </ul>
+    </div>
+  {:else}
+    <EmptyState
+      text="No archived chats. Archive a chat from its menu to keep it out of the list."
+    />
+  {/if}
 </section>
-{#if error}<p class="error-banner" role="alert">{error}</p>{/if}
 
 <dialog
   {@attach closeOutside}

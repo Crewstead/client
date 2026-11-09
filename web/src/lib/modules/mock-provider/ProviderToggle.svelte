@@ -27,7 +27,7 @@
 </script>
 
 {#if enabled}
-  <button class="button subtle" onclick={() => dialog?.showModal()}>Turn off</button>
+  <button class="button subtle small" onclick={() => dialog?.showModal()}>Turn off</button>
   <dialog
     {@attach closeOutside}
     bind:this={dialog}
@@ -49,8 +49,8 @@
     </div>
   </dialog>
 {:else}
-  <button class="button primary" disabled={busy} onclick={toggle}
+  <button class="button subtle small" disabled={busy} onclick={toggle}
     >{busy ? 'Turning on…' : 'Turn on'}</button
   >
-  {#if error}<p role="alert">{error}</p>{/if}
+  {#if error}<p class="row-error" role="alert">{error}</p>{/if}
 {/if}

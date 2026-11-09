@@ -1,6 +1,6 @@
 <script lang="ts">
   import SettingsHeading from '#lib/components/SettingsHeading.svelte';
-  import DesktopAppSettings from '#lib/desktop/DesktopAppSettings.svelte';
+  import EmptyState from '#lib/components/EmptyState.svelte';
   import { goto } from '$app/navigation';
   import { resolve } from '$app/paths';
   import { useAuthentication } from '#lib/auth/auth.svelte.ts';
@@ -35,8 +35,8 @@
   }
 </script>
 
-<section class="settings-section" aria-label="Account">
-  <SettingsHeading title="Signed in as" />
+<section class="settings-section" aria-label="Your account">
+  <SettingsHeading page title="Your account">The account you use on this device.</SettingsHeading>
   <div class="settings-card profile-card">
     <span class="profile-avatar" aria-hidden="true">{login[0]?.toUpperCase()}</span>
     <dl>
@@ -57,16 +57,12 @@
 </section>
 
 <section class="settings-section" aria-label="Other accounts">
-  <div class="section-heading">
-    <div>
-      <h2>Other accounts</h2>
-      <p class="muted-text">
-        Accounts you have used on this device. Switching is instant while an account is still signed
-        in.
-      </p>
-    </div>
-    <button class="button subtle small" onclick={() => auth.openAccount()}>Add account</button>
-  </div>
+  <SettingsHeading title="Other accounts on this device">
+    Switch without signing in again, on this hub or another one.
+    {#snippet action()}<button class="button subtle small" onclick={() => auth.openAccount()}
+        >Add account</button
+      >{/snippet}
+  </SettingsHeading>
   {#if others.length}
     <div class="settings-card">
       <ul aria-label="Saved accounts">
@@ -93,8 +89,6 @@
       </ul>
     </div>
   {:else}
-    <p class="muted-text empty-note">No other accounts yet.</p>
+    <EmptyState text="No other accounts on this device." />
   {/if}
 </section>
-
-<DesktopAppSettings />

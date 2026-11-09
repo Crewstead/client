@@ -68,7 +68,17 @@
   });
 </script>
 
-{#if view}
+<!-- Drawn at once, so the row never appears late; its state fills in when it arrives. -->
+{#if !view}
+  <li aria-label="Web search" aria-busy="true">
+    <span class="project-text">
+      <span class="row-name">Web search</span>
+      <span class="row-status"><span class="status-dot"></span>Checking…</span>
+      {#if error}<span class="row-error" role="alert">{error}</span>{/if}
+    </span>
+    <span class="loading-bar control" aria-hidden="true"></span>
+  </li>
+{:else}
   <li aria-label="Web search">
     <span class="project-text">
       <span

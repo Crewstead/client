@@ -29,7 +29,17 @@
   }
 </script>
 
-{#if view}
+<!-- Drawn at once, so the row never appears late; its state fills in when it arrives. -->
+{#if !view}
+  <li aria-label="Browser on the server" aria-busy="true">
+    <span class="project-text">
+      <span class="row-name">Browser on the server</span>
+      <span class="row-status"><span class="status-dot"></span>Checking…</span>
+      {#if error}<span class="row-error" role="alert">{error}</span>{/if}
+    </span>
+    <span class="loading-bar control" aria-hidden="true"></span>
+  </li>
+{:else}
   <li aria-label="Browser on the server">
     <span class="project-text">
       <span
@@ -38,12 +48,12 @@
         >Browser on the server</span
       >
       <span class="row-status"
-        ><span class="status-dot" class:online={view.enabled && view.installed}></span>For chats
-        without a project · {!view.installed
-          ? 'not installed: run pnpm install-browser on the server'
+        ><span class="status-dot" class:online={view.enabled && view.installed}
+        ></span>{!view.installed
+          ? 'Not installed: run pnpm install-browser on the server'
           : view.enabled
-            ? `on, ${view.sessions} of ${view.limit} in use`
-            : 'off'}</span
+            ? `On · ${view.sessions} of ${view.limit} in use`
+            : 'Off'} · for chats without a project</span
       >
       {#if error}<span class="row-error" role="alert">{error}</span>{/if}
     </span>
