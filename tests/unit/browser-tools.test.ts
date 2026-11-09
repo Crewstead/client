@@ -184,6 +184,8 @@ it.skipIf(!browserInstalled())(
     expect(Date.now() - started).toBeLessThan(5_000);
     await tool('browser_close');
   },
+  // Opening the hanging page waits out the snapshot's own 10 seconds; a busy runner needs the rest.
+  30_000,
 );
 
 it.skipIf(!browserInstalled())(
