@@ -43,6 +43,13 @@ jobs:
       - uses: webfactory/ssh-agent@v0.9.1
         with:
           ssh-private-key: ${{ secrets.CORE_DEPLOY_KEY }}
+      # The runner on the hub server has no GitHub host keys of its own; GitHub publishes them.
+      - name: GitHub host keys
+        shell: bash
+        run: |
+          mkdir -p ~/.ssh
+          grep -qs '^github.com ' ~/.ssh/known_hosts ||
+            curl -fsSL https://api.github.com/meta | jq -r '.ssh_keys[] | "github.com " + .' >> ~/.ssh/known_hosts
       # The computer service searches with ripgrep and sandboxes commands with bubblewrap; Ubuntu
       # blocks the user namespaces bubblewrap needs unless allowed.
       - uses: ./.github/actions/apt
@@ -105,6 +112,13 @@ jobs:
       - uses: webfactory/ssh-agent@v0.9.1
         with:
           ssh-private-key: ${{ secrets.CORE_DEPLOY_KEY }}
+      # The runner on the hub server has no GitHub host keys of its own; GitHub publishes them.
+      - name: GitHub host keys
+        shell: bash
+        run: |
+          mkdir -p ~/.ssh
+          grep -qs '^github.com ' ~/.ssh/known_hosts ||
+            curl -fsSL https://api.github.com/meta | jq -r '.ssh_keys[] | "github.com " + .' >> ~/.ssh/known_hosts
       - uses: actions/setup-node@v4
         with:
           node-version: 24.16.0
@@ -130,6 +144,13 @@ jobs:
       - uses: webfactory/ssh-agent@v0.9.1
         with:
           ssh-private-key: ${{ secrets.CORE_DEPLOY_KEY }}
+      # The runner on the hub server has no GitHub host keys of its own; GitHub publishes them.
+      - name: GitHub host keys
+        shell: bash
+        run: |
+          mkdir -p ~/.ssh
+          grep -qs '^github.com ' ~/.ssh/known_hosts ||
+            curl -fsSL https://api.github.com/meta | jq -r '.ssh_keys[] | "github.com " + .' >> ~/.ssh/known_hosts
       - uses: actions/setup-node@v4
         with:
           node-version: 24.16.0
