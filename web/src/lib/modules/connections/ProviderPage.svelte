@@ -86,7 +86,8 @@
       <div>
         <h1>{connection.label}</h1>
         <p class="muted-text">
-          {connection.providerLabel} · {connection.context === 'personal'
+          {connection.providerLabel}{connection.address ? ` at ${connection.address}` : ''} · {connection.context ===
+          'personal'
             ? 'Personal'
             : 'Organisation'}
         </p>

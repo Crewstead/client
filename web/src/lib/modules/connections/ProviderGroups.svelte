@@ -80,7 +80,7 @@
             >
             <span class="row-text"
               ><strong>{connection.label}</strong
-              >{#if connection.providerLabel !== connection.label}<small
+              >{#if connection.providerLabel !== connection.label}<small title={connection.address}
                   >{connection.providerLabel}</small
                 >{/if}</span
             >

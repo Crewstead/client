@@ -32,6 +32,7 @@
   let provider = $state(untrack(() => providers[0]?.id ?? ''));
   let label = $state('');
   let apiKey = $state('');
+  let address = $state('');
   let limit = $state(5);
   let view = $state<ConnectionView>();
   let choices = $state<Record<string, Choice>>({});
@@ -43,6 +44,15 @@
   let useKey = $state(false);
   const keyMode = $derived(!selected?.signIn || (useKey && selected.apiKey));
   const plan = $derived(selected?.billing === 'plan');
+  /** The API's host, the default name for a connection made by address. */
+  const host = $derived.by(() => {
+    try {
+      return new URL(address.trim()).host;
+    } catch {
+      return '';
+    }
+  });
+  const fallbackName = $derived((selected?.address && host) || (selected?.label ?? provider));
   async function signIn() {
     busy = true;
     error = '';
@@ -68,9 +78,10 @@
     try {
       view = await connections.create(context, {
         provider,
-        label: label.trim() || (selected?.label ?? provider),
+        label: label.trim() || fallbackName,
         apiKey: apiKey.trim(),
         dailyLimitUsd: Number(limit),
+        ...(selected?.address ? { address: address.trim() } : {}),
       });
       apiKey = '';
     } catch (cause) {
@@ -123,6 +134,9 @@
       <p class="dialog-description">
         {#if other}
           {other.description}
+        {:else if keyMode && selected?.address}
+          The hub lists the API’s models to check the address and key. The key is kept on this
+          server only and never shown again.
         {:else if keyMode}
           Your API key is checked with the provider, then kept on this server only and never shown
           again. Use is billed to that provider account.
@@ -158,9 +172,20 @@
             useKey = false;
           }}
         />
-        {#if other}<!-- Set up in the next step. -->{:else}{#if keyMode}<label for={`${id}-key`}
-              >API key</label
+        {#if other}<!-- Set up in the next step. -->{:else}{#if keyMode && selected?.address}<label
+              for={`${id}-address`}>API address</label
             >
+            <input
+              id={`${id}-address`}
+              type="url"
+              bind:value={address}
+              required
+              maxlength="300"
+              placeholder="https://example.com/v1"
+              autocomplete="off"
+              spellcheck="false"
+              disabled={busy}
+            />{/if}{#if keyMode}<label for={`${id}-key`}>API key</label>
             <input
               id={`${id}-key`}
               type="password"
@@ -177,7 +202,7 @@
             id={`${id}-label`}
             bind:value={label}
             maxlength="60"
-            placeholder={selected?.label ?? 'Provider'}
+            placeholder={fallbackName}
             disabled={busy}
           />
           {#if !plan}<label for={`${id}-limit`}>Daily spending limit ($)</label>
@@ -195,7 +220,7 @@
       {#if !other && selected?.connectNote}<p class="form-note connect-note">
           {selected.connectNote}
         </p>{/if}
-      {#if selected && keyMode}
+      {#if selected?.keyUrl && keyMode}
         <p class="form-note">
           <!-- External provider page, not an app route. -->
           <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
@@ -222,7 +247,10 @@
             onclick={() => dialog?.close()}
             disabled={busy}>Cancel</button
           >
-          <button type="submit" class="button primary" disabled={busy || apiKey.trim().length < 8}
+          <button
+            type="submit"
+            class="button primary"
+            disabled={busy || apiKey.trim().length < 8 || (!!selected?.address && !address.trim())}
             >{busy ? 'Checking…' : 'Continue'}</button
           >
         {:else}
