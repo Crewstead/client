@@ -22,8 +22,10 @@ import { BrowserTabs } from './browser-tabs.ts';
 import { SiteData } from './site-data/index.ts';
 import { openReturn, PORT } from './oauth-return.ts';
 
-// One app per person: a second start shows the first one's window.
-if (!app.requestSingleInstanceLock()) app.quit();
+// One app per person: a second start shows the first one's window and ends at once. `quit` would let
+// it reach `ready`, where it stopped the first one's computer service as a leftover.
+const first = app.requestSingleInstanceLock();
+if (!first) app.exit(0);
 // The browser's tabs (browser-tabs.ts) are driven by this computer's service through Chromium's
 // DevTools endpoint: on this computer only, at a port Chromium picks and names in a file in the app's
 // folder. Tabs not on screen keep working meanwhile.
@@ -257,6 +259,7 @@ ipcMain.handle('connect-hub', async (event, input: string) => {
 });
 
 void app.whenReady().then(() => {
+  if (!first) return;
   // The computer service runs Claude Code and project commands as a terminal would find them.
   process.env.PATH = terminalPath();
   window = createWindow(icon);

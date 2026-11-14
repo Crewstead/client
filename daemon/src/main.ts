@@ -244,10 +244,11 @@ async function ask(question: string) {
   }
 }
 
-main(process.argv.slice(2)).catch((error: unknown) => {
+// Run by the desktop app, its open pipe and channel would keep a service that stopped (asked to, or
+// failed) alive and silent, so the app would never start it again: it ends however `main` ends.
+const endForApp = () => process.env.CREWSTEAD_APP_PIPE === '1' && process.exit();
+main(process.argv.slice(2)).then(endForApp, (error: unknown) => {
   console.error(error instanceof Error ? error.message : error);
   process.exitCode ||= 1;
-  // Run by the desktop app, its open pipe and channel would keep a failed service alive and silent;
-  // ending lets the app start it again.
-  if (process.env.CREWSTEAD_APP_PIPE === '1') process.exit();
+  endForApp();
 });

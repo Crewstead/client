@@ -63,3 +63,28 @@ it('stops the app’s service when the app’s pipe closes, however the app ende
   child.stdin.end();
   await ended(child);
 }, 20_000);
+
+it('ends when asked to stop while the app’s pipe and channel stay open', async () => {
+  root = await mkdtemp(join(tmpdir(), 'hub-app-service-'));
+  const home = join(root, 'machine');
+  writeConfig(home, { hub: 'http://127.0.0.1:9', token: 'test-token' });
+  const command = join(root, 'crewstead');
+  await writeFile(command, launcher());
+  await chmod(command, 0o755);
+  // As the app runs it: open standard input and a message channel, which alone keep Node running.
+  const child = spawn(command, ['run'], {
+    cwd: root,
+    env: {
+      ...process.env,
+      HUB_MACHINE_HOME: home,
+      CREWSTEAD_APP_PIPE: '1',
+      // Listening for the app's browser requests is what holds the channel open.
+      CREWSTEAD_APP_DEVTOOLS: join(root, 'DevToolsActivePort'),
+    },
+    stdio: ['pipe', 'ignore', 'ignore', 'ipc'],
+  });
+  await new Promise((resolve) => setTimeout(resolve, 2_000));
+  expect(child.exitCode).toBeNull();
+  child.kill('SIGTERM');
+  await ended(child);
+}, 20_000);
