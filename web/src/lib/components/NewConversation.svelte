@@ -11,11 +11,14 @@
   import PlacePicker from './PlacePicker.svelte';
   import { effortSetting } from '#lib/effort.svelte.ts';
   import { newId } from '#lib/ids.ts';
+  import { CLOUD } from './sidebar-places.ts';
   const workspace = useWorkspace();
   let model = $state('');
   const selected = $derived(workspace.catalog?.models.find((item) => item.id === model));
   // A new chat starts in the cloud, or in the project the left panel's + was for (?project=).
-  let project = $state(page.url.searchParams.get('project') ?? '');
+  // ?project=cloud keeps the left panel on the cloud's chats; the chat itself has no project.
+  const asked = page.url.searchParams.get('project');
+  let project = $state(asked && asked !== CLOUD ? asked : '');
   const projects = $derived(workspace.catalog?.projects ?? []);
   $effect(() => {
     if (project && workspace.catalog && !projects.some((item) => item.id === project)) project = '';

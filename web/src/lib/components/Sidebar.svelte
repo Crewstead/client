@@ -2,7 +2,7 @@
   import ResizeHandle from './ResizeHandle.svelte';
   import { sidebarWidth } from '#lib/panel-widths.svelte.ts';
   import { resolve } from '$app/paths';
-  import { ChevronLeft, Laptop, MonitorPlay, Plus, Search } from '@lucide/svelte';
+  import { ChevronLeft, Laptop, LoaderCircle, MonitorPlay, Plus, Search } from '@lucide/svelte';
   import { page } from '$app/state';
   import { busy, useWorkspace } from '#lib/workspace.svelte.ts';
   import { notifier } from '#lib/notifications.svelte.ts';
@@ -22,7 +22,7 @@
     openSearch,
   }: { open?: boolean; close: () => void; openSearch: () => void } = $props();
   const workspace = useWorkspace();
-  const shortcut = /Mac|iPhone|iPad/.test(navigator.userAgent) ? '⌘K' : 'Ctrl K';
+  const shortcut = /Mac|iPhone|iPad/.test(navigator.userAgent) ? '⌘ + K' : 'Ctrl + K';
   // Shortcuts running modules add, e.g. to scheduled tasks.
   const links = $derived(
     activeModules(workspace.catalog?.modules).flatMap((module) => module.sidebarLinks ?? []),
@@ -47,7 +47,7 @@
     });
   });
   /** With only the cloud there is nothing to choose between: its chats are the list. */
-  const cloudOnly = $derived(places.length === 1);
+  const cloudOnly = $derived(workspace.ready && places.length === 1);
   // The place whose chats show: the one chosen in the panel, else the open chat's (or the new chat's).
   let chosen = $state<string | null>();
   $effect(() => {
@@ -177,9 +177,7 @@
       <!-- eslint-disable svelte/no-navigation-without-resolve -- built with resolve() -->
       <a
         class="new-session"
-        href={shown.id === CLOUD
-          ? resolve('/new')
-          : `${resolve('/new')}?project=${encodeURIComponent(shown.id)}`}
+        href={`${resolve('/new')}?project=${encodeURIComponent(shown.id)}`}
         onclick={close}
         aria-label={`New chat in ${shown.name}`}
         title={`New chat in ${shown.name}`}><Plus size={16} /></a
@@ -211,7 +209,10 @@
     </div>{/if}
   <nav class="session-list" class:dragging aria-label="Chats">
     {#if moveError}<p class="chat-error" role="alert">{moveError}</p>{/if}
-    {#if shown}
+    {#if !workspace.ready}<p class="place-empty" role="status" aria-label="Loading chats">
+        <LoaderCircle size={16} class="place-spin" />
+      </p>
+    {:else if shown}
       {#if dragging && !cloudOnly}
         <section class="drop-places" aria-label="Move to">
           <p>Move to</p>
