@@ -5,7 +5,7 @@
   import type { MachineView } from '@crewstead/core/protocol';
   import { serverUrl } from '#lib/auth/connection.ts';
   import { copyText } from '#lib/clipboard.ts';
-  import { machines } from './api.ts';
+  import { claudeAccounts, machines } from './api.ts';
   import HubSignIn from './HubSignIn.svelte';
   let { close }: { close: () => void } = $props();
   const id = $props.id();
@@ -27,8 +27,9 @@
   let code = $state('');
   let sent = $state(false);
   const hubSignedIn = $derived(!!hub?.claudeCode?.accounts?.[0]?.signedIn);
-  /** This computer, when the app here is already connected to this hub. */
+  /** The computer to use: this one when the app here is connected, else a connected one with Claude Code. */
   let here = $state<MachineView>();
+  const added = $derived(here?.claudeCode?.accounts?.find((account) => account.signedIn));
   /** A computer without the app (a server): connected with a command and a one-time token. */
   let manual = $state(false);
   let created = $state<{ machine: MachineView; token: string }>();
@@ -47,9 +48,25 @@
     if (first && hub) where = 'hub';
   }
   async function findHere() {
+    const list = await machines.list().catch(() => []);
     const mine = await app?.thisComputer?.().catch(() => undefined);
-    if (!mine) return;
-    here = (await machines.list().catch(() => [])).find((machine) => machine.id === mine);
+    here =
+      list.find((machine) => machine.id === mine) ??
+      list.find((machine) => !machine.hosted && machine.online && machine.claudeCode);
+  }
+  /** Adds that computer's usual Claude Code sign-in as an account: its models are offered from now. */
+  async function useIt() {
+    if (!here) return;
+    busy = true;
+    error = '';
+    try {
+      await claudeAccounts.add(here.id, 'This computer', 'usual');
+      await findHere();
+    } catch (cause) {
+      error = cause instanceof Error ? cause.message : 'Could not add its Claude Code.';
+    } finally {
+      busy = false;
+    }
   }
   async function createToken() {
     busy = true;
@@ -73,7 +90,7 @@
     void findHere();
     const timer = setInterval(async () => {
       if (where === 'hub') await findHub();
-      if (app?.thisComputer && !here) await findHere();
+      if (where === 'computer') await findHere();
       if (!created || online) return;
       const found = (await machines.list().catch(() => [])).find(
         (machine) => machine.id === created!.machine.id,
@@ -92,10 +109,10 @@
   onclose={finish}
 >
   <h2 id={`${id}-title`} class="dialog-title">Connect Claude Code</h2>
-  <div class="place-choices" role="radiogroup" aria-label="Where Claude Code runs">
+  <div class="runs-on-choices" role="radiogroup" aria-label="Where Claude Code runs">
     <button
       type="button"
-      class="place-choice"
+      class="runs-on-choice"
       role="radio"
       aria-checked={where === 'hub'}
       disabled={!hub}
@@ -108,7 +125,7 @@
     >
     <button
       type="button"
-      class="place-choice"
+      class="runs-on-choice"
       role="radio"
       aria-checked={where === 'computer'}
       onclick={() => (where = 'computer')}
@@ -117,14 +134,16 @@
       ></button
     >
   </div>
-  <div class="place-steps">
+  <div class="runs-on-steps">
     {#if where === 'hub' && hub}
       <HubSignIn bind:this={hubSignIn} machine={hub} bind:code bind:sent />
     {:else if here}
-      <p role="status">
-        {here.claudeCode
-          ? `${here.name} is connected with Claude Code. Its models are in your list.`
-          : `${here.name} is connected. Sign in to Claude Code there (run claude once) and its models appear.`}
+      <p role={added ? 'status' : undefined}>
+        {!here.claudeCode
+          ? `Install Claude Code on ${here.name} and sign in there (run claude once).`
+          : added
+            ? `Claude Code on ${here.name} is connected${added.email ? ` as ${added.email}` : ''}. Its models are in your list.`
+            : `Use Claude Code signed in on ${here.name}.`}
       </p>
     {:else if manual}
       <ol class="connect-steps">
@@ -187,8 +206,13 @@
           >{manual ? 'Use the app instead' : 'A server without the app'}</button
         >
       {/if}
-      {#if here || online}
-        <button class="button primary" onclick={() => dialog?.close()}>Done</button>
+      {#if here?.claudeCode && !added}
+        <button class="button subtle" onclick={() => dialog?.close()}>Cancel</button>
+        <button class="button primary" disabled={busy} onclick={useIt}>Use its Claude Code</button>
+      {:else if here || online}
+        <button class="button primary" onclick={() => dialog?.close()}
+          >{added ? 'Done' : 'Close'}</button
+        >
       {:else}
         <button class="button subtle" onclick={() => dialog?.close()}>Cancel</button>
         {#if app?.useComputer}

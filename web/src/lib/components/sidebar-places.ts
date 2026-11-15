@@ -12,6 +12,8 @@ export interface Place {
   kind: 'cloud' | 'computer' | 'project';
   /** The computer it is on; none for the cloud. */
   machine?: string;
+  /** Its computer is not connected now (only past chats name it). */
+  offline?: boolean;
   chats: Chat[];
   /** When one of its chats last changed, to list the busiest places first. */
   latest: string;
@@ -35,6 +37,7 @@ export function placesOf(chats: Chat[], projects: Project[], order: string[] = [
         name: whole ? 'Whole computer' : (known?.name ?? saved ?? 'Project'),
         kind: whole ? 'computer' : 'project',
         machine: known?.machine ?? 'Offline computer',
+        ...(known ? {} : { offline: true }),
         chats: [],
         latest: '',
       };
@@ -71,7 +74,10 @@ export interface PlaceGroup {
   places: Place[];
 }
 
-/** Places under the computer they are on, computers in the order their first place comes. */
+/**
+ * Places under the computer they are on: the cloud first, then connected computers in the order their
+ * first place comes, then offline ones.
+ */
 export function groupsOf(places: Place[]): PlaceGroup[] {
   const groups: PlaceGroup[] = [];
   for (const place of places) {
@@ -79,7 +85,9 @@ export function groupsOf(places: Place[]): PlaceGroup[] {
     if (group) group.places.push(place);
     else groups.push({ ...(place.machine ? { machine: place.machine } : {}), places: [place] });
   }
-  return groups;
+  const rank = (group: PlaceGroup) =>
+    !group.machine ? 0 : group.places.every((place) => place.offline) ? 2 : 1;
+  return groups.sort((a, b) => rank(a) - rank(b));
 }
 
 /** `ids` in order, with those in `part` rearranged among their own positions as `part` lists them. */

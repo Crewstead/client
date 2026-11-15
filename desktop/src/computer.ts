@@ -65,10 +65,17 @@ export class Computer {
     const me = await fetch('/api/auth/session');
     if (!me.ok) return false;
     const { user, csrf } = (await me.json()) as { user: { id: string }; csrf: string };
+    const saved = readConfig(machineHome());
     const created = await fetch('/api/machines', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-Hub-CSRF': csrf, 'X-Hub-Account': user.id },
-      body: JSON.stringify({ name: hostname() }),
+      // Connected to this hub before: the same computer there, with a new token (its chats stay its own).
+      body: JSON.stringify({
+        name: hostname(),
+        ...(saved?.hub === new URL(hub).origin && saved.machineId
+          ? { renew: saved.machineId }
+          : {}),
+      }),
     });
     if (!created.ok) throw new Error(((await created.json()) as { message?: string }).message);
     const { token } = (await created.json()) as { token: string };

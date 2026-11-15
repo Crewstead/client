@@ -14,6 +14,9 @@
   let { changed }: SlotProps['personal-providers'] = $props();
   const id = $props.id();
   let list = $state<MachineView[]>([]);
+  // Claude Code shows where its owner connected it (an account added, from Connect provider): never
+  // just because a computer, or the hub's own service, is connected.
+  const shown = $derived(list.filter((machine) => !!machine.claudeCode?.accounts?.length));
   let error = $state('');
   let removing = $state<MachineView>();
   let dialog = $state<HTMLDialogElement>();
@@ -72,7 +75,7 @@
 </script>
 
 <!-- One group per computer, styled like the provider connections around it. -->
-{#each list as machine (machine.id)}
+{#each shown as machine (machine.id)}
   <div class="provider-group" role="group" aria-label={`Claude Code on ${machine.name}`}>
     <div class="provider-head">
       <span class="key-mark" aria-hidden="true">C</span>

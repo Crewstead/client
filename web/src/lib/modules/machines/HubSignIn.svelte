@@ -18,12 +18,15 @@
   const account = $derived(machine.claudeCode?.accounts?.[0]);
   /** Starts Claude Code's sign-in on the hub, which prints Anthropic's page for the owner. */
   async function start() {
-    if (!account) return;
     error = '';
     sent = false;
-    await claudeAccounts.login(machine.id, account.id).catch((cause: unknown) => {
+    try {
+      // Connecting adds its account (none is there until then), then signs it in.
+      if (!account) await claudeAccounts.add(machine.id, 'Hub', 'usual');
+      await claudeAccounts.login(machine.id, account?.id ?? 'default');
+    } catch (cause) {
       error = cause instanceof Error ? cause.message : 'Could not start the sign-in.';
-    });
+    }
   }
   /** Sends the pasted code to the waiting sign-in; Connect calls it. */
   export async function connect() {
@@ -45,7 +48,7 @@
     }
   });
   onMount(() => {
-    if (account && !account.signedIn && !account.signingIn) void start();
+    if (!account?.signedIn && !account?.signingIn) void start();
   });
 </script>
 

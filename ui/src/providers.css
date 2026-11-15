@@ -246,12 +246,12 @@
   margin-right: auto;
 }
 /* Claude Code: where it runs, two cards to choose between, then that choice's steps under them. */
-.place-choices {
+.runs-on-choices {
   display: grid;
   gap: 8px;
   margin-bottom: var(--space-4);
 }
-.place-choice {
+.runs-on-choice {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -264,38 +264,38 @@
   text-align: left;
   cursor: pointer;
 }
-.place-choice > svg {
+.runs-on-choice > svg {
   flex-shrink: 0;
   color: var(--muted);
 }
-.place-choice > span {
+.runs-on-choice > span {
   display: grid;
   gap: 2px;
 }
-.place-choice strong {
+.runs-on-choice strong {
   font-size: var(--text-sm);
   font-weight: 500;
 }
-.place-choice small {
+.runs-on-choice small {
   color: var(--muted);
   font-size: var(--text-xs);
 }
-.place-choice[aria-checked='true'] {
+.runs-on-choice[aria-checked='true'] {
   border-color: var(--text);
 }
-.place-choice[aria-checked='true'] > svg {
+.runs-on-choice[aria-checked='true'] > svg {
   color: var(--text);
 }
-.place-choice:disabled {
+.runs-on-choice:disabled {
   cursor: default;
   opacity: 0.5;
 }
-.place-steps {
+.runs-on-steps {
   padding-top: var(--space-4);
   border-top: 1px solid var(--line-subtle);
   color: var(--muted);
   font-size: var(--text-sm);
 }
-.place-steps > p {
+.runs-on-steps > p {
   margin: 0;
 }

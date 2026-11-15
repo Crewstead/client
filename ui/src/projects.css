@@ -56,3 +56,16 @@
     grid-row: 1 / span 2;
   }
 }
+/* Chats left on a computer that is offline or gone, with the offer to move them. */
+.stray-chats {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+  padding: var(--space-4);
+}
+.stray-chats p {
+  flex: 1;
+  margin: 0;
+  font-size: var(--text-sm);
+}

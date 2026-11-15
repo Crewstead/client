@@ -10,6 +10,7 @@
   import WholeComputerRow from './WholeComputerRow.svelte';
   import TerminalsRow from './TerminalsRow.svelte';
   import ConnectComputer from './ConnectComputer.svelte';
+  import StrayChats from './StrayChats.svelte';
   import '@crewstead/ui/settings-cards.css';
   import '@crewstead/ui/providers.css';
   import '@crewstead/ui/projects.css';
@@ -63,6 +64,7 @@
         >{/if}{/snippet}
   </SettingsHeading>
   {#if error}<p class="error-banner" role="alert">{error}</p>{/if}
+  {#if loaded}<StrayChats {list} />{/if}
   {#if !loaded}
     <div class="settings-card"><LoadingRows label="Loading your computers" rows={3} /></div>
   {/if}

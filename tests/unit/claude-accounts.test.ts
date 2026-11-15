@@ -38,7 +38,15 @@ describe.skipIf(process.platform === 'win32')('Claude Code accounts on a compute
   });
   afterEach(() => rm(home, { recursive: true, force: true }));
 
-  it('starts with the usual sign-in, as before accounts existed', async () => {
+  it('starts with no account, then offers the usual sign-in once its owner adds it', async () => {
+    expect(claudeAccounts(home)).toEqual([]);
+    expect(await accountStatuses(claude, home)).toEqual([]);
+    await claudeAccountAction(
+      claude,
+      home,
+      { kind: 'claude_add', name: 'This computer', mode: 'usual' },
+      vi.fn(),
+    );
     expect(claudeAccounts(home)).toEqual([{ id: 'default', name: 'This computer', folder: null }]);
     expect(await accountStatuses(claude, home)).toEqual([
       {
@@ -56,6 +64,12 @@ describe.skipIf(process.platform === 'win32')('Claude Code accounts on a compute
 
   it('adds another account in its own folder, signs it in, renames and removes it', async () => {
     const changed = vi.fn();
+    await claudeAccountAction(
+      claude,
+      home,
+      { kind: 'claude_add', name: 'This computer', mode: 'usual' },
+      changed,
+    );
     await claudeAccountAction(
       claude,
       home,

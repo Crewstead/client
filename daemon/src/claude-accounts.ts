@@ -28,13 +28,12 @@ const LINK = /https:\/\/\S+/;
 /** The hub's own Claude Code service, in a container with no browser (docs/plan/30). */
 export const hosted = () => process.env.CREWSTEAD_HOSTED === '1';
 
-/** Until its owner changes them, a computer has its usual sign-in, as before accounts existed. */
+/**
+ * The Claude Code accounts its owner added here. None until they connect Claude Code from the hub
+ * (owner decision, 2026-11-15: nothing is offered without being added), including the usual one.
+ */
 export function claudeAccounts(home: string): StoredClaudeAccount[] {
-  return (
-    readConfig(home)?.claudeAccounts ?? [
-      { id: DEFAULT_CLAUDE_ACCOUNT, name: hosted() ? 'Hub' : 'This computer', folder: null },
-    ]
-  );
+  return readConfig(home)?.claudeAccounts ?? [];
 }
 
 /** Claude Code's environment for one account: its folder, or the usual one. */
