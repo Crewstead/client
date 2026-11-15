@@ -231,8 +231,7 @@
                       <Markdown text={item.text} />
                     </div>{/if}
                 {:else if item.text}<div class="message-text">{item.text}</div>{/if}
-                {#if item.status === 'interrupted'}<small class="muted-text"
-                    >Stopped. Send a follow-up to continue.</small
+                {#if item.status === 'interrupted'}<small class="muted-text">Stopped</small
                   >{/if}{#if item.result}<div class="error-banner" role="alert">
                     {item.result}
                   </div>{/if}

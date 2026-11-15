@@ -56,7 +56,8 @@
     search = '';
   });
   const following = $derived.by(() => {
-    const chat = sessions.find((session) => session.id === page.params.id);
+    // Archived ones too: archiving the open chat keeps its place's chats showing.
+    const chat = workspace.sessions.find((session) => session.id === page.params.id);
     if (chat) return chat.projectId ?? CLOUD;
     if (page.url.pathname === '/new') return page.url.searchParams.get('project') ?? undefined;
     return undefined;

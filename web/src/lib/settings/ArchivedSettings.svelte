@@ -56,7 +56,6 @@
 
 <section class="settings-section" aria-label="Archived chats">
   <SettingsHeading page title="Archived chats">
-    Chats you archived stay here until you restore or delete them.
     {#snippet action()}{#if archived.length}<button
           class="button subtle small"
           disabled={!!busy}

@@ -26,7 +26,7 @@ import { watchCommands } from './watch-link.ts';
 import { loadPty, terminalLink } from './terminal-link.ts';
 import { listProjects } from './projects.ts';
 import type { ToolHost } from './tools/run.ts';
-import type { ToolAnswer } from './tool-bridge.ts';
+import type { ToolAnswer } from './claude.ts';
 
 /** A reply in progress, and the tool calls it is waiting on (by call id). */
 interface ActiveRun {

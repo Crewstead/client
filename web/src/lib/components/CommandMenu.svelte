@@ -33,7 +33,7 @@
     >
       <span class="command-name"
         >{prefix}{command.name}{#if command.args}<small>{command.args}</small>{/if}</span
-      ><span class="command-hint">{command.hint}</span>
+      >{#if command.hint}<span class="command-hint">{command.hint}</span>{/if}
     </li>
   {/each}
 </ul>

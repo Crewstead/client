@@ -7,26 +7,29 @@ const returnPage = () =>
   (globalThis as { crewsteadDesktop?: { oauthReturn?: () => Promise<number | string> } })
     .crewsteadDesktop?.oauthReturn;
 
-/** Whether a sign-in can come back through this computer: only in the desktop app. */
-export const canReturnHere = () => !!returnPage();
 const WAIT_MS = 5 * 60_000;
+
+/** The app's return page port; none in a browser, or when the port is taken (the hub's page then). */
+async function returnPort() {
+  const port = await returnPage()?.().catch(() => undefined);
+  return typeof port === 'number' ? port : undefined;
+}
 
 /**
  * Opens a server's sign-in page and watches for the sign-in to land. In the Crewstead app the page
- * opens in the computer's browser; in a browser, in a new tab, opened before the hub answers so it is
- * not blocked as a pop-up. `done` reloads the list; `link` is set when no tab could be opened.
- * `here` sends the owner back through the app's return page on localhost, for services that allow
- * nothing else.
+ * opens in the computer's browser and comes back through the app's return page on localhost, which
+ * services allow apps (the hub falls back to its own page when one does not); in a browser, in a new
+ * tab, opened before the hub answers so it is not blocked as a pop-up, and back to the hub. `done`
+ * reloads the list; `link` is set when no tab could be opened.
  */
 export class McpSignIn {
   waiting = $state('');
   link = $state('');
   private timer: ReturnType<typeof setInterval> | undefined;
 
-  async start(id: string, signedIn: () => boolean, done: () => Promise<void>, here = false) {
+  async start(id: string, signedIn: () => boolean, done: () => Promise<void>) {
     const desktop = 'crewsteadDesktop' in globalThis;
-    const port = here ? await returnPage()?.() : undefined;
-    if (typeof port === 'string') throw new Error(port);
+    const port = desktop ? await returnPort() : undefined;
     const tab = desktop ? null : window.open('', '_blank');
     this.link = '';
     try {

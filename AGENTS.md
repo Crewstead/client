@@ -12,10 +12,14 @@ This file does not appoint an agent lead or authorize additional agents.
   Codex app-server, or OpenCode as the app engine, including indirect SDK binary wrappers.
 - Owner exception (2026-10-30): the machine daemon may run the official, unmodified `claude` program as a
   Personal-only model on the user's own machine, signed in by that user through Anthropic's own flow, with
-  Claude Code's tools, MCP servers and session history off. Never on the hub server, never for organisation
-  models, and never read, copy or store its sign-in. See `docs/plan/10-backends.md` "Claude Code".
+  Claude Code's tools, MCP servers and session history off. Never on the hub server (except below), never for
+  organisation models, and never read, copy or store its sign-in. See `docs/plan/10-backends.md` "Claude Code".
   Owner update (2026-10-30): its owner may also use it in an organisation workspace that allows members'
   personal models; it stays that owner's personal model there and is never offered to other members.
+  Owner update (2026-11-15): the hub may also run the official, unmodified `claude` program for the hub's
+  operator only, in an isolated container on the hub's server, signed in by that operator through
+  Anthropic's own flow. Its sign-in stays in that container's storage; hub code never reads it. Never for
+  organisation models or other members. See `docs/plan/30-hosted-claude-code.md`.
 - Use supported direct provider integrations. Existing CLI auth files must stay untouched and are not app credentials.
 - Keep optional modules removable through explicit interfaces and lifecycle contracts; read `docs/plan/22-modularity.md`.
 - No application-level conversation encryption, custom vault, or recovery-key implementation now.

@@ -3,6 +3,7 @@
 import { build } from 'esbuild';
 import { spawnSync } from 'node:child_process';
 import { copyFileSync, cpSync, mkdirSync, rmSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -32,7 +33,11 @@ await build({
   },
 });
 mkdirSync(resolve(out, 'daemon'), { recursive: true });
-copyFileSync(resolve(root, '../daemon/src/mcp-bridge.mjs'), resolve(out, 'daemon/mcp-bridge.mjs'));
+// Claude Code's bridge to the hub's tools, beside the bundle, where core's runner looks for it.
+const core = createRequire(resolve(root, '../daemon/package.json')).resolve(
+  '@crewstead/core/adapter-claude-code',
+);
+copyFileSync(resolve(dirname(core), 'mcp-bridge.mjs'), resolve(out, 'daemon/mcp-bridge.mjs'));
 // The interface, built fresh from this checkout's web app (never an older build left in web/build).
 const web = resolve(root, '../web');
 const vite = spawnSync(process.execPath, [resolve(web, 'node_modules/vite/bin/vite.js'), 'build'], {

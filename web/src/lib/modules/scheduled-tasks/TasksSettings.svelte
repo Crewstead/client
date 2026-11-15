@@ -23,8 +23,7 @@
 
 <section class="settings-section" aria-label="Scheduled">
   <SettingsHeading page title="Scheduled tasks">
-    Prompts sent into a chat at set times. A run is posted in its chat only when it has something to
-    tell you; every run is kept in the task’s history.
+    Prompts sent at set times. A run posts in its chat only when it has something to say.
   </SettingsHeading>
   {#if error}<p class="error-banner" role="alert">{error}</p>{/if}
   {#if list?.length}

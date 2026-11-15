@@ -54,7 +54,7 @@
             checked: computer.browser,
             disabled: !computer.browser && !here,
             hint: computer.browser
-              ? 'A headless browser on that computer'
+              ? undefined
               : here
                 ? 'Turn on a headless browser here'
                 : 'Turn on at the computer, in its Crewstead app',
@@ -70,7 +70,7 @@
         ? [
             {
               label: 'Turn on whole computer',
-              hint: 'Chats may work anywhere here, as you; every change asks first',
+              hint: 'Works as you; every change asks first',
               run: () => set('enabled', true),
             },
           ]

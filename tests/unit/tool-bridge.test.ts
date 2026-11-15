@@ -5,10 +5,10 @@ import { join } from 'node:path';
 import { createInterface } from 'node:readline';
 import { afterAll, beforeAll, expect, it } from 'vitest';
 import { projectRoot } from '../../daemon/src/projects.ts';
-import { openToolBridge } from '../../daemon/src/tool-bridge.ts';
+import { openToolBridge } from '@crewstead/core/adapter-claude-code';
 
 // Runs on Linux, macOS and Windows (CI runs it on Windows too): the bridge Claude Code uses for the
-// hub's tools, over a socket file or a named pipe.
+// hub's tools (from core), over a socket file or a named pipe.
 let folder: string;
 beforeAll(async () => {
   folder = await mkdtemp(join(tmpdir(), 'crewstead-bridge-'));

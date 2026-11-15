@@ -23,9 +23,9 @@
     changed: number;
   } = $props();
   const tabs = [
-    { id: 'live', label: 'Live', icon: Activity, hint: 'Subagents, commands, terminals, browsers' },
-    { id: 'files', label: 'Files', icon: Files, hint: 'Changed and attached files, and the place' },
-    { id: 'chat', label: 'Chat', icon: MessageSquare, hint: 'Usage, skills and scheduled tasks' },
+    { id: 'live', label: 'Live', icon: Activity },
+    { id: 'files', label: 'Files', icon: Files },
+    { id: 'chat', label: 'Chat', icon: MessageSquare },
   ] as const;
   function pick(tab: PanelTab) {
     current = tab;
@@ -59,7 +59,6 @@
       aria-selected={current === tab.id}
       aria-controls={`panel-pane-${tab.id}`}
       tabindex={current === tab.id ? 0 : -1}
-      title={tab.hint}
       onclick={() => pick(tab.id)}
       onkeydown={keydown}
       ><tab.icon size={14} />{tab.label}{#if tab.id === 'live'}<i

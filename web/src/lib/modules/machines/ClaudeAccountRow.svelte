@@ -27,7 +27,6 @@
   const items: MenuItem[] = $derived([
     {
       label: account.signedIn ? 'Sign in again' : 'Sign in',
-      hint: `Opens the sign-in page in the browser on ${machine.name}`,
       disabled: account.signingIn,
       run: () => act(() => claudeAccounts.login(machine.id, account.id)),
     },

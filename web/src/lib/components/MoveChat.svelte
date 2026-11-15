@@ -46,8 +46,9 @@
       <button
         disabled={busy}
         onclick={(event) => move(null, event.currentTarget.closest('dialog')!)}
-        ><Cloud size={14} /><span>Cloud <small>On the hub only</small></span
-        >{#if !session.projectId}<Check size={14} />{/if}</button
+        ><Cloud size={14} /><span>Cloud</span>{#if !session.projectId}<Check
+            size={14}
+          />{/if}</button
       >
     </li>
     {#each computers as computer (computer)}

@@ -55,8 +55,7 @@
 
 <section class="settings-section" aria-label="Computers">
   <SettingsHeading page title="Computers">
-    Where chats can work: in a project folder, or on the whole computer when you allow it there.
-    Choose one in the prompt box.
+    Folders and computers chats can work in.
     {#snippet action()}{#if desktop?.addProject}<button
           class="button subtle small"
           disabled={adding}

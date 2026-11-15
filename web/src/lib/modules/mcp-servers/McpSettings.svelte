@@ -24,10 +24,10 @@
   $effect(() => void refresh());
   const signIn = new McpSignIn();
   $effect(() => () => signIn.stop());
-  function startSignIn(id: string, here?: boolean) {
+  function startSignIn(id: string) {
     error = '';
     signIn
-      .start(id, () => !!list?.find((server) => server.id === id)?.signIn?.signedIn, refresh, here)
+      .start(id, () => !!list?.find((server) => server.id === id)?.signIn?.signedIn, refresh)
       .catch((cause: unknown) => {
         error = cause instanceof Error ? cause.message : 'Could not start the sign-in.';
       });
@@ -45,8 +45,7 @@
 
 <section class="settings-section" aria-label="MCP servers">
   <SettingsHeading page title="MCP servers">
-    Other services’ tools for your Personal chats, through the Model Context Protocol. Each call
-    asks you first unless you allow that tool.
+    Tools from other services. Each call asks first unless you allow it.
     {#snippet action()}<button class="button subtle small" onclick={() => (editing = {})}
         ><Plus size={14} aria-hidden="true" />Add server</button
       >{/snippet}
@@ -59,7 +58,7 @@
           {server}
           {act}
           edit={() => (editing = { server })}
-          signIn={(here) => startSignIn(server.id, here)}
+          signIn={() => startSignIn(server.id)}
           waiting={signIn.waiting === server.id}
           link={signIn.waiting === server.id ? signIn.link : ''}
         />

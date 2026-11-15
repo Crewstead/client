@@ -65,7 +65,6 @@
           {
             label: 'Browser',
             checked: project.rules.browser,
-            hint: 'A headless browser on that computer',
             run: () => setRule('browser', !project.rules.browser),
           },
         ]

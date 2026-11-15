@@ -66,7 +66,8 @@
           checked={mode === option.value}
           onchange={() => choose(option.value)}
         />
-        <span class="effort-option"><span>{option.label}</span><small>{option.hint}</small></span
+        <span class="effort-option"
+          ><span>{option.label}</span>{#if option.hint}<small>{option.hint}</small>{/if}</span
         >{#if mode === option.value}<Check size={14} />{/if}
       </label>
     {/each}

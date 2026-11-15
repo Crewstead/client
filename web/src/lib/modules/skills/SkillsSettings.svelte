@@ -33,12 +33,10 @@
     {
       label: 'On',
       checked: skill.enabled,
-      hint: 'Offered in chats',
       run: () => act(() => skills.update(skill.id, { enabled: !skill.enabled })),
     },
     {
       label: 'Edit',
-      hint: 'Name, description and instructions',
       run: () => (editing = { scope: skill.scope, skill }),
     },
     {

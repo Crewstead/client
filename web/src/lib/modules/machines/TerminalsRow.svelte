@@ -46,7 +46,7 @@
         ? [
             {
               label: 'Turn on terminals',
-              hint: 'Open shells here from any device: in projects (sandboxed) and the whole computer (as you)',
+              hint: 'Shells here from any device',
               run: turnOn,
             },
           ]

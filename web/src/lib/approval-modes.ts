@@ -1,8 +1,8 @@
 import type { ApprovalMode } from '@crewstead/core/protocol';
 
 /** The three ways tool calls are approved, as the prompt box and Settings describe them. */
-export const approvalModes: Array<{ value: ApprovalMode; label: string; hint: string }> = [
-  { value: 'ask', label: 'Ask first', hint: 'You approve each tool use' },
+export const approvalModes: Array<{ value: ApprovalMode; label: string; hint?: string }> = [
+  { value: 'ask', label: 'Ask first' },
   {
     value: 'auto',
     label: 'Auto-review',

@@ -58,7 +58,6 @@
 
 <section class="settings-section" aria-label="Other accounts">
   <SettingsHeading title="Other accounts on this device">
-    Switch without signing in again, on this hub or another one.
     {#snippet action()}<button class="button subtle small" onclick={() => auth.openAccount()}
         >Add account</button
       >{/snippet}

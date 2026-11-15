@@ -2,11 +2,11 @@ import type { Effort } from '@crewstead/core/protocol';
 
 const KEY = 'crewstead-effort';
 export type EffortChoice = Effort | 'auto';
-export const efforts: Array<{ value: EffortChoice; label: string; hint: string }> = [
-  { value: 'auto', label: 'Auto', hint: 'The model’s default' },
-  { value: 'low', label: 'Low', hint: 'Quicker, thinks less' },
-  { value: 'medium', label: 'Medium', hint: 'Balanced' },
-  { value: 'high', label: 'High', hint: 'Thinks longest, uses more' },
+export const efforts: Array<{ value: EffortChoice; label: string }> = [
+  { value: 'auto', label: 'Auto' },
+  { value: 'low', label: 'Low' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'high', label: 'High' },
 ];
 const choices = efforts.map((option) => option.value);
 

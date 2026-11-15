@@ -122,7 +122,6 @@
         <button
           type="button"
           aria-pressed={effortSetting.value === option.value}
-          title={option.hint}
           onclick={() => effortSetting.set(option.value)}>{option.label}</button
         >
       {/each}

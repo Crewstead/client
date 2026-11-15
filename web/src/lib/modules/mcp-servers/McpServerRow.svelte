@@ -4,7 +4,6 @@
   import OptionPicker from '#lib/components/OptionPicker.svelte';
   import RowMenu, { type MenuItem } from '#lib/components/RowMenu.svelte';
   import { mcpServers } from './api.ts';
-  import { canReturnHere } from './sign-in.svelte.ts';
   let {
     server,
     edit,
@@ -17,11 +16,8 @@
     edit: () => void;
     /** Runs a change, then reloads the list (showing any error). */
     act: (action: () => Promise<unknown>) => Promise<void>;
-    /**
-     * Opens the server's own sign-in page, for servers that sign their users in; `here` comes back
-     * through this computer's localhost.
-     */
-    signIn: (here?: boolean) => void;
+    /** Opens the server's own sign-in page, for servers that sign their users in. */
+    signIn: () => void;
     /** A sign-in is open in another window and being waited for. */
     waiting: boolean;
     /** The sign-in page, when it could not be opened in a new tab. */
@@ -30,33 +26,21 @@
   const needsSignIn = $derived(!!server.signIn && !server.signIn.signedIn);
   let open = $state(false);
   let checking = $state(false);
-  const rules: Array<{ value: McpToolRule; label: string; hint: string }> = [
+  const rules: Array<{ value: McpToolRule; label: string; hint?: string }> = [
     { value: 'ask', label: 'Ask first', hint: 'Follows the chat’s approval mode' },
-    { value: 'allow', label: 'Always allow', hint: 'Runs without asking' },
-    { value: 'off', label: 'Off', hint: 'Models never see it' },
+    { value: 'allow', label: 'Always allow' },
+    { value: 'off', label: 'Off' },
   ];
-  // For services that only send people back to localhost; the desktop app has that page.
-  const signInHere: MenuItem[] = canReturnHere()
-    ? [
-        {
-          label: 'Sign in through this computer',
-          hint: 'For services that only return to localhost',
-          run: () => signIn(true),
-        },
-      ]
-    : [];
   const usable = $derived(server.tools.filter((tool) => tool.rule !== 'off').length);
   const items: MenuItem[] = $derived([
     {
       label: 'On',
       checked: server.enabled,
-      hint: 'Offered in your Personal chats',
       run: () => act(() => mcpServers.update(server.id, { enabled: !server.enabled })),
     },
     {
       label: checking ? 'Refreshing…' : 'Refresh',
       disabled: checking,
-      hint: 'List its tools again',
       run: async () => {
         checking = true;
         await act(() => mcpServers.check(server.id));
@@ -66,28 +50,12 @@
     ...(server.signIn
       ? server.signIn.signedIn
         ? [
-            {
-              label: 'Sign in again',
-              hint: 'Through the service’s own page',
-              run: () => signIn(),
-            },
-            ...signInHere,
-            {
-              label: 'Sign out',
-              hint: 'Crewstead forgets the sign-in',
-              run: () => act(() => mcpServers.signOut(server.id)),
-            },
+            { label: 'Sign in again', run: () => signIn() },
+            { label: 'Sign out', run: () => act(() => mcpServers.signOut(server.id)) },
           ]
-        : [
-            { label: 'Sign in', hint: 'Through the service’s own page', run: () => signIn() },
-            ...signInHere,
-          ]
+        : [{ label: 'Sign in', run: () => signIn() }]
       : []),
-    {
-      label: 'Edit',
-      hint: server.signIn ? 'Name and address' : 'Name, address and headers',
-      run: edit,
-    },
+    { label: 'Edit', run: edit },
     {
       label: 'Remove',
       confirm: 'Remove? Click again to confirm.',

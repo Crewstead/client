@@ -4,7 +4,8 @@
  */
 export interface Command {
   name: string;
-  hint: string;
+  /** What it does, when the name does not say. */
+  hint?: string;
   /** Shown after the name, e.g. "<name>"; the command then needs that text. */
   args?: string;
   run?: (argument: string) => void | Promise<void>;

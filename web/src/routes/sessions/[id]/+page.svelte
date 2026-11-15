@@ -84,17 +84,16 @@
   let composer = $state<ReturnType<typeof Composer>>();
   const commands: Command[] = [
     { name: 'compact', hint: 'Summarize earlier messages to free up the model’s context' },
-    { name: 'stats', hint: 'Show this chat’s statistics', run: () => stats?.open() },
+    { name: 'stats', run: () => stats?.open() },
     {
       name: 'rename',
       args: '<name>',
-      hint: 'Rename this chat',
       run: async (title) => {
         if (conversation.session)
           await workspace.setPreferences(conversation.session.id, { title: title.slice(0, 100) });
       },
     },
-    { name: 'new', hint: 'Start a new chat', run: () => goto(resolve('/new')) },
+    { name: 'new', run: () => goto(resolve('/new')) },
   ];
   // Retrying, editing and forking from the timeline go with the model and place picked below.
   const actions: ChatActions = {
