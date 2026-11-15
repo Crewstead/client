@@ -44,14 +44,12 @@
     <span class="project-text">
       <span
         class="row-name"
-        title={`A throwaway Linux sandbox per chat without a project, to write files and run code: no access to the hub’s data or your computers, public websites only. Deleted after a day unused; turning it off deletes them all.`}
+        title="A throwaway Linux sandbox per chat without a project, to write files and run code: no access to the hub’s data or your computers, public websites only. Deleted after a day unused; turning it off deletes them all."
         >Code sandbox</span
       >
       <span class="row-status"
-        ><span
-          class="status-dot"
-          class:online={view.enabled && !view.missing.length}
-        ></span>{view.missing.length
+        ><span class="status-dot" class:online={view.enabled && !view.missing.length}></span>{view
+          .missing.length
           ? `Not available on this hub: it needs ${view.missing.join(', ')}`
           : busy && !view.enabled
             ? 'Setting up (the first time downloads gVisor)'
