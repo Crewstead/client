@@ -24,8 +24,7 @@ export interface SlotProps {
 export type SlotName = keyof SlotProps;
 
 /** Where a section sits in the Settings list (docs/plan/29-settings-design.md in the server repository). */
-export type SettingsGroup =
-  'general' | 'chats' | 'tools' | 'account' | 'developer';
+export type SettingsGroup = 'general' | 'chats' | 'tools' | 'account' | 'developer';
 
 export interface SettingsTab {
   id: string;
