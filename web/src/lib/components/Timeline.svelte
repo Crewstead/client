@@ -2,9 +2,15 @@
   import { tick } from 'svelte';
   import { resolve } from '$app/paths';
   import { ArrowDown, Bot, ChevronRight, Clock, Cloud, Folder, Sparkles } from '@lucide/svelte';
-  import type { ChatBranch, TimelineItem } from '@crewstead/core/protocol';
+  import {
+    QUESTION_TOOL,
+    questionsOf,
+    type ChatBranch,
+    type TimelineItem,
+  } from '@crewstead/core/protocol';
   import Markdown from '#lib/markdown/Markdown.svelte';
   import ToolItem from './ToolItem.svelte';
+  import QuestionCard from './QuestionCard.svelte';
   import Attachments from './attachments/Attachments.svelte';
   import ExploredGroup from './ExploredGroup.svelte';
   import ChangedFiles from './ChangedFiles.svelte';
@@ -136,6 +142,8 @@
   $effect(() => {
     const length = items.length;
     const tail = items.at(-1)?.text;
+    // Also when the reply ends: what it ended with may grow then (its questions open).
+    void running;
     if ((length || tail) && nearBottom && viewport)
       queueMicrotask(() => {
         viewport.scrollTop = viewport.scrollHeight;
@@ -188,7 +196,16 @@
         </div>
       {:else}
         {@const item = entry.item}
-        {#if item.role === 'tool'}<div class="tool-row"><ToolItem {item} {decide} /></div>
+        {@const asked = item.toolName === QUESTION_TOOL ? questionsOf(item.arguments) : undefined}
+        {#if asked}<div class="tool-row">
+            <QuestionCard
+              questions={asked}
+              open={!!actions && !running && item.id === lastTurn}
+              disabled={actions?.disabled}
+              answer={(text) => actions?.answer(text) ?? Promise.resolve(false)}
+            />
+          </div>
+        {:else if item.role === 'tool'}<div class="tool-row"><ToolItem {item} {decide} /></div>
         {:else if item.role === 'notice' && item.notice}
           <!-- Another model or another place from here on: what changed, and from what. -->
           <p class="summary-divider moved-divider" title={item.text}>

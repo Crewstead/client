@@ -8,6 +8,8 @@ export interface ChatActions {
   version(anchor: string, version: number): Promise<void>;
   /** Opens a new chat with the messages up to the end of this turn. */
   fork(itemId: string): Promise<void>;
+  /** Sends the owner's answers to the model's questions, as their next message. */
+  answer(text: string): Promise<boolean>;
 }
 
 /** Where a prompt's versions are kept, which is shown, and how many there are. */

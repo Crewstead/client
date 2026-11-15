@@ -97,6 +97,12 @@
     { name: 'new', run: () => goto(resolve('/new')) },
   ];
   // Retrying, editing and forking from the timeline go with the model and place picked below.
+  /** What the prompt box has chosen, sent with a message. */
+  const choices = () => ({
+    ...(model?.effort ? { effort: effortSetting.forRequest() } : {}),
+    modelId: chosen,
+    projectId: project,
+  });
   const actions: ChatActions = {
     get disabled() {
       const status = conversation.session?.status;
@@ -110,12 +116,8 @@
       );
     },
     again: (itemId, text) =>
-      conversation.again(itemId, workspace.context, {
-        ...(text ? { text } : {}),
-        ...(model?.effort ? { effort: effortSetting.forRequest() } : {}),
-        modelId: chosen,
-        projectId: project,
-      }),
+      conversation.again(itemId, workspace.context, { ...(text ? { text } : {}), ...choices() }),
+    answer: (text) => conversation.send(text, workspace.context, choices()),
     version: (anchor, version) => conversation.version(anchor, version, workspace.context),
     fork: async (itemId) => {
       const id = await conversation.fork(itemId, workspace.context);
@@ -314,19 +316,9 @@
           sending={conversation.sending}
           bind:this={composer}
           send={(text, attachments) =>
-            conversation.send(text, workspace.context, {
-              ...(model?.effort ? { effort: effortSetting.forRequest() } : {}),
-              modelId: chosen,
-              projectId: project,
-              attachments,
-            })}
+            conversation.send(text, workspace.context, { ...choices(), attachments })}
           queue={(text, attachments) =>
-            conversation.queue(text, workspace.context, {
-              ...(model?.effort ? { effort: effortSetting.forRequest() } : {}),
-              modelId: chosen,
-              projectId: project,
-              attachments,
-            })}
+            conversation.queue(text, workspace.context, { ...choices(), attachments })}
           images={!!model?.images}
           stop={() => conversation.command(`/sessions/${session.id}/stop`, workspace.context)}
           {commands}
