@@ -9,7 +9,7 @@
   import ChatRow from './ChatRow.svelte';
   import PlaceRow from './PlaceRow.svelte';
   import AddProject from './AddProject.svelte';
-  import { CLOUD, groupsOf, placesOf, rearranged } from './sidebar-places.ts';
+  import { CLOUD, chatOrder, groupsOf, placesOf, rearranged } from './sidebar-places.ts';
   import { PlaceReorder } from './place-reorder.svelte.ts';
   import { flip } from 'svelte/animate';
   import AccountMenu from './AccountMenu.svelte';
@@ -34,6 +34,7 @@
       sessions,
       workspace.catalog?.projects ?? [],
       workspace.catalog?.preferences.placeOrder,
+      workspace.catalog?.preferences.pinnedOrder,
     ),
   );
   // Places move among their own computer's; the saved order is the whole list.
@@ -69,9 +70,54 @@
     search = '';
   }
   const words = $derived(search.trim().toLowerCase());
-  const chats = $derived(
+  const matching = $derived(
     (shown?.chats ?? []).filter((session) => session.title.toLowerCase().includes(words)),
   );
+  // Pinned chats move by dragging one over another (or Alt with the arrows); `pinLive` is the order
+  // shown while dragging.
+  let pinLive = $state<string[] | null>(null);
+  const pinnedIds = $derived(matching.filter((chat) => chat.pinned).map((chat) => chat.id));
+  const chats = $derived(
+    pinLive
+      ? [
+          ...pinLive.flatMap((id) => matching.filter((chat) => chat.id === id)),
+          ...matching.filter((chat) => !chat.pinned),
+        ]
+      : matching,
+  );
+  /** Saves `local` (pinned chats shown here) into the workspace's order of every pinned chat. */
+  function savePinned(local: string[], id: string) {
+    const all = chatOrder(
+      sessions.filter((chat) => chat.pinned && chat.id !== id),
+      workspace.catalog?.preferences.pinnedOrder,
+    ).map((chat) => chat.id);
+    const at = local.indexOf(id);
+    const next = all.indexOf(local[at + 1] ?? '');
+    const previous = all.indexOf(local[at - 1] ?? '');
+    all.splice(next >= 0 ? next : previous >= 0 ? previous + 1 : all.length, 0, id);
+    void workspace.setPinnedOrder(all).catch(() => {
+      moveError = 'The new order could not be saved.';
+    });
+  }
+  function pinOver(id: string) {
+    const moving = dragging?.id;
+    if (!moving || moving === id || !pinnedIds.includes(moving)) return;
+    // It takes the place of the chat it is over: below it when coming from above.
+    const current = pinLive ?? pinnedIds;
+    const down = current.indexOf(moving) < current.indexOf(id);
+    const order = current.filter((chat) => chat !== moving);
+    order.splice(order.indexOf(id) + (down ? 1 : 0), 0, moving);
+    if (order.join() !== pinLive?.join()) pinLive = order;
+  }
+  function pinKey(event: KeyboardEvent, id: string) {
+    const step = event.key === 'ArrowUp' ? -1 : event.key === 'ArrowDown' ? 1 : 0;
+    const at = pinnedIds.indexOf(id);
+    if (!event.altKey || !step || at + step < 0 || at + step >= pinnedIds.length) return;
+    event.preventDefault();
+    const order = pinnedIds.filter((chat) => chat !== id);
+    order.splice(at + step, 0, id);
+    savePinned(order, id);
+  }
   const listed = $derived.by(() => {
     const matching = places.filter((place) =>
       `${place.name} ${place.machine ?? ''}`.toLowerCase().includes(words),
@@ -137,7 +183,10 @@
   }
   const dragOf = (session: (typeof sessions)[number]) => (started: boolean) => {
     dragging = started ? { id: session.id, from: session.projectId ?? CLOUD } : undefined;
-    if (!started) over = '';
+    if (started) return;
+    over = '';
+    if (pinLive && pinLive.join() !== pinnedIds.join()) savePinned(pinLive, session.id);
+    pinLive = null;
   };
 </script>
 
@@ -227,6 +276,14 @@
           selected={page.params.id === session.id}
           {close}
           drag={dragOf(session)}
+          {...session.pinned
+            ? {
+                reorder: {
+                  over: () => pinOver(session.id),
+                  key: (event: KeyboardEvent) => pinKey(event, session.id),
+                },
+              }
+            : {}}
         />
       {:else}
         <p class="place-empty">{words ? 'No chats match.' : 'No chats here yet.'}</p>

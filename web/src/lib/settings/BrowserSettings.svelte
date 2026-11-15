@@ -1,9 +1,11 @@
 <script lang="ts">
   import SettingsHeading from '#lib/components/SettingsHeading.svelte';
   import LoadingRows from '#lib/components/LoadingRows.svelte';
+  import OptionPicker from '#lib/components/OptionPicker.svelte';
   import { siteData, type SiteCount } from '#lib/desktop/site-data.ts';
   import '@crewstead/ui/settings-cards.css';
   import '@crewstead/ui/projects.css';
+  import '@crewstead/ui/providers.css';
   import '@crewstead/ui/site-data.css';
   const plural = (count: number) => (count === 1 ? '1 cookie' : `${count} cookies`);
   const reason = (cause: unknown) =>
@@ -111,28 +113,32 @@
   </SettingsHeading>
   <div class="settings-card site-import">
     {#if sources.length}
-      <label class="site-import-source">
-        <span>From</span>
-        <select value={source} onchange={(event) => pick(event.currentTarget.value)}>
-          <option value="">Choose a browser…</option>
-          {#each sources as entry (entry.id)}<option value={entry.id}>{entry.label}</option>{/each}
-        </select>
-      </label>
+      <div class="site-import-source">
+        <span aria-hidden="true">From</span>
+        <OptionPicker
+          value={source}
+          options={sources.map((entry) => ({ value: entry.id, label: entry.label }))}
+          label="Import from"
+          placeholder="Choose a browser"
+          wide
+          onchange={pick}
+        />
+      </div>
     {:else}
       <p class="row-status">No Chrome, Chromium, Edge, Brave or Vivaldi profile found here.</p>
     {/if}
     {#if sites}
       <input type="search" placeholder="Find a site" aria-label="Find a site" bind:value={filter} />
-      <ul class="site-import-list" aria-label="Sites to import">
+      <ul class="choose-list site-import-list" aria-label="Sites to import">
         {#each shown as entry (entry.site)}
           <li>
-            <label>
+            <label class="choose-row">
               <input type="checkbox" value={entry.site} bind:group={chosen} />
               <span>{entry.site}</span>
               <span class="row-status">{plural(entry.cookies)}</span>
             </label>
           </li>
-        {:else}<li class="row-status">No sites match.</li>{/each}
+        {:else}<li class="provider-empty row-status">No sites match.</li>{/each}
       </ul>
       <div class="site-import-actions">
         {#if note}<span class="row-status" role="status">{note}</span>{/if}

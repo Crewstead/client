@@ -106,7 +106,11 @@
               : 'Sign in to use it'
             : server.problem
               ? 'Not reachable'
-              : `${server.signIn ? 'Signed in · ' : ''}${usable} of ${server.tools.length} tools in use`}</span
+              : `${server.signIn ? 'Signed in · ' : ''}${
+                  server.enabled
+                    ? `${usable} of ${server.tools.length} tools in use`
+                    : `${server.tools.length} tools`
+                }`}</span
         >
       </span>
     </button>

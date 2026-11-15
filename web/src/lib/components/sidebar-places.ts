@@ -1,6 +1,5 @@
-import type { Project, Session } from '@crewstead/core/protocol';
-
-type Chat = Omit<Session, 'items'>;
+import type { Project } from '@crewstead/core/protocol';
+import type { ChatSummary as Chat } from '#lib/api.ts';
 
 /** The id the cloud goes by in the left panel; chats there have no project. */
 export const CLOUD = 'cloud';
@@ -23,9 +22,14 @@ export interface Place {
  * Every place: each project and whole computer the hub knows (with or without chats), places only past
  * chats name (a computer that is offline or removed), and the cloud. In the owner's own order once
  * they arranged it (places added since go after, busiest first); until then busiest first, the cloud
- * last. Chats keep the order given, pinned first.
+ * last. Chats are in `chatOrder`.
  */
-export function placesOf(chats: Chat[], projects: Project[], order: string[] = []): Place[] {
+export function placesOf(
+  chats: Chat[],
+  projects: Project[],
+  order: string[] = [],
+  pinnedOrder: string[] = [],
+): Place[] {
   const places = new Map<string, Place>();
   const add = (id: string, saved?: string) => {
     let place = places.get(id);
@@ -53,7 +57,7 @@ export function placesOf(chats: Chat[], projects: Project[], order: string[] = [
     if (chat.updatedAt > place.latest) place.latest = chat.updatedAt;
   }
   for (const place of [...places.values(), cloud])
-    place.chats.sort((a, b) => Number(b.pinned) - Number(a.pinned));
+    place.chats = chatOrder(place.chats, pinnedOrder);
   const listed = [...places.values()].sort(
     (a, b) => b.latest.localeCompare(a.latest) || a.name.localeCompare(b.name),
   );
@@ -95,4 +99,23 @@ export function rearranged(ids: string[], part: string[]) {
   const moved = new Set(part);
   let next = 0;
   return ids.map((id) => (moved.has(id) ? part[next++]! : id));
+}
+
+const written = (chat: Chat) => chat.lastMessageAt ?? chat.createdAt;
+
+/**
+ * Pinned chats first, in the order the owner arranged (ones pinned since go after them), then the
+ * rest by their last message, newest first.
+ */
+export function chatOrder(chats: Chat[], pinnedOrder: string[] = []): Chat[] {
+  const rank = (chat: Chat) => {
+    const at = pinnedOrder.indexOf(chat.id);
+    return at < 0 ? pinnedOrder.length : at;
+  };
+  return [...chats].sort(
+    (a, b) =>
+      Number(b.pinned) - Number(a.pinned) ||
+      (a.pinned ? rank(a) - rank(b) : 0) ||
+      written(b).localeCompare(written(a)),
+  );
 }

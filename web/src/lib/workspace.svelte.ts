@@ -1,7 +1,7 @@
 import { getContext } from 'svelte';
 import type { ApprovalMode, ContextId, Session } from '@crewstead/core/protocol';
 import { SvelteMap } from 'svelte/reactivity';
-import { request, scoped, type Catalog } from './api';
+import { request, scoped, type Catalog, type ChatSummary } from './api';
 import { newReply, notifier } from './notifications.svelte.ts';
 
 /** A chat whose reply is still going (working, or waiting for the owner). */
@@ -13,7 +13,7 @@ const CONTEXT_KEY = 'crewstead-context';
 export class Workspace {
   context = $state<ContextId>('personal');
   catalog = $state<Catalog | null>(null);
-  sessions = $state<Omit<Session, 'items'>[]>([]);
+  sessions = $state<ChatSummary[]>([]);
   /** Chats whose reply finished (or failed) while the owner was in another chat. */
   unseen = new SvelteMap<string, 'done' | 'failed'>();
   /** The chat open now; its own endings are seen as they happen. */
@@ -49,6 +49,16 @@ export class Workspace {
     const result = await request<Catalog['preferences']>('/preferences', {
       method: 'PATCH',
       body: JSON.stringify({ placeOrder: ids, context: this.context }),
+    });
+    if (this.catalog) this.catalog.preferences = result;
+  }
+
+  /** The order of this workspace's pinned chats; shown at once, saved for every device. */
+  async setPinnedOrder(ids: string[]) {
+    if (this.catalog) this.catalog.preferences = { ...this.catalog.preferences, pinnedOrder: ids };
+    const result = await request<Catalog['preferences']>('/preferences', {
+      method: 'PATCH',
+      body: JSON.stringify({ pinnedOrder: ids, context: this.context }),
     });
     if (this.catalog) this.catalog.preferences = result;
   }
@@ -109,7 +119,7 @@ export class Workspace {
   async refreshChats() {
     if (this.disposed) return;
     const context = this.context;
-    const sessions = await request<Omit<Session, 'items'>[]>(scoped('/sessions', context)).catch(
+    const sessions = await request<ChatSummary[]>(scoped('/sessions', context)).catch(
       () => undefined,
     );
     if (!sessions || context !== this.context) return;
@@ -118,7 +128,7 @@ export class Workspace {
   }
 
   /** Replies that ended while their chat was not open: marked until it is opened, and notified. */
-  private noteEndings(next: Omit<Session, 'items'>[]) {
+  private noteEndings(next: ChatSummary[]) {
     for (const session of next) {
       const before = this.sessions.find((entry) => entry.id === session.id);
       // A chat that appeared since the list was first read started idle (e.g. one a model made).
@@ -185,7 +195,7 @@ export class Workspace {
     try {
       const [catalog, sessions] = await Promise.all([
         request<Catalog>(scoped('/catalog', context)),
-        request<Omit<Session, 'items'>[]>(scoped('/sessions', context)),
+        request<ChatSummary[]>(scoped('/sessions', context)),
       ]);
       if (generation !== this.generation) return;
       this.catalog = catalog;

@@ -12,12 +12,15 @@
     selected,
     close,
     drag,
+    reorder,
   }: {
     session: Omit<Session, 'items'>;
     selected: boolean;
     close: () => void;
     /** Tells the list a drag of this chat started (true) or ended (false), to show where it can go. */
     drag?: (dragging: boolean) => void;
+    /** A pinned chat: another dragged over it takes its place; Alt with the arrows moves it. */
+    reorder?: { over: () => void; key: (event: KeyboardEvent) => void };
   } = $props();
   let moving = $state(false);
   /** On touch screens the actions live behind one button, so titles keep the row's width. */
@@ -54,6 +57,13 @@
     onclick={close}
     title={session.title}
     aria-label={session.title}
+    onkeydown={(event) => reorder?.key(event)}
+    ondragover={(event) => {
+      if (!reorder || !event.dataTransfer?.types.includes('application/x-crewstead-chat')) return;
+      event.preventDefault();
+      reorder.over();
+    }}
+    ondrop={(event) => reorder && event.preventDefault()}
     ondragstart={(event) => {
       event.dataTransfer?.setData('application/x-crewstead-chat', session.id);
       if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move';

@@ -57,10 +57,20 @@
   /* Messages fade out above the prompt box instead of being cut off at its edge. */
   mask-image: linear-gradient(to bottom, #000 calc(100% - 40px), transparent);
 }
+/* The chat runs on behind the prompt box's tab row, so the fade ends at the box itself; not when
+   terminals sit in between. */
+.conversation-main:not(:has(.terminal-drawer)) .timeline ~ .composer-area {
+  position: relative;
+  margin-top: -40px;
+  pointer-events: none;
+}
+.conversation-main:not(:has(.terminal-drawer)) .timeline ~ .composer-area > * {
+  pointer-events: auto;
+}
 .timeline-content {
   max-width: 800px;
   margin: auto;
-  padding: 24px 32px 44px;
+  padding: 24px 32px 84px;
 }
 .message {
   margin: 0 0 32px;
@@ -120,7 +130,7 @@
     min-height: 48px;
   }
   .timeline-content {
-    padding: 24px 20px 44px;
+    padding: 24px 20px 84px;
   }
   .user-message .message-content {
     max-width: 92%;

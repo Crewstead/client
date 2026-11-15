@@ -19,6 +19,9 @@
   list-style: none;
   cursor: pointer;
 }
+.option-placeholder {
+  color: var(--muted);
+}
 .option-picker summary::-webkit-details-marker {
   display: none;
 }
@@ -37,10 +40,11 @@
 .option-picker.wide summary {
   width: 100%;
 }
-/* Match the height of the text fields it sits beside. */
+/* Sized as the text fields it sits beside (base.css input). */
 .option-picker.wide summary {
-  min-height: 38px;
-  padding: 8px 10px;
+  min-height: 42px;
+  padding: 10px 12px;
+  font-size: 14px;
 }
 .option-picker.wide .option-list {
   left: 0;

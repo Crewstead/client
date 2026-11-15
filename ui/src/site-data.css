@@ -9,30 +9,22 @@
   align-items: center;
   gap: var(--space-2);
 }
-.site-import-source select {
+.site-import-source .option-picker {
   flex: 1;
   min-width: 0;
 }
+/* The model chooser's list (.choose-list, .choose-row), sized for a long list of sites. */
 .site-import-list {
-  max-height: 280px;
   margin: 0;
+  max-height: 280px;
+  border-color: var(--line);
+}
+/* Its rows pad themselves (.choose-row), not as the card's other lists do. */
+.settings-card.site-import > .site-import-list > li {
   padding: 0;
-  overflow: auto;
-  list-style: none;
-  border: 1px solid var(--line);
-  border-radius: 8px;
 }
-.site-import-list li {
-  padding: 6px 10px;
-  border-bottom: 1px solid var(--line-subtle);
-}
-.site-import-list li:last-child {
-  border-bottom: 0;
-}
-.site-import-list label {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
+.settings-card.site-import > .site-import-list > li.provider-empty {
+  padding: var(--space-3);
 }
 .site-import-list label > span:nth-child(2) {
   flex: 1;

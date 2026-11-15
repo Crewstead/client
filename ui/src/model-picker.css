@@ -59,6 +59,8 @@
 }
 .model-options svg {
   margin-left: auto;
+  /* Keeps its size beside a hint that wraps. */
+  flex-shrink: 0;
 }
 .model-label {
   display: inline-block;

@@ -55,6 +55,14 @@
   font-size: var(--text-sm);
   font-weight: 500;
 }
+/* A compact chip on the name's line, as on scheduled tasks, so the line keeps its height. */
+.mcp-server-name .pill {
+  flex-shrink: 0;
+  padding: 0 6px;
+  font-size: 10.5px;
+  letter-spacing: 0.3px;
+  line-height: 16px;
+}
 .mcp-server-host {
   overflow: hidden;
   color: var(--muted);

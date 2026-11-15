@@ -25,6 +25,8 @@ export interface Catalog {
     /** The approval mode set last, which new chats start with. */
     approvalMode: ApprovalMode;
     placeOrder?: string[];
+    /** The order of the pinned chats, by id. */
+    pinnedOrder?: string[];
     /** The model chosen last in this workspace, which a new chat starts with. */
     lastModelId?: string;
   };
@@ -66,6 +68,9 @@ export async function request<T>(path: string, options?: RequestInit): Promise<T
   if (body === undefined) throw new Error('The hub sent an answer this app cannot read.');
   return body as T;
 }
+
+/** A chat as the list has it: no messages, and when its last one was written. */
+export type ChatSummary = Omit<Session, 'items'> & { lastMessageAt?: string };
 
 export const scoped = (path: string, context: ContextId) => `${path}?context=${context}`;
 export const getSession = (id: string, context: ContextId) =>

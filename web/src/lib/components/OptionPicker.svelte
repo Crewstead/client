@@ -7,6 +7,7 @@
     label,
     disabled = false,
     wide = false,
+    placeholder = '',
     onchange,
   }: {
     value: Value;
@@ -16,6 +17,8 @@
     disabled?: boolean;
     /** Fill the available width, for use as a form field. */
     wide?: boolean;
+    /** Shown while no option is chosen. */
+    placeholder?: string;
     /** With onchange the parent owns the value (e.g. reloads it from the server); otherwise bind it. */
     onchange?: (value: Value) => void;
   } = $props();
@@ -47,10 +50,12 @@
 <details class="option-picker" class:disabled class:wide bind:this={details}>
   <summary
     bind:this={trigger}
-    aria-label={`${label}: ${chosen?.label ?? value}`}
+    aria-label={`${label}: ${chosen?.label ?? (value || placeholder)}`}
     tabindex={disabled ? -1 : 0}
     onclick={(event) => disabled && event.preventDefault()}
-    >{chosen?.label ?? value}<ChevronDown size={14} /></summary
+    >{#if chosen || value}{chosen?.label ?? value}{:else}<span class="option-placeholder"
+        >{placeholder}</span
+      >{/if}<ChevronDown size={14} /></summary
   >
   <fieldset class="option-list">
     <legend class="sr-only">{label}</legend>
