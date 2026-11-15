@@ -72,7 +72,6 @@
   >
   <div class="row-menu-items" role="menu">
     {#each items as item (item.label)}
-      {#if item.confirm}<hr />{/if}
       <button
         role={item.checked === undefined ? 'menuitem' : 'menuitemcheckbox'}
         aria-checked={item.checked}

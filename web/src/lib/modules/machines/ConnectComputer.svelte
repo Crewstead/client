@@ -1,7 +1,7 @@
 <script lang="ts">
   import { closeOutside } from '#lib/close-outside.ts';
   import { onMount } from 'svelte';
-  import { Check, Copy } from '@lucide/svelte';
+  import { Check, Cloud, Copy, Monitor } from '@lucide/svelte';
   import type { MachineView } from '@crewstead/core/protocol';
   import { serverUrl } from '#lib/auth/connection.ts';
   import { copyText } from '#lib/clipboard.ts';
@@ -18,8 +18,12 @@
     }
   ).crewsteadDesktop;
   let dialog = $state<HTMLDialogElement>();
+  /** Where Claude Code runs. The hub's own Claude Code is not built yet (docs/plan/30). */
+  let where = $state<'hub' | 'computer'>('computer');
   /** This computer, when the app here is already connected to this hub. */
   let here = $state<MachineView>();
+  /** A computer without the app (a server): connected with a command and a one-time token. */
+  let manual = $state(false);
   let created = $state<{ machine: MachineView; token: string }>();
   let online = $state(false);
   let busy = $state(false);
@@ -75,34 +79,35 @@
   onclose={finish}
 >
   <h2 id={`${id}-title`} class="dialog-title">Connect Claude Code</h2>
-  {#if here}
-    <p class="dialog-description" role="status">
-      {here.claudeCode
-        ? `This computer (${here.name}) is connected, with Claude Code. Its models are in your list.`
-        : `This computer (${here.name}) is connected. Sign in to Claude Code here (run claude once) and its models appear.`}
-    </p>
-  {:else if app?.useComputer}
-    <p class="dialog-description">Use Claude Code signed in on this computer.</p>
-    <button class="button primary" onclick={() => void app.useComputer?.()}
-      >Use this computer</button
+  <div class="place-choices" role="radiogroup" aria-label="Where Claude Code runs">
+    <button type="button" class="place-choice" role="radio" aria-checked={where === 'hub'} disabled
+      ><Cloud size={18} /><span
+        ><strong>On the hub</strong><small>Works when your computers are off · coming soon</small
+        ></span
+      ></button
     >
-  {:else}
-    <p class="dialog-description">
-      Open the Crewstead app on the computer where Claude Code is signed in; it offers to connect.
-    </p>
-    <a
-      class="button subtle"
-      href="https://github.com/Crewstead/client/releases/latest"
-      target="_blank"
-      rel="noreferrer">Get the app</a
+    <button
+      type="button"
+      class="place-choice"
+      role="radio"
+      aria-checked={where === 'computer'}
+      onclick={() => (where = 'computer')}
+      ><Monitor size={18} /><span
+        ><strong>On a computer</strong><small>Where Claude Code is signed in</small></span
+      ></button
     >
-  {/if}
-  {#if !here}
-    <details class="connect-manual">
-      <summary>Without the app</summary>
+  </div>
+  <div class="place-steps">
+    {#if here}
+      <p role="status">
+        {here.claudeCode
+          ? `${here.name} is connected with Claude Code. Its models are in your list.`
+          : `${here.name} is connected. Sign in to Claude Code there (run claude once) and its models appear.`}
+      </p>
+    {:else if manual}
       <ol class="connect-steps">
         <li>
-          <span>On that computer, in a Crewstead client checkout, run:</span>
+          <span>In a Crewstead client checkout on that computer, run:</span>
           <span class="copy-line"
             ><code>{command}</code><button
               class="icon-button"
@@ -130,19 +135,44 @@
           {/if}
         </li>
       </ol>
-      {#if created}
-        <p class="form-note" role="status">
+      {#if created}<p role="status">
           {online
             ? 'Connected. Its Claude Code models are in your list.'
             : 'Waiting for it to connect…'}
-        </p>
-      {/if}
-    </details>
-  {/if}
+        </p>{/if}
+    {:else if app?.useComputer}
+      <p>The app asks before chats can use this computer.</p>
+    {:else}
+      <p>Open the Crewstead app on that computer; it offers to connect.</p>
+    {/if}
+  </div>
   {#if error}<p class="error-banner" role="alert">{error}</p>{/if}
   <div class="dialog-actions">
-    <button class="button primary" onclick={() => dialog?.close()}
-      >{here || online ? 'Done' : 'Close'}</button
-    >
+    {#if !here && !app?.useComputer}
+      <button type="button" class="link-button dialog-back" onclick={() => (manual = !manual)}
+        >{manual ? 'Use the app instead' : 'A server without the app'}</button
+      >
+    {/if}
+    {#if here || online}
+      <button class="button primary" onclick={() => dialog?.close()}>Done</button>
+    {:else}
+      <button class="button subtle" onclick={() => dialog?.close()}>Cancel</button>
+      {#if app?.useComputer}
+        <button
+          class="button primary"
+          onclick={async () => {
+            await app.useComputer?.();
+            await findHere();
+          }}>Use this computer</button
+        >
+      {:else if !manual}
+        <a
+          class="button primary"
+          href="https://github.com/Crewstead/client/releases/latest"
+          target="_blank"
+          rel="noreferrer">Get the app</a
+        >
+      {/if}
+    {/if}
   </div>
 </dialog>

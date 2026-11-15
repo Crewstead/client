@@ -245,12 +245,57 @@
 .dialog-actions .dialog-back {
   margin-right: auto;
 }
-/* Connecting Claude Code without the desktop app (a server): folded, under the usual way. */
-.connect-manual {
-  margin-top: var(--space-4);
+/* Claude Code: where it runs, two cards to choose between, then that choice's steps under them. */
+.place-choices {
+  display: grid;
+  gap: 8px;
+  margin-bottom: var(--space-4);
 }
-.connect-manual > summary {
+.place-choice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.place-choice > svg {
+  flex-shrink: 0;
+  color: var(--muted);
+}
+.place-choice > span {
+  display: grid;
+  gap: 2px;
+}
+.place-choice strong {
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+.place-choice small {
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+.place-choice[aria-checked='true'] {
+  border-color: var(--text);
+}
+.place-choice[aria-checked='true'] > svg {
+  color: var(--text);
+}
+.place-choice:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+.place-steps {
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--line-subtle);
   color: var(--muted);
   font-size: var(--text-sm);
-  cursor: pointer;
+}
+.place-steps > p {
+  margin: 0;
 }
