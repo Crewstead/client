@@ -37,6 +37,8 @@ for (const name of [
   'disable-background-timer-throttling',
 ])
   app.commandLine.appendSwitch(name);
+// Being driven over DevTools sets navigator.webdriver, which sites read as a bot; same as fresh.ts.
+app.commandLine.appendSwitch('disable-blink-features', 'AutomationControlled');
 
 const assets = join(__dirname, '..', 'assets');
 const icon = join(assets, 'icon.png');
