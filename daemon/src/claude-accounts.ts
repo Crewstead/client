@@ -22,12 +22,17 @@ const LOGIN_MS = 10 * 60_000;
 const MAX_ACCOUNTS = 10;
 /** Sign-ins waiting in this computer's browser, by account id. */
 const signingIn = new Map<string, ChildProcess>();
+/** Where there is no browser (the hub's own service): the sign-in page Claude Code printed. */
+const links = new Map<string, string>();
+const LINK = /https:\/\/\S+/;
+/** The hub's own Claude Code service, in a container with no browser (docs/plan/30). */
+export const hosted = () => process.env.CREWSTEAD_HOSTED === '1';
 
 /** Until its owner changes them, a computer has its usual sign-in, as before accounts existed. */
 export function claudeAccounts(home: string): StoredClaudeAccount[] {
   return (
     readConfig(home)?.claudeAccounts ?? [
-      { id: DEFAULT_CLAUDE_ACCOUNT, name: 'This computer', folder: null },
+      { id: DEFAULT_CLAUDE_ACCOUNT, name: hosted() ? 'Hub' : 'This computer', folder: null },
     ]
   );
 }
@@ -57,6 +62,7 @@ async function status(binary: string, account: StoredClaudeAccount): Promise<Cla
     usual: account.folder === null,
     signedIn: false,
     signingIn: signingIn.has(account.id),
+    ...(links.has(account.id) ? { signInLink: links.get(account.id)! } : {}),
   };
   try {
     const { stdout } = await promisify(execFile)(binary, ['auth', 'status', '--json'], {
@@ -92,21 +98,38 @@ function save(home: string, accounts: StoredClaudeAccount[]) {
 
 /**
  * Starts Claude Code's own sign-in for an account: it opens Anthropic's page in this computer's
- * browser and saves the sign-in in the account's folder. `changed` runs when it starts and ends.
+ * browser and saves the sign-in in the account's folder. Without a browser (hosted), the page it
+ * prints goes to the hub for its owner, and the code they paste comes back (`enterCode`). `changed`
+ * runs when it starts, when the page is known, and when it ends.
  */
 function login(binary: string, account: StoredClaudeAccount, changed: () => void) {
   signingIn.get(account.id)?.kill();
+  links.delete(account.id);
   const child = spawn(binary, ['auth', 'login', '--claudeai'], {
-    env: accountEnvironment(account),
-    // Standard input stays open: Claude Code waits for the browser rather than for typing.
-    stdio: ['pipe', 'ignore', 'ignore'],
+    // No browser to open here: Claude Code then prints the page and asks for the code.
+    env: { ...accountEnvironment(account), ...(hosted() ? { BROWSER: 'true' } : {}) },
+    // Standard input stays open: Claude Code waits for the browser, or for the code.
+    stdio: ['pipe', hosted() ? 'pipe' : 'ignore', 'ignore'],
   });
   child.stdin?.on('error', () => {});
+  let printed = '';
+  child.stdout?.setEncoding('utf8');
+  child.stdout?.on('data', (part: string) => {
+    printed = (printed + part).slice(-8_000);
+    const link = LINK.exec(printed)?.[0];
+    if (link && !links.has(account.id)) {
+      links.set(account.id, link);
+      changed();
+    }
+  });
   signingIn.set(account.id, child);
   const timer = setTimeout(() => child.kill(), LOGIN_MS);
   const done = () => {
     clearTimeout(timer);
-    if (signingIn.get(account.id) === child) signingIn.delete(account.id);
+    if (signingIn.get(account.id) === child) {
+      signingIn.delete(account.id);
+      links.delete(account.id);
+    }
     changed();
   };
   child.once('error', done);
@@ -151,7 +174,12 @@ export async function claudeAccountAction(
     save(home, [...list, account]);
     login(binary, account, changed);
   } else if (action.kind === 'claude_login') login(binary, find(action.account), changed);
-  else if (action.kind === 'claude_rename')
+  else if (action.kind === 'claude_code') {
+    const waiting = signingIn.get(find(action.account).id);
+    if (!waiting?.stdin) throw new Error('No sign-in is waiting; start it again.');
+    // Typed into the waiting sign-in, once; never written anywhere.
+    waiting.stdin.write(`${action.code}\n`);
+  } else if (action.kind === 'claude_rename')
     save(
       home,
       list.map((entry) => (entry.id === action.account ? { ...entry, name: action.name } : entry)),

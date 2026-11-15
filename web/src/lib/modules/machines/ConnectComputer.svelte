@@ -6,6 +6,7 @@
   import { serverUrl } from '#lib/auth/connection.ts';
   import { copyText } from '#lib/clipboard.ts';
   import { machines } from './api.ts';
+  import HubSignIn from './HubSignIn.svelte';
   let { close }: { close: () => void } = $props();
   const id = $props.id();
   /** The desktop app, when this page is in it. */
@@ -18,8 +19,14 @@
     }
   ).crewsteadDesktop;
   let dialog = $state<HTMLDialogElement>();
-  /** Where Claude Code runs. The hub's own Claude Code is not built yet (docs/plan/30). */
+  /** Where Claude Code runs: the hub's own service (docs/plan/30), or a computer. */
   let where = $state<'hub' | 'computer'>('computer');
+  /** The hub's own Claude Code service, when this hub has one for its owner. */
+  let hub = $state<MachineView>();
+  let hubSignIn = $state<ReturnType<typeof HubSignIn>>();
+  let code = $state('');
+  let sent = $state(false);
+  const hubSignedIn = $derived(!!hub?.claudeCode?.accounts?.[0]?.signedIn);
   /** This computer, when the app here is already connected to this hub. */
   let here = $state<MachineView>();
   /** A computer without the app (a server): connected with a command and a one-time token. */
@@ -34,6 +41,10 @@
     await copyText(text);
     copied = label;
     setTimeout(() => (copied = ''), 1500);
+  }
+  async function findHub(first = false) {
+    hub = (await machines.list().catch(() => [])).find((machine) => machine.hosted);
+    if (first && hub) where = 'hub';
   }
   async function findHere() {
     const mine = await app?.thisComputer?.().catch(() => undefined);
@@ -58,8 +69,10 @@
   }
   onMount(() => {
     dialog?.showModal();
+    void findHub(true);
     void findHere();
     const timer = setInterval(async () => {
+      if (where === 'hub') await findHub();
       if (app?.thisComputer && !here) await findHere();
       if (!created || online) return;
       const found = (await machines.list().catch(() => [])).find(
@@ -80,9 +93,16 @@
 >
   <h2 id={`${id}-title`} class="dialog-title">Connect Claude Code</h2>
   <div class="place-choices" role="radiogroup" aria-label="Where Claude Code runs">
-    <button type="button" class="place-choice" role="radio" aria-checked={where === 'hub'} disabled
+    <button
+      type="button"
+      class="place-choice"
+      role="radio"
+      aria-checked={where === 'hub'}
+      disabled={!hub}
+      onclick={() => (where = 'hub')}
       ><Cloud size={18} /><span
-        ><strong>On the hub</strong><small>Works when your computers are off · coming soon</small
+        ><strong>On the hub</strong><small
+          >{hub ? 'Works when your computers are off' : 'Not set up on this hub'}</small
         ></span
       ></button
     >
@@ -98,7 +118,9 @@
     >
   </div>
   <div class="place-steps">
-    {#if here}
+    {#if where === 'hub' && hub}
+      <HubSignIn bind:this={hubSignIn} machine={hub} bind:code bind:sent />
+    {:else if here}
       <p role="status">
         {here.claudeCode
           ? `${here.name} is connected with Claude Code. Its models are in your list.`
@@ -148,30 +170,43 @@
   </div>
   {#if error}<p class="error-banner" role="alert">{error}</p>{/if}
   <div class="dialog-actions">
-    {#if !here && !app?.useComputer}
-      <button type="button" class="link-button dialog-back" onclick={() => (manual = !manual)}
-        >{manual ? 'Use the app instead' : 'A server without the app'}</button
-      >
-    {/if}
-    {#if here || online}
-      <button class="button primary" onclick={() => dialog?.close()}>Done</button>
-    {:else}
-      <button class="button subtle" onclick={() => dialog?.close()}>Cancel</button>
-      {#if app?.useComputer}
+    {#if where === 'hub' && hub}
+      {#if hubSignedIn}
+        <button class="button primary" onclick={() => dialog?.close()}>Done</button>
+      {:else}
+        <button class="button subtle" onclick={() => dialog?.close()}>Cancel</button>
         <button
           class="button primary"
-          onclick={async () => {
-            await app.useComputer?.();
-            await findHere();
-          }}>Use this computer</button
+          disabled={!code.trim() || sent}
+          onclick={() => void hubSignIn?.connect()}>{sent ? 'Connecting…' : 'Connect'}</button
         >
-      {:else if !manual}
-        <a
-          class="button primary"
-          href="https://github.com/Crewstead/client/releases/latest"
-          target="_blank"
-          rel="noreferrer">Get the app</a
+      {/if}
+    {:else}
+      {#if !here && !app?.useComputer}
+        <button type="button" class="link-button dialog-back" onclick={() => (manual = !manual)}
+          >{manual ? 'Use the app instead' : 'A server without the app'}</button
         >
+      {/if}
+      {#if here || online}
+        <button class="button primary" onclick={() => dialog?.close()}>Done</button>
+      {:else}
+        <button class="button subtle" onclick={() => dialog?.close()}>Cancel</button>
+        {#if app?.useComputer}
+          <button
+            class="button primary"
+            onclick={async () => {
+              await app.useComputer?.();
+              await findHere();
+            }}>Use this computer</button
+          >
+        {:else if !manual}
+          <a
+            class="button primary"
+            href="https://github.com/Crewstead/client/releases/latest"
+            target="_blank"
+            rel="noreferrer">Get the app</a
+          >
+        {/if}
       {/if}
     {/if}
   </div>

@@ -38,6 +38,12 @@ export const claudeAccounts = {
     }),
   login: (machineId: string, account: string) =>
     request(`/machines/${machineId}/claude-accounts/${account}/login`, { method: 'POST' }),
+  /** The code Anthropic's page showed, for the hub's own service's waiting sign-in. */
+  code: (machineId: string, account: string, code: string) =>
+    request(`/machines/${machineId}/claude-accounts/${account}/code`, {
+      method: 'POST',
+      body: JSON.stringify({ code }),
+    }),
   rename: (machineId: string, account: string, name: string) =>
     request(`/machines/${machineId}/claude-accounts/${account}`, {
       method: 'PATCH',

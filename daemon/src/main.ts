@@ -164,7 +164,8 @@ async function connect(home: string, address: string | undefined, foreground: bo
   if (!/^ahm_[A-Za-z0-9_-]{43}$/.test(token.trim()))
     throw new Error('That is not a computer token.');
   writeConfig(home, { ...readConfig(home), hub, token: token.trim() });
-  await ensureBrowser();
+  // The hub's own Claude Code service has no browser tools.
+  if (process.env.CREWSTEAD_HOSTED !== '1') await ensureBrowser();
   if (!foreground && serviceState()) {
     install(home, true);
     return log('Connected. Running in the background and starting with this computer.');

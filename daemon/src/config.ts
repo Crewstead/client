@@ -67,7 +67,10 @@ export function workFolder(home: string) {
 /** Accepts https anywhere and plain http only on this computer. */
 export function hubUrl(value: string) {
   const url = new URL(value);
-  const local = ['127.0.0.1', 'localhost', '[::1]'].includes(url.hostname);
+  // The hub's own service reaches the hub over their private container network.
+  const local =
+    ['127.0.0.1', 'localhost', '[::1]'].includes(url.hostname) ||
+    process.env.CREWSTEAD_HOSTED === '1';
   if (url.protocol !== 'https:' && !(url.protocol === 'http:' && local))
     throw new Error('The hub address must start with https:// (or http:// on this computer).');
   return url.origin;

@@ -136,7 +136,7 @@ async function linkOnce(options: LinkOptions, connected: () => void) {
       .catch(() => {});
   const pty = await loadPty();
   const hello = async (): Promise<MachineHello> => ({
-    name: hostname().slice(0, 80) || 'Computer',
+    name: process.env.CREWSTEAD_HOSTED === '1' ? 'Hub' : hostname().slice(0, 80) || 'Computer',
     version: DAEMON_VERSION,
     claudeCode: await claudeHello(),
     projects: listProjects(options.tools.home),
@@ -145,6 +145,7 @@ async function linkOnce(options: LinkOptions, connected: () => void) {
     browser: !!options.tools.browser,
     computer: computerHello(options.tools.home, !!options.tools.browser),
     terminals: !!pty && terminalsOn(options.tools.home),
+    hosted: process.env.CREWSTEAD_HOSTED === '1',
   });
   const first = await hello();
   rememberId(options.tools.home, await (await call('/api/machine/hello', first)).json());
