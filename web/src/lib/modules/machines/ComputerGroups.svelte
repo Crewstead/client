@@ -5,7 +5,7 @@
   import type { SlotProps } from '../types.ts';
   import { Plus } from '@lucide/svelte';
   import type { ClaudeAccount } from '@crewstead/core/protocol';
-  import { machines, machineState } from './api.ts';
+  import { claudeAccounts, machines, machineState } from './api.ts';
   import ClaudeAccountDialog from './ClaudeAccountDialog.svelte';
   import ClaudeAccountRow from './ClaudeAccountRow.svelte';
   import '@crewstead/ui/dialogs.css';
@@ -44,7 +44,9 @@
     dialog?.close();
     if (!target) return;
     try {
-      await machines.remove(target.id);
+      // Only Claude Code is disconnected: its accounts there, never the computer and its projects.
+      for (const account of target.claudeCode?.accounts ?? [])
+        await claudeAccounts.remove(target.id, account.id);
       await Promise.all([load(), changed()]);
     } catch (cause) {
       error = cause instanceof Error ? cause.message : 'Could not disconnect';
@@ -145,8 +147,9 @@
 >
   <h2 id={`${id}-remove`} class="dialog-title">Disconnect Claude Code on {removing?.name}?</h2>
   <p class="dialog-description">
-    The computer is disconnected at once and its Claude Code models stop working here. Chats stay
-    readable. Claude Code itself is not changed.
+    {removing?.hosted
+      ? 'Claude Code on the hub is signed out and its models stop working here. Chats stay readable.'
+      : `Its Claude Code models stop working here. Chats stay readable, and Claude Code stays signed in on ${removing?.name}.`}
   </p>
   <div class="dialog-actions">
     <button class="button subtle" onclick={() => dialog?.close()}>Cancel</button>

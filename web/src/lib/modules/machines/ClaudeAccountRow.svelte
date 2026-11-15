@@ -45,7 +45,10 @@
     { label: 'Rename', run: rename },
     {
       label: 'Remove',
-      confirm: account.usual ? 'Remove? Claude Code stays signed in' : 'Remove and sign out?',
+      confirm:
+        account.usual && !machine.hosted
+          ? 'Remove? Claude Code stays signed in'
+          : 'Remove and sign out?',
       run: () => act(() => claudeAccounts.remove(machine.id, account.id)),
     },
   ]);

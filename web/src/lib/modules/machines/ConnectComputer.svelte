@@ -7,7 +7,7 @@
   import { copyText } from '#lib/clipboard.ts';
   import { claudeAccounts, machines } from './api.ts';
   import HubSignIn from './HubSignIn.svelte';
-  let { close }: { close: () => void } = $props();
+  let { close, opened }: { close: () => void; opened?: () => void } = $props();
   const id = $props.id();
   /** The desktop app, when this page is in it. */
   const app = (
@@ -29,7 +29,10 @@
   const hubSignedIn = $derived(!!hub?.claudeCode?.accounts?.[0]?.signedIn);
   /** The computer to use: this one when the app here is connected, else a connected one with Claude Code. */
   let here = $state<MachineView>();
-  const added = $derived(here?.claudeCode?.accounts?.find((account) => account.signedIn));
+  // Crewstead's own sign-in there (its own folder); the terminal's `claude` sign-in is never used.
+  const ownAccount = $derived(here?.claudeCode?.accounts?.find((account) => !account.usual));
+  const added = $derived(ownAccount?.signedIn ? ownAccount : undefined);
+  const signing = $derived(!!ownAccount?.signingIn);
   /** A computer without the app (a server): connected with a command and a one-time token. */
   let manual = $state(false);
   let created = $state<{ machine: MachineView; token: string }>();
@@ -54,16 +57,17 @@
       list.find((machine) => machine.id === mine) ??
       list.find((machine) => !machine.hosted && machine.online && machine.claudeCode);
   }
-  /** Adds that computer's usual Claude Code sign-in as an account: its models are offered from now. */
-  async function useIt() {
+  /** Signs Crewstead in to Claude Code there, apart from the terminal's: its page opens on that computer. */
+  async function signIn() {
     if (!here) return;
     busy = true;
     error = '';
     try {
-      await claudeAccounts.add(here.id, 'This computer', 'usual');
+      if (ownAccount) await claudeAccounts.login(here.id, ownAccount.id);
+      else await claudeAccounts.add(here.id, 'Claude', 'new');
       await findHere();
     } catch (cause) {
-      error = cause instanceof Error ? cause.message : 'Could not add its Claude Code.';
+      error = cause instanceof Error ? cause.message : 'Could not start the sign-in.';
     } finally {
       busy = false;
     }
@@ -85,9 +89,11 @@
     close();
   }
   onMount(() => {
-    dialog?.showModal();
-    void findHub(true);
-    void findHere();
+    // Shown once it knows where Claude Code can run, so it opens on the right choice, not jumping.
+    void Promise.all([findHub(true), findHere()]).then(() => {
+      dialog?.showModal();
+      opened?.();
+    });
     const timer = setInterval(async () => {
       if (where === 'hub') await findHub();
       if (where === 'computer') await findHere();
@@ -143,7 +149,9 @@
           ? `Install Claude Code on ${here.name} and sign in there (run claude once).`
           : added
             ? `Claude Code on ${here.name} is connected${added.email ? ` as ${added.email}` : ''}. Its models are in your list.`
-            : `Use Claude Code signed in on ${here.name}.`}
+            : signing
+              ? `Finish signing in on the Claude page that opened on ${here.name}.`
+              : `Sign in to Claude on ${here.name}. The sign-in page opens there.`}
       </p>
     {:else if manual}
       <ol class="connect-steps">
@@ -208,7 +216,9 @@
       {/if}
       {#if here?.claudeCode && !added}
         <button class="button subtle" onclick={() => dialog?.close()}>Cancel</button>
-        <button class="button primary" disabled={busy} onclick={useIt}>Use its Claude Code</button>
+        <button class="button primary" disabled={busy || signing} onclick={signIn}
+          >{signing ? 'Signing in…' : 'Sign in'}</button
+        >
       {:else if here || online}
         <button class="button primary" onclick={() => dialog?.close()}
           >{added ? 'Done' : 'Close'}</button

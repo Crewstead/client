@@ -141,7 +141,7 @@
     {providers}
     {extra}
     pick={(option) => {
-      connecting = false;
+      // The list stays on screen until the option's dialog shows (no empty frame between them).
       setup = option;
     }}
     done={connected}
@@ -151,6 +151,7 @@
 {#if setup}
   {#await setup.load() then loaded}
     <loaded.default
+      opened={() => (connecting = false)}
       close={() => {
         setup = undefined;
         void connected();

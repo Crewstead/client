@@ -50,7 +50,8 @@ export interface ConnectOption {
   hint: string;
   /** Shown when chosen, before Continue. */
   description: string;
-  load: Lazy<{ close: () => void }>;
+  /** `opened` runs once the option's own dialog shows, so the provider list stays until then. */
+  load: Lazy<{ close: () => void; opened?: () => void }>;
 }
 /** A link in the workspace menu; `href` is an app path such as "/settings?tab=organisations". */
 export interface WorkspaceAction {

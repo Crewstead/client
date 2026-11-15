@@ -38,38 +38,53 @@ describe.skipIf(process.platform === 'win32')('Claude Code accounts on a compute
   });
   afterEach(() => rm(home, { recursive: true, force: true }));
 
-  it('starts with no account, then offers the usual sign-in once its owner adds it', async () => {
+  it('starts with no account and never takes the computer’s own sign-in', async () => {
     expect(claudeAccounts(home)).toEqual([]);
     expect(await accountStatuses(claude, home)).toEqual([]);
-    await claudeAccountAction(
-      claude,
-      home,
-      { kind: 'claude_add', name: 'This computer', mode: 'usual' },
-      vi.fn(),
-    );
-    expect(claudeAccounts(home)).toEqual([{ id: 'default', name: 'This computer', folder: null }]);
-    expect(await accountStatuses(claude, home)).toEqual([
-      {
-        id: 'default',
-        name: 'This computer',
-        usual: true,
-        signedIn: true,
-        signingIn: false,
-        email: 'me@example.test',
-        plan: 'max',
-      },
-    ]);
-    expect(accountEnvironment(accountFor(home, undefined)).CLAUDE_CONFIG_DIR).toBeUndefined();
+    await expect(
+      claudeAccountAction(
+        claude,
+        home,
+        { kind: 'claude_add', name: 'This computer', mode: 'usual' },
+        vi.fn(),
+      ),
+    ).rejects.toThrow(/for Crewstead instead/);
+    expect(claudeAccounts(home)).toEqual([]);
   });
 
-  it('adds another account in its own folder, signs it in, renames and removes it', async () => {
+  it('on the hub’s own service, its one sign-in is added, and removing it signs it out', async () => {
+    vi.stubEnv('CREWSTEAD_HOSTED', '1');
+    try {
+      await claudeAccountAction(
+        claude,
+        home,
+        { kind: 'claude_add', name: 'Hub', mode: 'usual' },
+        vi.fn(),
+      );
+      expect(claudeAccounts(home)).toEqual([{ id: 'default', name: 'Hub', folder: null }]);
+      expect(accountEnvironment(accountFor(home, undefined)).CLAUDE_CONFIG_DIR).toBeUndefined();
+      await expect(
+        claudeAccountAction(
+          claude,
+          home,
+          { kind: 'claude_add', name: 'again', mode: 'usual' },
+          vi.fn(),
+        ),
+      ).rejects.toThrow(/already added/);
+      await claudeAccountAction(
+        claude,
+        home,
+        { kind: 'claude_remove', account: 'default' },
+        vi.fn(),
+      );
+      expect(claudeAccounts(home)).toEqual([]);
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it('adds Crewstead’s own account in its own folder, signs it in, renames and removes it', async () => {
     const changed = vi.fn();
-    await claudeAccountAction(
-      claude,
-      home,
-      { kind: 'claude_add', name: 'This computer', mode: 'usual' },
-      changed,
-    );
     await claudeAccountAction(
       claude,
       home,
@@ -95,29 +110,10 @@ describe.skipIf(process.platform === 'win32')('Claude Code accounts on a compute
       changed,
     );
     expect(accountFor(home, work.id)?.name).toBe('company');
-    // The usual sign-in can be added only once.
-    await expect(
-      claudeAccountAction(
-        claude,
-        home,
-        { kind: 'claude_add', name: 'again', mode: 'usual' },
-        changed,
-      ),
-    ).rejects.toThrow(/already added/);
 
+    // Removing it signs out only its own folder and deletes it; the terminal's sign-in is untouched.
     await claudeAccountAction(claude, home, { kind: 'claude_remove', account: work.id }, changed);
     expect(existsSync(work.folder!)).toBe(false);
     expect(() => accountFor(home, work.id)).toThrow(/no longer on this computer/);
-    // Removing the usual sign-in only forgets it.
-    await claudeAccountAction(claude, home, { kind: 'claude_remove', account: 'default' }, changed);
-    expect(claudeAccounts(home)).toEqual([]);
-    expect(() => accountFor(home, undefined)).toThrow(/no longer on this computer/);
-    await claudeAccountAction(
-      claude,
-      home,
-      { kind: 'claude_add', name: 'Mine', mode: 'usual' },
-      changed,
-    );
-    expect(claudeAccounts(home)).toEqual([{ id: 'default', name: 'Mine', folder: null }]);
   });
 });

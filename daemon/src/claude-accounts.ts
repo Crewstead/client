@@ -158,6 +158,9 @@ export async function claudeAccountAction(
   if (action.kind === 'claude_add') {
     if (list.length >= MAX_ACCOUNTS) throw new Error(`At most ${MAX_ACCOUNTS} accounts.`);
     if (action.mode === 'usual') {
+      // Crewstead never uses a computer's own `claude` sign-in (owner, 2026-11-15); only the hub's
+      // service, whose sign-in is Crewstead's alone, has a usual one.
+      if (!hosted()) throw new Error('Sign in to a Claude account for Crewstead instead.');
       if (list.some((entry) => entry.folder === null))
         throw new Error('This computer’s usual sign-in is already added.');
       const id = list.some((entry) => entry.id === DEFAULT_CLAUDE_ACCOUNT)
@@ -190,13 +193,14 @@ export async function claudeAccountAction(
       home,
       list.filter((entry) => entry.id !== account.id),
     );
-    // A folder Crewstead made is signed out and deleted; the usual sign-in is only forgotten.
-    if (account.folder) {
+    // A folder Crewstead made is signed out and deleted, and so is the hub's own sign-in (it is only
+    // Crewstead's); a computer's usual sign-in is its owner's own, and only forgotten.
+    if (account.folder || hosted()) {
       await promisify(execFile)(binary, ['auth', 'logout'], {
         timeout: 15_000,
         env: accountEnvironment(account),
       }).catch(() => undefined);
-      rmSync(account.folder, { recursive: true, force: true });
+      if (account.folder) rmSync(account.folder, { recursive: true, force: true });
     }
   }
 }

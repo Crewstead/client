@@ -16,14 +16,9 @@
     close: (saved: boolean) => void;
   } = $props();
   const id = $props.id();
-  // The form starts from the props it opened with; later changes do not reset what was typed.
-  const start = () => ({
-    name: account?.name ?? '',
-    usualTaken: !!machine.claudeCode?.accounts?.some((entry) => entry.usual),
-  });
-  const initial = start();
-  let name = $state(initial.name);
-  let mode = $state<'usual' | 'new'>(initial.usualTaken ? 'new' : 'usual');
+  // The form starts from the name it opened with; later changes do not reset what was typed.
+  const start = () => account?.name ?? '';
+  let name = $state(start());
   let busy = $state(false);
   let error = $state('');
   let saved = false;
@@ -33,7 +28,7 @@
     error = '';
     try {
       if (account) await claudeAccounts.rename(machine.id, account.id, name);
-      else await claudeAccounts.add(machine.id, name, mode);
+      else await claudeAccounts.add(machine.id, name, 'new');
       saved = true;
       (event.target as HTMLElement).closest('dialog')?.close();
     } catch (cause) {
@@ -61,36 +56,12 @@
         bind:value={name}
         required
         maxlength="40"
-        placeholder={mode === 'usual' ? 'Personal' : 'Work'}
+        placeholder="Work"
         autocomplete="off"
         disabled={busy}
       />
       <small>Shown with its models, e.g. “Claude Code Opus · {name || 'Work'}”.</small>
     </label>
-    {#if !account}
-      <fieldset class="claude-account-modes" disabled={busy}>
-        <legend>Account</legend>
-        <label class:disabled={initial.usualTaken}
-          ><input type="radio" bind:group={mode} value="usual" disabled={initial.usualTaken} />
-          <span
-            ><strong>The one already signed in there</strong><small
-              >{initial.usualTaken
-                ? 'Already added.'
-                : 'The Claude Code sign-in this computer uses in a terminal.'}</small
-            ></span
-          ></label
-        >
-        <label
-          ><input type="radio" bind:group={mode} value="new" />
-          <span
-            ><strong>Sign in to another account</strong><small
-              >Kept apart from the others. The sign-in page opens in the browser on {machine.name},
-              so finish it there.</small
-            ></span
-          ></label
-        >
-      </fieldset>
-    {/if}
     {#if error}<p class="error-banner" role="alert">{error}</p>{/if}
     <div class="dialog-actions">
       <button
@@ -100,7 +71,7 @@
         onclick={(event) => event.currentTarget.closest('dialog')?.close()}>Cancel</button
       >
       <button type="submit" class="button primary" disabled={busy}
-        >{account ? 'Rename' : mode === 'new' ? 'Add and sign in' : 'Add account'}</button
+        >{account ? 'Rename' : 'Add and sign in'}</button
       >
     </div>
   </form>
