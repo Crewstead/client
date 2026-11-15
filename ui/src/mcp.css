@@ -139,3 +139,38 @@
   flex: none;
   white-space: nowrap;
 }
+
+/* A service's logo (or its first letter), in the catalog and the list of servers. */
+.mcp-icon {
+  flex-shrink: 0;
+}
+.mcp-letter {
+  display: inline-grid;
+  place-items: center;
+  width: var(--size, 20px);
+  height: var(--size, 20px);
+  border-radius: 5px;
+  background: var(--surface-hover);
+  color: var(--muted);
+  font-size: calc(var(--size, 20px) * 0.55);
+  font-weight: 600;
+}
+.mcp-tag {
+  margin-left: 6px;
+  padding: 1px 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 500;
+  vertical-align: 1px;
+}
+.mcp-connect-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.mcp-copied {
+  color: var(--muted);
+  font-size: var(--text-xs);
+}

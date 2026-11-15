@@ -4,6 +4,8 @@
   import OptionPicker from '#lib/components/OptionPicker.svelte';
   import RowMenu, { type MenuItem } from '#lib/components/RowMenu.svelte';
   import { mcpServers } from './api.ts';
+  import { catalog } from './catalog/index.ts';
+  import McpIcon from './McpIcon.svelte';
   let {
     server,
     edit,
@@ -73,6 +75,11 @@
       onclick={() => (open = !open)}
     >
       <ChevronDown size={14} />
+      <McpIcon
+        entry={catalog.find((entry) => entry.url === server.url)}
+        name={server.name}
+        size={18}
+      />
       <span class="mcp-server-text">
         <span class="skill-row-name"
           >{server.name}{#if !server.enabled}<span class="pill">Off</span>{/if}</span

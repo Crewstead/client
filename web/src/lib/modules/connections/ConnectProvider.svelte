@@ -1,9 +1,9 @@
 <script lang="ts">
   import { closeOutside } from '#lib/close-outside.ts';
-  import { onMount, untrack } from 'svelte';
+  import { onMount } from 'svelte';
   import type { ConnectionView, ContextId, ProviderInfo } from '@crewstead/core/protocol';
   import type { ConnectOption } from '#lib/modules/types.ts';
-  import OptionPicker from '#lib/components/OptionPicker.svelte';
+  import ProviderPicker from './ProviderPicker.svelte';
   import { connections } from './api.ts';
   import ChooseModels, { type Choice } from './ChooseModels.svelte';
   import { isPriced } from './format.ts';
@@ -29,7 +29,8 @@
   } = $props();
   const id = $props.id();
   let dialog = $state<HTMLDialogElement>();
-  let provider = $state(untrack(() => providers[0]?.id ?? ''));
+  /** Empty until one is picked in the first step. */
+  let provider = $state('');
   let label = $state('');
   let apiKey = $state('');
   let address = $state('');
@@ -39,7 +40,6 @@
   let busy = $state(false);
   let error = $state('');
   const selected = $derived(providers.find((item) => item.id === provider));
-  const other = $derived(extra.find((option) => `extra:${option.id}` === provider));
   // Providers that offer sign-in lead with it; some (ChatGPT) cannot use an API key at all.
   let useKey = $state(false);
   const keyMode = $derived(!selected?.signIn || (useKey && selected.apiKey));
@@ -121,20 +121,30 @@
   aria-labelledby={`${id}-title`}
   onclose={() => (view ? void done() : close())}
 >
-  {#if !view}
+  {#if !provider}
+    <div class="provider-pick" aria-label="Choose a provider" role="group">
+      <h2 id={`${id}-title`} class="dialog-title">Connect a provider</h2>
+      <ProviderPicker
+        {providers}
+        {extra}
+        choose={(value) => {
+          const other = extra.find((option) => `extra:${option.id}` === value);
+          if (other) pick(other);
+          else provider = value;
+        }}
+      />
+      <div class="dialog-actions">
+        <button type="button" class="button subtle" onclick={() => dialog?.close()}>Cancel</button>
+      </div>
+    </div>
+  {:else if !view}
     <form
-      onsubmit={(event) => {
-        if (!other) return keyMode ? connect(event) : (event.preventDefault(), void signIn());
-        event.preventDefault();
-        pick(other);
-      }}
+      onsubmit={(event) => (keyMode ? connect(event) : (event.preventDefault(), void signIn()))}
       aria-label="Connect provider"
     >
-      <h2 id={`${id}-title`} class="dialog-title">Connect a provider</h2>
+      <h2 id={`${id}-title`} class="dialog-title">Connect {selected?.label}</h2>
       <p class="dialog-description">
-        {#if other}
-          {other.description}
-        {:else if keyMode && selected?.address}
+        {#if keyMode && selected?.address}
           The hub lists the API’s models to check the address and key. The key is kept on this
           server only and never shown again.
         {:else if keyMode}
@@ -149,75 +159,50 @@
         {/if}
       </p>
       <div class="field-grid dialog-fields">
-        <span class="field-label" aria-hidden="true">Provider</span>
-        <OptionPicker
-          bind:value={provider}
-          options={[
-            ...providers.map((item) => ({
-              value: item.id,
-              label: item.label,
-              hint: item.description,
-            })),
-            ...extra.map((option) => ({
-              value: `extra:${option.id}`,
-              label: option.label,
-              hint: option.hint,
-            })),
-          ]}
-          label="Provider"
-          disabled={busy}
-          wide
-          onchange={(next) => {
-            provider = next;
-            useKey = false;
-          }}
-        />
-        {#if other}<!-- Set up in the next step. -->{:else}{#if keyMode && selected?.address}<label
-              for={`${id}-address`}>API address</label
-            >
-            <input
-              id={`${id}-address`}
-              type="url"
-              bind:value={address}
-              required
-              maxlength="300"
-              placeholder="https://example.com/v1"
-              autocomplete="off"
-              spellcheck="false"
-              disabled={busy}
-            />{/if}{#if keyMode}<label for={`${id}-key`}>API key</label>
-            <input
-              id={`${id}-key`}
-              type="password"
-              bind:value={apiKey}
-              required
-              minlength="8"
-              maxlength="512"
-              autocomplete="off"
-              spellcheck="false"
-              disabled={busy}
-            />{/if}
-          <label for={`${id}-label`}>Name</label>
+        {#if keyMode && selected?.address}<label for={`${id}-address`}>API address</label>
           <input
-            id={`${id}-label`}
-            bind:value={label}
-            maxlength="60"
-            placeholder={fallbackName}
+            id={`${id}-address`}
+            type="url"
+            bind:value={address}
+            required
+            maxlength="300"
+            placeholder="https://example.com/v1"
+            autocomplete="off"
+            spellcheck="false"
             disabled={busy}
-          />
-          {#if !plan}<label for={`${id}-limit`}>Daily spending limit ($)</label>
-            <input
-              id={`${id}-limit`}
-              type="number"
-              bind:value={limit}
-              required
-              min="0.01"
-              max="1000"
-              step="0.01"
-              disabled={busy}
-            />{/if}{/if}
+          />{/if}{#if keyMode}<label for={`${id}-key`}>API key</label>
+          <input
+            id={`${id}-key`}
+            type="password"
+            bind:value={apiKey}
+            required
+            minlength="8"
+            maxlength="512"
+            autocomplete="off"
+            spellcheck="false"
+            disabled={busy}
+          />{/if}
+        <label for={`${id}-label`}>Name</label>
+        <input
+          id={`${id}-label`}
+          bind:value={label}
+          maxlength="60"
+          placeholder={fallbackName}
+          disabled={busy}
+        />
+        {#if !plan}<label for={`${id}-limit`}>Daily spending limit ($)</label>
+          <input
+            id={`${id}-limit`}
+            type="number"
+            bind:value={limit}
+            required
+            min="0.01"
+            max="1000"
+            step="0.01"
+            disabled={busy}
+          />{/if}
       </div>
-      {#if !other && selected?.connectNote}<p class="form-note connect-note">
+      {#if selected?.connectNote}<p class="form-note connect-note">
           {selected.connectNote}
         </p>{/if}
       {#if selected?.keyUrl && keyMode}
@@ -231,11 +216,17 @@
       {/if}
       {#if error}<p class="error-banner" role="alert">{error}</p>{/if}
       <div class="dialog-actions">
-        {#if other}
-          <button type="button" class="button subtle" onclick={() => dialog?.close()}>Cancel</button
-          >
-          <button type="submit" class="button primary">Continue</button>
-        {:else if keyMode}
+        <button
+          type="button"
+          class="link-button dialog-back"
+          onclick={() => {
+            provider = '';
+            useKey = false;
+            error = '';
+          }}
+          disabled={busy}>Back</button
+        >
+        {#if keyMode}
           {#if selected?.signIn}<button
               type="button"
               class="link-button dialog-switch"

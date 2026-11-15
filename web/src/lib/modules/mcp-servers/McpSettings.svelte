@@ -5,6 +5,7 @@
   import { Plus } from '@lucide/svelte';
   import type { McpServer } from '@crewstead/core/protocol';
   import { mcpServers } from './api.ts';
+  import McpAddDialog from './McpAddDialog.svelte';
   import McpServerDialog from './McpServerDialog.svelte';
   import McpServerRow from './McpServerRow.svelte';
   import { McpSignIn } from './sign-in.svelte.ts';
@@ -14,6 +15,7 @@
   let list = $state<McpServer[]>();
   let error = $state('');
   let editing = $state<{ server?: McpServer }>();
+  let adding = $state(false);
   async function refresh() {
     try {
       list = await mcpServers.list();
@@ -46,7 +48,7 @@
 <section class="settings-section" aria-label="MCP servers">
   <SettingsHeading page title="MCP servers">
     Tools from other services. Each call asks first unless you allow it.
-    {#snippet action()}<button class="button subtle small" onclick={() => (editing = {})}
+    {#snippet action()}<button class="button subtle small" onclick={() => (adding = true)}
         ><Plus size={14} aria-hidden="true" />Add server</button
       >{/snippet}
   </SettingsHeading>
@@ -65,13 +67,21 @@
       {/each}
     </ul>
   {:else if list}
-    <EmptyState
-      text="No MCP servers yet. Add one by its address; services that sign you in on their own page, such as Notion or Linear, need nothing else."
-    />
+    <EmptyState text="No MCP servers yet." />
   {:else}
     <div class="settings-card"><LoadingRows label="Loading MCP servers" /></div>
   {/if}
 </section>
+{#if adding}<McpAddDialog
+    taken={list?.map((server) => server.name) ?? []}
+    custom={() => (editing = {})}
+    close={(added, needsSignIn) => {
+      adding = false;
+      if (!added) return;
+      void refresh();
+      if (needsSignIn) startSignIn(added.id);
+    }}
+  />{/if}
 {#if editing}<McpServerDialog
     {...editing.server ? { server: editing.server } : {}}
     close={(saved) => {

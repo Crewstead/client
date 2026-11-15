@@ -6,6 +6,7 @@ import {
   type TimelineItem,
 } from '@crewstead/core/protocol';
 import { kindOf } from './tool-kinds.ts';
+import { watchReport } from './watch-report.ts';
 
 export interface ChangedFile {
   path: string;
@@ -84,11 +85,21 @@ export function timelineEntries(items: TimelineItem[], running: boolean): Timeli
       const files = changedFiles(turn);
       if (files.length) entries.push({ kind: 'changes', id: `changes-${asked!.id}`, files });
     }
+    // A background command's notes continue the turn: its time includes what the model did after each.
+    const notes = turn.filter((item, at) => at > 0 && watchReport(item));
+    const worked = [asked, ...notes].reduce<number | undefined>(
+      (sum, item) => (item?.workedMs === undefined ? sum : (sum ?? 0) + item.workedMs),
+      undefined,
+    );
     if (asked?.role === 'user')
       entries.push({
         kind: 'worked',
         id: `worked-${asked.id}`,
-        ...(finished ? { ms: asked.workedMs } : { since: asked.createdAt }),
+        ...(finished
+          ? worked === undefined
+            ? {}
+            : { ms: worked }
+          : { since: (notes.at(-1) ?? asked).createdAt }),
         ...(finished && asked.generated && asked.generated.ms >= 250
           ? { tokensPerSecond: Math.round((asked.generated.tokens * 1000) / asked.generated.ms) }
           : {}),
@@ -108,7 +119,9 @@ export function timelineEntries(items: TimelineItem[], running: boolean): Timeli
   };
   for (const item of items) {
     // A notice (another model or place) closes the turn before it, so its divider comes after it.
-    if (item.role === 'user' || item.role === 'notice') endTurn();
+    // A background command's note continues the turn it belongs to rather than starting one.
+    if ((item.role === 'user' && !(turn.length && watchReport(item))) || item.role === 'notice')
+      endTurn();
     turn.push(item);
     // A scheduled run's report call only marks the run as posted in the chat.
     if (isEmpty(item) || isReportCall(item)) continue;

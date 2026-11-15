@@ -85,7 +85,7 @@
 >
   <form onsubmit={submit}>
     <h2 id={`${id}-title`} class="dialog-title">
-      {server ? `Edit ${server.name}` : 'Add an MCP server'}
+      {server ? `Edit ${server.name}` : 'Custom MCP server'}
     </h2>
     <label class="skill-field"
       >Name

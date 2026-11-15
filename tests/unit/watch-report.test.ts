@@ -35,6 +35,30 @@ describe('watch reports in the chat', () => {
     expect(watchSummary(report!)).toBe('7 lines · ended: exited with code 1');
   });
 
+  it('reads the short note at its end, with any matching lines', () => {
+    const plain = watchReport(
+      message(
+        `${head} ended: exited with code 0. 120 lines of output; read them with watch_read only if you need them.`,
+      ),
+    );
+    expect(plain).toMatchObject({ lines: [], ended: 'exited with code 0', total: 120 });
+    expect(watchSummary(plain!)).toBe('ended: exited with code 0 · 120 lines');
+    const matching = watchReport(
+      message(
+        `${head} ended: exited with code 1. 1 line of output; read them with watch_read only if you need them.\n\nMatching lines:\n\nerror: x`,
+      ),
+    );
+    expect(matching).toMatchObject({ lines: ['error: x'], ended: 'exited with code 1', total: 1 });
+  });
+
+  it('reads matching lines sent before the end', () => {
+    const report = watchReport(
+      message(`${head} matched:\n\nready in 300 ms\n… 3 more matching lines left out.`),
+    );
+    expect(report).toMatchObject({ lines: ['ready in 300 ms'], more: 3, matched: true });
+    expect(watchSummary(report!)).toBe('4 matching lines');
+  });
+
   it('leaves the owner’s messages and other chats’ messages alone', () => {
     expect(watchReport({ ...message(head), sentBy: undefined })).toBeUndefined();
     expect(watchReport(message(head, 'Research chat'))).toBeUndefined();

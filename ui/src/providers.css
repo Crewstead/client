@@ -219,3 +219,29 @@
 .provider-groups:has(.provider-group) + .settings-empty {
   display: none;
 }
+
+/* Connecting, first step: a searchable list of providers, each row the whole width. */
+.provider-pick .skill-search {
+  margin: 0;
+}
+.provider-results {
+  max-height: min(440px, calc(100dvh - 260px));
+  margin: 8px -10px 0;
+  padding: 0 0 4px;
+}
+.provider-result {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.provider-result > svg {
+  flex-shrink: 0;
+  color: var(--faint);
+}
+.dialog-actions .dialog-back {
+  margin-right: auto;
+}
