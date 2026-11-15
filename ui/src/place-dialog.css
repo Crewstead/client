@@ -111,9 +111,16 @@
     max-height: calc(85dvh - 60px);
   }
 }
-/* The model chooser: one line per model, and the effort choice below the list. */
+/* The model chooser: one line per model, the chosen one highlighted (a lighter one follows the pointer
+   and the keys), and the effort choice below the list. */
 .place-choice.model-choice {
   min-height: 38px;
+}
+.place-choice.model-choice.active {
+  background: color-mix(in srgb, var(--surface-hover) 55%, transparent);
+}
+.place-choice.model-choice[aria-selected='true'] {
+  background: var(--surface-hover);
 }
 .model-effort {
   display: flex;

@@ -59,7 +59,7 @@
     {#snippet action()}{#if archived.length}<button
           class="button subtle small"
           disabled={!!busy}
-          onclick={() => confirm('all')}>Delete all…</button
+          onclick={() => confirm('all')}>Delete all</button
         >{/if}{/snippet}
   </SettingsHeading>
   {#if error}<p class="error-banner" role="alert">{error}</p>{/if}

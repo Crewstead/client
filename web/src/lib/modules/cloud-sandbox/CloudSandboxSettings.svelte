@@ -44,23 +44,20 @@
     <span class="project-text">
       <span
         class="row-name"
-        title={`A throwaway Linux container per chat without a project, to write files and run code: gVisor’s kernel, no access to this server or your computers, public websites only. About ${view.memoryMb / 1024} GB each, deleted after a day unused; turning it off deletes them all.`}
+        title={`A throwaway Linux sandbox per chat without a project, to write files and run code: no access to the hub’s data or your computers, public websites only. Deleted after a day unused; turning it off deletes them all.`}
         >Code sandbox</span
       >
       <span class="row-status"
         ><span
           class="status-dot"
           class:online={view.enabled && !view.missing.length}
-          class:failed={view.enabled && view.missing.length > 0}
-        ></span>{busy && !view.enabled
-          ? 'Setting up (the first time downloads gVisor)'
-          : view.enabled && view.missing.length
-            ? `On, but not working: needs ${view.missing.join(', ')} on the server`
+        ></span>{view.missing.length
+          ? `Not available on this hub: it needs ${view.missing.join(', ')}`
+          : busy && !view.enabled
+            ? 'Setting up (the first time downloads gVisor)'
             : view.enabled
-              ? `On · ${view.sandboxes} of ${view.limit} in use`
-              : view.missing.length
-                ? `Needs ${view.missing.join(', ')} on the server`
-                : 'Off'} · for chats without a project</span
+              ? `On · ${view.sandboxes} of ${view.limit} in use · for chats without a project`
+              : 'Off · for chats without a project'}</span
       >
       {#if error}<span class="row-error" role="alert">{error}</span>{/if}
     </span>
@@ -68,8 +65,8 @@
       type="checkbox"
       class="switch"
       aria-label="Code sandbox on the server"
-      checked={view.enabled}
-      disabled={!view.canManage || busy || (!view.enabled && view.missing.length > 0)}
+      checked={view.enabled && !view.missing.length}
+      disabled={!view.canManage || busy || view.missing.length > 0}
       onchange={(event) => set(event.currentTarget.checked)}
     />
   </li>

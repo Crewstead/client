@@ -1,6 +1,6 @@
 <script lang="ts">
   import { closeOutside } from '#lib/close-outside.ts';
-  import { Check, Search } from '@lucide/svelte';
+  import { Search } from '@lucide/svelte';
   import type { Model } from '@crewstead/core/protocol';
   import { effortSetting, efforts } from '#lib/effort.svelte.ts';
   import '@crewstead/ui/dialogs.css';
@@ -109,7 +109,6 @@
                 title={`${top.label}: ${top.used}% used${top.resets ? ` · ${top.resets}` : ''}`}
                 >{top.label} {top.used}%</span
               >{/if}{/if}
-          {#if value === model.id}<Check size={15} />{/if}
         </button>
       {/each}
     {/each}

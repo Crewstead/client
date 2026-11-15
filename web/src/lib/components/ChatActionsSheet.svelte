@@ -40,7 +40,7 @@
     <button onclick={choose(pin)}
       >{#if pinned}<PinOff size={18} />Unpin{:else}<Pin size={18} />Pin{/if}</button
     >
-    <button onclick={choose(move)}><FolderInput size={18} />Move to…</button>
+    <button onclick={choose(move)}><FolderInput size={18} />Move</button>
     <button onclick={choose(archive)}><Archive size={18} />Archive</button>
   </div>
   <button class="action-sheet-cancel" onclick={() => dialog.close()}>Cancel</button>
