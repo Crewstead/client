@@ -63,3 +63,18 @@
     padding-left: var(--space-4);
   }
 }
+/* The hub's sign-in, finished from its row: Anthropic's page, then the code it shows. */
+.provider-group > ul > li.claude-account:has(.claude-account-code) {
+  flex-wrap: wrap;
+}
+.claude-account-code {
+  display: flex;
+  flex-basis: 100%;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+}
+.claude-account-code input {
+  flex: 1;
+  min-width: 0;
+}
