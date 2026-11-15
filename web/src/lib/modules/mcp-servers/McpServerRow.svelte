@@ -51,8 +51,7 @@
   const usable = $derived(server.tools.filter((tool) => tool.rule !== 'off').length);
   const items: MenuItem[] = $derived([
     {
-      label: 'On',
-      checked: server.enabled,
+      label: server.enabled ? 'Turn off' : 'Turn on',
       run: () => act(() => mcpServers.update(server.id, { enabled: !server.enabled })),
     },
     {

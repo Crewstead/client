@@ -31,8 +31,7 @@
   }
   const menu = (skill: Skill): MenuItem[] => [
     {
-      label: 'On',
-      checked: skill.enabled,
+      label: skill.enabled ? 'Turn off' : 'Turn on',
       run: () => act(() => skills.update(skill.id, { enabled: !skill.enabled })),
     },
     {
