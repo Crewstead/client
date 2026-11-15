@@ -280,15 +280,16 @@
         >
       </header>
       {#if conversation.error}<div class="error-banner" role="alert">{conversation.error}</div>{/if}
-      <Timeline
-        items={session.items}
-        {...session.branches ? { branches: session.branches } : {}}
-        {actions}
-        {decide}
-        bind:editing
-        running={session.status === 'running' || session.status === 'awaiting_approval'}
-        focus={page.url.searchParams.get('item') ?? undefined}
-      />
+      <!-- Each chat starts drawn from its latest messages. -->
+      {#key session.id}<Timeline
+          items={session.items}
+          {...session.branches ? { branches: session.branches } : {}}
+          {actions}
+          {decide}
+          bind:editing
+          running={session.status === 'running' || session.status === 'awaiting_approval'}
+          focus={page.url.searchParams.get('item') ?? undefined}
+        />{/key}
       <TerminalDrawer />
       {#key session.id}<Composer
           draftKey={workspace.draftKey(`draft:${workspace.context}:${session.id}`)}

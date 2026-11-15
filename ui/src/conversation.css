@@ -331,3 +331,7 @@
     animation: none;
   }
 }
+/* Marks where earlier messages are drawn as the reader scrolls up. */
+.timeline-earlier {
+  height: 1px;
+}

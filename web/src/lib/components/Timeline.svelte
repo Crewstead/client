@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { tick } from 'svelte';
   import { resolve } from '$app/paths';
   import { ArrowDown, Bot, ChevronRight, Clock, Cloud, Folder, Sparkles } from '@lucide/svelte';
   import type { ChatBranch, TimelineItem } from '@crewstead/core/protocol';
@@ -41,6 +42,43 @@
     editing?: string | undefined;
   } = $props();
   let viewport: HTMLDivElement;
+  // A long chat draws its latest entries first and earlier ones as the reader nears the top: drawing
+  // hundreds of replies at once took seconds. Every item stays loaded for the panel and export.
+  const FIRST = 40;
+  const MORE = 40;
+  const entries = $derived(timelineEntries(items, running));
+  let drawn = $state(FIRST);
+  const shown = $derived(entries.length > drawn ? entries.slice(-drawn) : entries);
+  let top = $state<HTMLDivElement>();
+  function earlier() {
+    if (drawn >= entries.length) return;
+    // What is on screen stays where it is while entries are added above it.
+    const fromBottom = viewport.scrollHeight - viewport.scrollTop;
+    drawn += MORE;
+    void tick().then(() => {
+      viewport.scrollTop = viewport.scrollHeight - fromBottom;
+      if (viewport.scrollTop < viewport.clientHeight) earlier();
+    });
+  }
+  $effect(() => {
+    if (!top) return;
+    const watcher = new IntersectionObserver(
+      (seen) => seen.some((entry) => entry.isIntersecting) && earlier(),
+      { root: viewport, rootMargin: '800px 0px 0px 0px' },
+    );
+    watcher.observe(top);
+    return () => watcher.disconnect();
+  });
+  // A message asked for further up is drawn, with what follows it.
+  $effect(() => {
+    if (!focus) return;
+    const at = entries.findIndex((entry) =>
+      entry.kind === 'item'
+        ? entry.item.id === focus
+        : entry.kind === 'explored' && entry.items.some((item) => item.id === focus),
+    );
+    if (at >= 0 && entries.length - at > drawn) drawn = entries.length - at + 5;
+  });
   // Each prompt that has versions: the first prompt after where they are kept (notices come first).
   const versions = $derived.by(() => {
     const found: Record<string, Versions> = {};
@@ -73,9 +111,9 @@
       if (!node) return;
       node.scrollIntoView({ block: 'center' });
       // The message's own bubble is marked, not the whole row.
-      const shown = node.querySelector<HTMLElement>('.message-content, summary') ?? node;
-      shown.classList.add('found-item');
-      setTimeout(() => shown.classList.remove('found-item'), 2_400);
+      const marked = node.querySelector<HTMLElement>('.message-content, summary') ?? node;
+      marked.classList.add('found-item');
+      setTimeout(() => marked.classList.remove('found-item'), 2_400);
     }, 60);
   });
   $effect(() => {
@@ -97,10 +135,11 @@
   aria-live="polite"
 >
   <div class="timeline-content">
+    {#if shown.length < entries.length}<div class="timeline-earlier" bind:this={top}></div>{/if}
     {#if !items.length}<div class="conversation-welcome">
         <h2>Start a chat</h2>
       </div>{/if}
-    {#each timelineEntries(items, running) as entry (entry.kind === 'item' ? entry.item.id : entry.id)}
+    {#each shown as entry (entry.kind === 'item' ? entry.item.id : entry.id)}
       {#if entry.kind === 'explored'}<div class="tool-row">
           <ExploredGroup items={entry.items} />
         </div>

@@ -39,7 +39,7 @@ export class Conversation {
       if (generation !== this.generation) return;
       this.session = snapshot.session;
       this.cursor = snapshot.cursor;
-      this.connect(id, context, generation);
+      this.connect(id, context, generation, snapshot.cursor);
     } catch (error) {
       if (generation !== this.generation) return;
       this.session = null;
@@ -52,10 +52,10 @@ export class Conversation {
    * from the last update seen; when the browser gives up (e.g. the server answered with an error
    * while restarting), a fresh stream is started with growing delays, keeping the chat on screen.
    */
-  private connect(id: string, context: ContextId, generation: number) {
-    const source = new EventSource(withAccount(apiUrl(scoped(`/sessions/${id}/events`, context))), {
-      withCredentials: true,
-    });
+  private connect(id: string, context: ContextId, generation: number, after = 0) {
+    // The stream starts after the chat just loaded rather than sending all of it again.
+    const path = scoped(`/sessions/${id}/events`, context) + (after ? `&after=${after}` : '');
+    const source = new EventSource(withAccount(apiUrl(path)), { withCredentials: true });
     this.source = source;
     const current = () => generation === this.generation && this.source === source;
     source.onopen = () => {
@@ -69,7 +69,7 @@ export class Conversation {
       void request('/auth/session').catch(() => {});
       if (source.readyState !== EventSource.CLOSED) return;
       this.retry = setTimeout(() => {
-        if (generation === this.generation) this.connect(id, context, generation);
+        if (generation === this.generation) this.connect(id, context, generation, this.cursor);
       }, this.retryMs);
       this.retryMs = Math.min(this.retryMs * 2, RETRY_MAX_MS);
     };
