@@ -245,3 +245,12 @@
 .dialog-actions .dialog-back {
   margin-right: auto;
 }
+/* Connecting Claude Code without the desktop app (a server): folded, under the usual way. */
+.connect-manual {
+  margin-top: var(--space-4);
+}
+.connect-manual > summary {
+  color: var(--muted);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}

@@ -174,6 +174,7 @@ ipcMain.handle('update-restart', (event) => {
 
 // Whole-computer settings of this computer, from its own window: turning them on happens at the
 // computer, and this app is there. The page asks which computer this is, to offer it on its row.
+ipcMain.handle('use-computer', (event) => (fromHub(event) ? offerComputer(true) : undefined));
 ipcMain.handle('this-computer', (event) =>
   fromHub(event) && computer.connectedHub() === hub()
     ? readConfig(machineHome())?.machineId

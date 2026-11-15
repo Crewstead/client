@@ -16,8 +16,8 @@ const core: SettingsTab[] = [
   {
     id: 'models',
     label: 'Models',
-    group: 'models',
-    order: 10,
+    group: 'chats',
+    order: 1,
     load: () => import('./ModelsSettings.svelte'),
   },
   {
@@ -68,10 +68,8 @@ const desktop: SettingsTab[] = [
 /** The Settings list's groups, in order. */
 export const settingsGroups: { id: SettingsGroup; label: string }[] = [
   { id: 'general', label: 'General' },
-  { id: 'models', label: 'Models' },
-  { id: 'tools', label: 'Tools' },
-  { id: 'computers', label: 'Computers' },
   { id: 'chats', label: 'Chats' },
+  { id: 'tools', label: 'Tools' },
   { id: 'account', label: 'Account' },
   { id: 'developer', label: 'Developer' },
 ];

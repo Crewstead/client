@@ -53,8 +53,8 @@
   });
 </script>
 
-<section class="settings-section" aria-label="Computers">
-  <SettingsHeading page title="Computers">
+<section class="settings-section" aria-label="Projects">
+  <SettingsHeading page title="Projects">
     Folders and computers chats can work in.
     {#snippet action()}{#if desktop?.addProject}<button
           class="button subtle small"

@@ -33,6 +33,21 @@
     { value: 'allow', label: 'Always allow' },
     { value: 'off', label: 'Off' },
   ];
+  let filter = $state('');
+  const shownTools = $derived.by(() => {
+    const words = filter.toLowerCase().split(/\s+/).filter(Boolean);
+    return server.tools.filter((tool) =>
+      words.every((word) => `${tool.name} ${tool.description}`.toLowerCase().includes(word)),
+    );
+  });
+  /** The service's host: the whole address is in its tooltip. */
+  const host = $derived.by(() => {
+    try {
+      return new URL(server.url).host;
+    } catch {
+      return server.url;
+    }
+  });
   const usable = $derived(server.tools.filter((tool) => tool.rule !== 'off').length);
   const items: MenuItem[] = $derived([
     {
@@ -81,10 +96,10 @@
         size={18}
       />
       <span class="mcp-server-text">
-        <span class="skill-row-name"
+        <span class="mcp-server-name"
           >{server.name}{#if !server.enabled}<span class="pill">Off</span>{/if}</span
         >
-        <span class="skill-row-description" title={server.url}>{server.url}</span>
+        <span class="mcp-server-host" title={server.url}>{host}</span>
         <span class="mcp-server-count" class:problem={!!server.problem && !needsSignIn}
           >{needsSignIn
             ? waiting
@@ -116,14 +131,18 @@
     </p>{/if}
   {#if open}
     {#if server.tools.length}
+      {#if server.tools.length > 8}<label class="mcp-tool-filter">
+          <span class="sr-only">Filter {server.name} tools</span>
+          <input type="search" bind:value={filter} placeholder="Filter tools" />
+        </label>{/if}
       <ul class="mcp-tools" aria-label={`${server.name} tools`}>
-        {#each server.tools as tool (tool.name)}
+        {#each shownTools as tool (tool.name)}
           <li data-rule={tool.rule}>
             <span class="mcp-tool-text">
               <span class="skill-row-name">{tool.name}</span>
               <span class="mcp-tool-description"
-                >{#if tool.readOnly}<span class="mcp-tool-reads">Reads only</span
-                  >{#if tool.description}&nbsp;·&#32;{/if}{/if}{tool.description}</span
+                >{#if tool.readOnly}<span class="mcp-tag">Reads only</span
+                  >{/if}{tool.description}</span
               >
             </span>
             <OptionPicker
@@ -134,6 +153,7 @@
                 act(() => mcpServers.update(server.id, { rules: { [tool.name]: rule } }))}
             />
           </li>
+        {:else}<li class="mcp-tools-empty">No tool matches.</li>
         {/each}
       </ul>
     {:else}<p class="mcp-problem">No tools listed yet.</p>{/if}

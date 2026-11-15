@@ -10,6 +10,8 @@ contextBridge.exposeInMainWorld('crewsteadDesktop', {
   connect: (address: string) => ipcRenderer.invoke('connect-hub', address) as Promise<string>,
   /** Resolves '' when a project was added, 'cancelled', or why it could not be. */
   addProject: () => ipcRenderer.invoke('add-project') as Promise<string>,
+  /** Asks, in the app's own prompt, to let chats on this hub use this computer. */
+  useComputer: () => ipcRenderer.invoke('use-computer') as Promise<void>,
   /** This computer's id at the hub, when the app's computer service is connected to it. */
   thisComputer: () => ipcRenderer.invoke('this-computer') as Promise<string | undefined>,
   /** Turns a whole-computer setting of this computer on or off; '' or why it could not. */
