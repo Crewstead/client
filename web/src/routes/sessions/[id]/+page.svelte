@@ -135,10 +135,11 @@
   );
   // While the next chat loads, the one on screen stays (read-only): no blank page, no flash.
   const switching = $derived(!!conversation.session && conversation.session.id !== page.params.id);
-  // "Reconnecting…" only once the live connection has really been down a moment, not on every switch.
+  // "Reconnecting…" only once an open chat's live connection has really been down a moment: never while
+  // a chat loads (a long one takes a while) or on a switch.
   let offline = $state(false);
   $effect(() => {
-    if (conversation.connected) {
+    if (conversation.connected || switching || !conversation.session) {
       offline = false;
       return;
     }
@@ -295,7 +296,6 @@
           draftKey={workspace.draftKey(`draft:${workspace.context}:${session.id}`)}
           busy={session.status === 'running' || session.status === 'awaiting_approval'}
           connected={conversation.connected}
-          {offline}
           paused={switching}
           enabled={!!model}
           {...usageOf(model)}

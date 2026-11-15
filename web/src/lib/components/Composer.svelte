@@ -33,7 +33,6 @@
     editLast,
     commands = [],
     images = true,
-    offline = !connected,
     paused = false,
     queue,
     above,
@@ -70,8 +69,6 @@
     commands?: Command[];
     /** The model reads images; otherwise it gets their names only. */
     images?: boolean;
-    /** Shows the "Connecting…" note; by default whenever not connected. */
-    offline?: boolean;
     /** Holds sending without changing the placeholder, e.g. while the next chat loads. */
     paused?: boolean;
     /** Sends a message once the running reply ends; without it, nothing is sent while one runs. */
@@ -344,5 +341,4 @@
   {#if hasImages && !images}<p class="composer-caption" role="status">
       This model can’t see images; it gets their names only.
     </p>{/if}
-  {#if offline}<p class="composer-caption" role="status">Connecting… Your draft is saved.</p>{/if}
 </div>
