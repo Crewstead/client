@@ -1,6 +1,7 @@
 import { accountHeaders, apiUrl, csrfHeaders, transportRevision } from './auth/connection.ts';
 import type {
   ApprovalMode,
+  ChatBranch,
   ContextId,
   Context,
   Model,
@@ -8,6 +9,7 @@ import type {
   Project,
   Role,
   Session,
+  TimelineItem,
 } from '@crewstead/core/protocol';
 
 export interface Catalog {
@@ -68,3 +70,14 @@ export async function request<T>(path: string, options?: RequestInit): Promise<T
 export const scoped = (path: string, context: ContextId) => `${path}?context=${context}`;
 export const getSession = (id: string, context: ContextId) =>
   request<{ session: Session; cursor: number }>(scoped(`/sessions/${id}`, context));
+/** A chat with only its latest `limit` messages, and how many came before them. */
+export const getLatest = (id: string, context: ContextId, limit: number) =>
+  request<{ session: Session; cursor: number; earlier: number }>(
+    `${scoped(`/sessions/${id}`, context)}&limit=${limit}`,
+  );
+/** Up to `limit` messages (all when absent) before the message `before`, and how many remain. */
+export const getEarlier = (id: string, context: ContextId, before: string, limit?: number) =>
+  request<{ items: TimelineItem[]; branches: Record<string, ChatBranch>; earlier: number }>(
+    `${scoped(`/sessions/${id}/earlier`, context)}&before=${encodeURIComponent(before)}` +
+      (limit ? `&limit=${limit}` : ''),
+  );

@@ -44,7 +44,7 @@
     const url = current?.url ?? entry.url;
     return { title: pageName(current?.title || entry.title, url), url };
   };
-  // Once the chat's browsers have closed, what they last showed.
+  // The chat used a browser, so the section stays once they have closed.
   const used = $derived(
     [browserState(session, 'browser'), browserState(session, 'web')].filter((state) => state),
   );
@@ -98,10 +98,7 @@
         {/key}
       </div>
     {:else}
-      <p class="panel-empty">
-        No browser open now. {#each used as state, index (index)}{#if state?.url}Last page:
-            <code>{state.url}</code>{/if}{/each}
-      </p>
+      <p class="panel-empty">No browser open now.</p>
     {/if}
   </PanelSection>
 {/if}

@@ -27,6 +27,8 @@
     running = false,
     focus,
     editing = $bindable(),
+    earlier = 0,
+    loadEarlier,
   }: {
     items: TimelineItem[];
     /** Other versions of the chat from its prompts on. */
@@ -40,30 +42,44 @@
     decide: (id: string, decision: 'approve' | 'reject' | 'approve-all') => Promise<boolean>;
     /** The prompt being edited. */
     editing?: string | undefined;
+    /** Messages before `items` that the hub has not sent yet. */
+    earlier?: number;
+    /** Loads earlier messages: `count` of them, or all. */
+    loadEarlier?: (count?: number) => Promise<void>;
   } = $props();
   let viewport: HTMLDivElement;
   // A long chat draws its latest entries first and earlier ones as the reader nears the top: drawing
-  // hundreds of replies at once took seconds. Every item stays loaded for the panel and export.
+  // hundreds of replies at once took seconds. Past the loaded messages, earlier ones are loaded.
   const FIRST = 40;
   const MORE = 40;
   const entries = $derived(timelineEntries(items, running));
   let drawn = $state(FIRST);
   const shown = $derived(entries.length > drawn ? entries.slice(-drawn) : entries);
   let top = $state<HTMLDivElement>();
-  function earlier() {
-    if (drawn >= entries.length) return;
+  let fetching = false;
+  function more() {
+    if (drawn >= entries.length) {
+      if (!earlier || !loadEarlier || fetching) return;
+      fetching = true;
+      const had = items.length;
+      void loadEarlier(200).then(() => {
+        fetching = false;
+        if (items.length > had) void tick().then(more);
+      });
+      return;
+    }
     // What is on screen stays where it is while entries are added above it.
     const fromBottom = viewport.scrollHeight - viewport.scrollTop;
     drawn += MORE;
     void tick().then(() => {
       viewport.scrollTop = viewport.scrollHeight - fromBottom;
-      if (viewport.scrollTop < viewport.clientHeight) earlier();
+      if (viewport.scrollTop < viewport.clientHeight) more();
     });
   }
   $effect(() => {
     if (!top) return;
     const watcher = new IntersectionObserver(
-      (seen) => seen.some((entry) => entry.isIntersecting) && earlier(),
+      (seen) => seen.some((entry) => entry.isIntersecting) && more(),
       { root: viewport, rootMargin: '800px 0px 0px 0px' },
     );
     watcher.observe(top);
@@ -72,6 +88,7 @@
   // A message asked for further up is drawn, with what follows it.
   $effect(() => {
     if (!focus) return;
+    if (earlier && !items.some((item) => item.id === focus)) void loadEarlier?.();
     const at = entries.findIndex((entry) =>
       entry.kind === 'item'
         ? entry.item.id === focus
@@ -135,7 +152,10 @@
   aria-live="polite"
 >
   <div class="timeline-content">
-    {#if shown.length < entries.length}<div class="timeline-earlier" bind:this={top}></div>{/if}
+    {#if shown.length < entries.length || earlier}<div
+        class="timeline-earlier"
+        bind:this={top}
+      ></div>{/if}
     {#if !items.length}<div class="conversation-welcome">
         <h2>Start a chat</h2>
       </div>{/if}

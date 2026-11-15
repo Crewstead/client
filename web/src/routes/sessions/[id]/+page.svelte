@@ -16,6 +16,7 @@
   import { useWorkspace } from '#lib/workspace.svelte.ts';
   import { downloadChat } from '#lib/components/chat-export.ts';
   import { Conversation } from '#lib/conversation.svelte.ts';
+  import { delayed } from '#lib/delayed.svelte.ts';
   import Timeline from '#lib/components/Timeline.svelte';
   import Composer from '#lib/components/Composer.svelte';
   import ModelPicker from '#lib/components/ModelPicker.svelte';
@@ -137,23 +138,15 @@
   const switching = $derived(!!conversation.session && conversation.session.id !== page.params.id);
   // "Reconnecting…" only once an open chat's live connection has really been down a moment: never while
   // a chat loads (a long one takes a while) or on a switch.
-  let offline = $state(false);
-  $effect(() => {
-    if (conversation.connected || switching || !conversation.session) {
-      offline = false;
-      return;
-    }
-    const timer = setTimeout(() => (offline = true), 1_500);
-    return () => clearTimeout(timer);
-  });
+  const offline = delayed(
+    () => !conversation.connected && !switching && !!conversation.session,
+    1_500,
+  );
   // Only the very first chat loads onto an empty page; a slow load gets a quiet spinner.
-  let slowLoad = $state(false);
-  $effect(() => {
-    if (conversation.session) return;
-    slowLoad = false;
-    const timer = setTimeout(() => (slowLoad = true), 600);
-    return () => clearTimeout(timer);
-  });
+  const slowLoad = delayed(() => !conversation.session, 600);
+  // A switch keeps the chat on screen (no blank flash), but one that takes a while shows the loading
+  // circle instead of a chat that looks frozen.
+  const slowSwitch = delayed(() => switching, 400);
   $effect(() => {
     void page.params.id;
     picked = '';
@@ -223,7 +216,7 @@
   }
 </script>
 
-{#if conversation.session}
+{#if conversation.session && !slowSwitch.value}
   {@const session = conversation.session}
   <div class="conversation-layout">
     <div class="conversation-main">
@@ -253,23 +246,29 @@
             title={session.title}
             rename={(title) => workspace.setPreferences(session.id, { title })}
           />
-          <span class:sr-only={!offline} role="status" aria-label="Connection status"
-            >{offline
+          <span class:sr-only={!offline.value} role="status" aria-label="Connection status"
+            >{offline.value
               ? 'Reconnecting…'
               : conversation.connected
                 ? 'Connected'
                 : 'Connecting…'}</span
           >
         </div>
-        <ChatStats bind:this={stats} {session} {models} />
+        <ChatStats
+          bind:this={stats}
+          {session}
+          {models}
+          loadAll={() => conversation.loadEarlier()}
+        />
         <button
           class="icon-button"
           aria-label="Export as Markdown"
           title="Export as Markdown"
           disabled={!session.items.length}
-          onclick={() =>
-            downloadChat(session, (id) => models.find((entry) => entry.id === id)?.label ?? id)}
-          ><Download size={18} /></button
+          onclick={async () => {
+            await conversation.loadEarlier();
+            downloadChat(session, (id) => models.find((entry) => entry.id === id)?.label ?? id);
+          }}><Download size={18} /></button
         >
         <button
           class="icon-button"
@@ -284,6 +283,8 @@
       <!-- Each chat starts drawn from its latest messages. -->
       {#key session.id}<Timeline
           items={session.items}
+          earlier={conversation.earlier}
+          loadEarlier={(count) => conversation.loadEarlier(count)}
           {...session.branches ? { branches: session.branches } : {}}
           {actions}
           {decide}
@@ -378,13 +379,15 @@
         {...projects.find((entry) => entry.id === session.projectId)
           ? { project: projects.find((entry) => entry.id === session.projectId) }
           : {}}
+        loadAll={() => conversation.loadEarlier()}
         close={() => chatPanel.set(false)}
         details={() => stats?.open()}
       />{/if}
   </div>
 {:else}<div class="page-container">
     {#if conversation.error}<div class="error-banner" role="alert">{conversation.error}</div>
-      <a class="back-link" href={resolve('/')}>Back to chats</a>{:else if slowLoad}<p
+      <a class="back-link" href={resolve('/')}>Back to chats</a
+      >{:else if slowLoad.value || slowSwitch.value}<p
         class="chat-loading"
         role="status"
         aria-label="Loading chat"

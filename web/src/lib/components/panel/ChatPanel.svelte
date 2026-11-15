@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { untrack } from 'svelte';
   import ResizeHandle from '../ResizeHandle.svelte';
   import { chatPanelWidth } from '#lib/panel-widths.svelte.ts';
   import { ChartNoAxesColumn, FileDiff, Paperclip, Folder, Monitor, X } from '@lucide/svelte';
@@ -26,6 +27,7 @@
     project,
     close,
     details,
+    loadAll,
   }: {
     session: Session;
     model?: Model;
@@ -34,7 +36,13 @@
     close: () => void;
     /** Opens the full statistics. */
     details: () => void;
+    /** Loads the chat's messages not sent yet: the panel counts the whole chat. */
+    loadAll?: () => Promise<void>;
   } = $props();
+  $effect(() => {
+    void session.id;
+    untrack(() => void loadAll?.());
+  });
   const workspace = useWorkspace();
   let tab = $state(savedTab());
   const files = $derived(chatFiles(session));

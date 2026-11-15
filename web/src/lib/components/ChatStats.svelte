@@ -8,7 +8,16 @@
   import ContextBreakdown from './ContextBreakdown.svelte';
   import '@crewstead/ui/dialogs.css';
   import '@crewstead/ui/stats.css';
-  let { session, models }: { session: Session; models: Model[] } = $props();
+  let {
+    session,
+    models,
+    loadAll,
+  }: {
+    session: Session;
+    models: Model[];
+    /** Loads the chat's messages not sent yet, which its counts need. */
+    loadAll?: () => Promise<void>;
+  } = $props();
   const workspace = useWorkspace();
   const id = $props.id();
   let dialog = $state<HTMLDialogElement>();
@@ -26,6 +35,7 @@
   /** Opened from the context meter in the prompt box. */
   export async function open() {
     dialog?.showModal();
+    void loadAll?.();
     cost = undefined;
     try {
       cost = await request(scoped(`/sessions/${session.id}/cost`, workspace.context));

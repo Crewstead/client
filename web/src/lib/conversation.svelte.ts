@@ -8,17 +8,21 @@ import type {
   TimelineItem,
   ToolProgress,
 } from '@crewstead/core/protocol';
-import { getSession, request, scoped } from './api';
+import { getEarlier, getLatest, request, scoped } from './api';
 import { addUsage } from '@crewstead/core/protocol';
 import { newId } from './ids.ts';
 
 const RETRY_MAX_MS = 30_000;
+/** Messages a chat opens with; earlier ones load as the reader scrolls up. */
+const LATEST = 200;
 
 /** The model, effort and project picked in the prompt box, sent when they change. */
 type SendChoices = { effort?: Effort; modelId?: string; projectId?: string };
 
 export class Conversation {
   session = $state<Session | null>(null);
+  /** How many messages came before the loaded ones; they load on scrolling up or for the panel. */
+  earlier = $state(0);
   connected = $state(false);
   error = $state('');
   sending = $state(false);
@@ -27,6 +31,8 @@ export class Conversation {
   private retryMs = 1_000;
   private generation = 0;
   private cursor = 0;
+  private context?: ContextId;
+  private loading?: Promise<void>;
 
   async open(id: string, context: ContextId) {
     this.close();
@@ -35,10 +41,12 @@ export class Conversation {
     // The chat on screen stays until the next one has loaded, so switching does not blank the page;
     // the page treats it as read-only meanwhile (its id is not the one in the address).
     try {
-      const snapshot = await getSession(id, context);
+      const snapshot = await getLatest(id, context, LATEST);
       if (generation !== this.generation) return;
       this.session = snapshot.session;
+      this.earlier = snapshot.earlier;
       this.cursor = snapshot.cursor;
+      this.context = context;
       this.connect(id, context, generation, snapshot.cursor);
     } catch (error) {
       if (generation !== this.generation) return;
@@ -54,7 +62,10 @@ export class Conversation {
    */
   private connect(id: string, context: ContextId, generation: number, after = 0) {
     // The stream starts after the chat just loaded rather than sending all of it again.
-    const path = scoped(`/sessions/${id}/events`, context) + (after ? `&after=${after}` : '');
+    const path =
+      scoped(`/sessions/${id}/events`, context) +
+      `&limit=${LATEST}` +
+      (after ? `&after=${after}` : '');
     const source = new EventSource(withAccount(apiUrl(path)), { withCredentials: true });
     this.source = source;
     const current = () => generation === this.generation && this.source === source;
@@ -81,8 +92,13 @@ export class Conversation {
     });
     source.addEventListener('snapshot', (event) => {
       if (!current()) return;
-      const snapshot = JSON.parse(event.data) as { session: Session; cursor: number };
+      const snapshot = JSON.parse(event.data) as {
+        session: Session;
+        cursor: number;
+        earlier?: number;
+      };
       this.session = snapshot.session;
+      this.earlier = snapshot.earlier ?? 0;
       this.cursor = snapshot.cursor;
     });
     // On a resumed stream: the reply still being written, with its text so far.
@@ -143,6 +159,7 @@ export class Conversation {
       else if (update.event.type === 'session.items') {
         this.session.items = update.event.items;
         this.session.branches = update.event.branches;
+        this.earlier = 0;
       } else this.upsert(update.event.item);
     });
   }
@@ -150,8 +167,36 @@ export class Conversation {
   private upsert(item: TimelineItem) {
     const items = this.session!.items;
     const index = items.findIndex((previous) => previous.id === item.id);
+    // An earlier message not loaded yet: it loads as it is now when the reader gets to it.
+    if (index < 0 && this.earlier && items[0] && item.createdAt < items[0].createdAt) return;
     if (index < 0) items.push(item);
     else items[index] = item;
+  }
+
+  /** Loads up to `count` messages before the loaded ones, or all of them when absent. */
+  async loadEarlier(count?: number): Promise<void> {
+    while (this.loading) await this.loading;
+    const session = this.session;
+    const first = session?.items[0]?.id;
+    if (!session || !first || !this.earlier || !this.context) return;
+    const generation = this.generation;
+    const loading = getEarlier(session.id, this.context, first, count)
+      .then((page) => {
+        if (generation !== this.generation || this.session !== session) return;
+        if (!this.earlier || session.items[0]?.id !== first) return;
+        session.items.unshift(...page.items);
+        session.branches = { ...page.branches, ...session.branches };
+        this.earlier = page.earlier;
+      })
+      .catch((error: unknown) => {
+        if (generation === this.generation)
+          this.error = error instanceof Error ? error.message : 'Could not load earlier messages';
+      })
+      .finally(() => {
+        if (this.loading === loading) this.loading = undefined;
+      });
+    this.loading = loading;
+    await loading;
   }
 
   async command(path: string, context: ContextId, body: unknown = {}, method = 'POST') {
@@ -276,5 +321,6 @@ export class Conversation {
     this.connected = false;
     this.sending = false;
     this.retryMs = 1_000;
+    this.loading = undefined;
   }
 }
