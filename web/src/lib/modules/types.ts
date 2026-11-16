@@ -20,6 +20,8 @@ export interface SlotProps {
   tools: Record<string, never>;
   /** A chat's side panel, above the core sections (e.g. the skills in use). */
   'chat-panel': { session: Session };
+  /** The plans page (/plans): a project's plans, or one plan when `plan` names its folder. */
+  'plan-page': { project: string; plan?: string };
 }
 export type SlotName = keyof SlotProps;
 

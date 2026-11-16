@@ -9,6 +9,7 @@ import {
   type MachineHello,
   type MachineReport,
   type PlanLimits,
+  isPlanFileAction,
 } from '@crewstead/core/protocol';
 import { detectClaudeCode, runClaude } from './claude.ts';
 import {
@@ -20,6 +21,7 @@ import {
 import { computerHello, terminalsOn } from './computer.ts';
 import { readConfig, writeConfig, type MachineConfig } from './config.ts';
 import { listFolders, projectAction } from './folders.ts';
+import { planFiles } from './plan-files.ts';
 import { browserLink, isBrowserAction } from './browser-link.ts';
 import { projectCommands, watchProjects } from './project-link.ts';
 import { watchCommands } from './watch-link.ts';
@@ -200,6 +202,8 @@ async function linkOnce(options: LinkOptions, connected: () => void) {
       const { action } = command;
       if (isBrowserAction(action))
         answer = { requestId: command.requestId, ...(await browsers.answer(action)) };
+      else if (isPlanFileAction(action))
+        answer = { requestId: command.requestId, ...(await planFiles(options.tools.home, action)) };
       else if (action.kind.startsWith('claude_')) {
         await claudeAccountAction(
           options.claude,
@@ -221,7 +225,13 @@ async function linkOnce(options: LinkOptions, connected: () => void) {
         error: (error instanceof Error ? error.message : 'That did not work.').slice(0, 500),
       };
     }
-    await call('/api/machine/action-results', answer).catch(() => {});
+    // An answer the hub cannot take still ends the wait there, with what went wrong.
+    await call('/api/machine/action-results', answer).catch((error: unknown) =>
+      call('/api/machine/action-results', {
+        requestId: command.requestId,
+        error: `The computer could not send its answer: ${String(error).slice(0, 200)}`,
+      }).catch(() => {}),
+    );
   };
   // Cleaned up however the link ends, so reconnecting never leaves watchers or runs behind.
   try {

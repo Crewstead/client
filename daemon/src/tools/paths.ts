@@ -3,13 +3,19 @@ import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 
 /** Paths the tools never write to; Git metadata is also read-only inside the command sandbox. */
 const PROTECTED = /(^|[\\/])\.git([\\/]|$)/;
+/** Plans change only through the hub's plan tools, which check and version them (docs/plan/33). */
+const PLANS = /(^|[\\/])\.crewstead[\\/]plans([\\/]|$)/;
 
 /**
  * Resolves a path the model gave, relative to the project, through any symbolic links, and refuses
  * anything that ends up outside the project folder. Checked at use, so a swapped link is caught.
  * The root "/" is the whole computer: paths are absolute and shown as such.
  */
-export async function projectPath(root: string, path: string, options: { write?: boolean } = {}) {
+export async function projectPath(
+  root: string,
+  path: string,
+  options: { write?: boolean; plans?: boolean } = {},
+) {
   const whole = root === '/';
   if ((isAbsolute(path) && !whole) || path.includes('\0'))
     throw new Error('Use a path relative to the project folder.');
@@ -35,6 +41,8 @@ export async function projectPath(root: string, path: string, options: { write?:
   const shown = whole ? real : relative(root, real) || '.';
   if (options.write) {
     if (PROTECTED.test(shown)) throw new Error('Git metadata cannot be changed with these tools.');
+    if (!options.plans && PLANS.test(shown))
+      throw new Error('Plans change only through the plan tools (plan_write, plan_patch).');
     const stat = await lstat(real).catch(() => undefined);
     if (stat?.isDirectory()) throw new Error(`${shown} is a folder.`);
   }

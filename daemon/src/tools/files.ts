@@ -133,7 +133,7 @@ export async function writeProjectFile(
 }
 
 /** Writes through a temporary file and a rename, keeping the file's permissions. */
-async function replaceFile(real: string, text: string) {
+export async function replaceFile(real: string, text: string) {
   const mode = await stat(real)
     .then((info) => info.mode & 0o777)
     .catch(() => 0o644);
