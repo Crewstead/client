@@ -29,7 +29,7 @@ await build({
   // loads a native module for terminals.
   external: ['playwright-core', 'node-pty'],
   banner: {
-    js: "import { createRequire as __require } from 'node:module'; const require = __require(import.meta.url);",
+    js: "import { createRequire as __appRequire } from 'node:module'; const require = __appRequire(import.meta.url);",
   },
 });
 mkdirSync(resolve(out, 'daemon'), { recursive: true });

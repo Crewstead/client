@@ -15,6 +15,8 @@
   import '@crewstead/ui/providers.css';
   import '@crewstead/ui/projects.css';
   let list = $state<MachineView[]>([]);
+  // The hub's own Claude Code service runs only Claude Code: no projects, terminals or whole computer.
+  const computers = $derived(list.filter((machine) => !machine.hosted));
   let loaded = $state(false);
   let error = $state('');
   /** Inside the Crewstead app, which can pick a folder on this computer; absent in a browser. */
@@ -69,7 +71,7 @@
     <div class="settings-card"><LoadingRows label="Loading your computers" rows={3} /></div>
   {/if}
   <div class="computer-list">
-    {#each list as machine (machine.id)}
+    {#each computers as machine (machine.id)}
       <div
         class="settings-card provider-groups computer-card"
         role="group"
@@ -129,7 +131,7 @@
       </div>
     {/each}
   </div>
-  {#if loaded && !list.length}
+  {#if loaded && !computers.length}
     <EmptyState
       text="No computers yet. Sign in to this hub in the Crewstead app on a computer and let chats use it, or connect one here."
     >
@@ -138,7 +140,7 @@
         >{/snippet}
     </EmptyState>
   {/if}
-  {#if loaded && list.length}
+  {#if loaded && computers.length}
     <p class="settings-footnote">
       {#if desktop?.addProject}
         Add project picks a folder on this computer; to add one on another computer, open Crewstead
