@@ -1,4 +1,4 @@
-import { unwatchFile, watchFile } from 'node:fs';
+import { statSync, unwatchFile, watchFile } from 'node:fs';
 import { join } from 'node:path';
 import type {
   MachineCommand,
@@ -52,12 +52,20 @@ export function projectCommands(
   };
 }
 
-/** Calls `changed` when the owner adds or removes a project, so the hub hears of it at once. */
-export function watchProjects(home: string, changed: () => void) {
+/** When the settings (projects, folders) last changed. */
+export const settingsTime = (home: string) =>
+  statSync(join(home, 'config.json'), { throwIfNoEntry: false })?.mtimeMs;
+
+/**
+ * Calls `changed` when the owner adds or removes a project, so the hub hears of it at once. A change
+ * since `since` (made while the link was connecting, before this watch began) is reported at once too.
+ */
+export function watchProjects(home: string, changed: () => void, since = settingsTime(home)) {
   const file = join(home, 'config.json');
   const listener = (now: { mtimeMs: number }, before: { mtimeMs: number }) => {
     if (now.mtimeMs !== before.mtimeMs) changed();
   };
   watchFile(file, { interval: 1_000 }, listener);
+  if (settingsTime(home) !== since) changed();
   return () => unwatchFile(file, listener);
 }

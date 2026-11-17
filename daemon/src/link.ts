@@ -23,7 +23,7 @@ import { readConfig, writeConfig, type MachineConfig } from './config.ts';
 import { listFolders, projectAction } from './folders.ts';
 import { planFiles } from './plan-files.ts';
 import { browserLink, isBrowserAction } from './browser-link.ts';
-import { projectCommands, watchProjects } from './project-link.ts';
+import { projectCommands, settingsTime, watchProjects } from './project-link.ts';
 import { watchCommands } from './watch-link.ts';
 import { loadPty, terminalLink } from './terminal-link.ts';
 import { listProjects } from './projects.ts';
@@ -149,16 +149,22 @@ async function linkOnce(options: LinkOptions, connected: () => void) {
     terminals: !!pty && terminalsOn(options.tools.home),
     hosted: process.env.CREWSTEAD_HOSTED === '1',
   });
+  // What the first hello reports; a later change is sent again once the watch below begins.
+  const since = settingsTime(options.tools.home);
   const first = await hello();
   rememberId(options.tools.home, await (await call('/api/machine/hello', first)).json());
   const stream = await call('/api/machine/link');
   connected();
-  const unwatch = watchProjects(options.tools.home, () => {
-    void hello()
-      .then((value) => call('/api/machine/hello', value))
-      .then(() => options.log('Sent the updated project list to the hub.'))
-      .catch(() => {});
-  });
+  const unwatch = watchProjects(
+    options.tools.home,
+    () => {
+      void hello()
+        .then((value) => call('/api/machine/hello', value))
+        .then(() => options.log('Sent the updated project list to the hub.'))
+        .catch(() => {});
+    },
+    since,
+  );
   const projects = projectCommands(
     options.tools,
     async (result) => {
