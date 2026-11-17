@@ -18,10 +18,18 @@
   let clock = $state(Date.now());
   const timer = setInterval(() => (clock = Date.now()), 1_000);
   onDestroy(() => clearInterval(timer));
-  const elapsed = $derived.by(() => {
-    const seconds = Math.max(0, Math.floor((clock - Date.parse(item.createdAt)) / 1_000));
+  const time = (ms: number) => {
+    const seconds = Math.max(0, Math.floor(ms / 1_000));
     return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+  };
+  const elapsed = $derived(time(clock - Date.parse(item.createdAt)));
+  // When the current line last changed here. A model that thinks without showing it (Claude Code
+  // does not stream Opus's thinking) sends nothing for minutes; the card says so instead of looking stuck.
+  let changed = $state({ line: '', at: Date.now() });
+  $effect.pre(() => {
+    if (now !== changed.line) changed = { line: now, at: Date.now() };
   });
+  const quiet = $derived(clock - changed.at >= 30_000 ? time(clock - changed.at) : '');
 </script>
 
 <!-- While a plan is being made: what it is doing now, how long it has run, and what is finished. -->
@@ -30,7 +38,12 @@
     <header>
       <ListChecks size={17} /><strong>Planning</strong><span class="tool-status">{elapsed}</span>
     </header>
-    <p class="plan-make-now" role="status"><span class="plan-make-pulse"></span>{now}</p>
+    <p class="plan-make-now" role="status">
+      <span class="plan-make-pulse"></span><span
+        >{now}{#if quiet}<span class="plan-make-quiet">{` · no new output for ${quiet}`}</span
+          >{/if}</span
+      >
+    </p>
     {#if done.length}<details class="plan-make-steps">
         <summary><ChevronRight size={13} />{done.length} done</summary>
         <ul>

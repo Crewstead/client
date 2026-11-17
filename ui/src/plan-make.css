@@ -20,6 +20,10 @@
   background: var(--amber);
   animation: chat-working 1.4s ease-in-out infinite;
 }
+.plan-make-quiet {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
 .plan-make-steps {
   border-top: 1px solid var(--line);
 }
