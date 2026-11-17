@@ -1,5 +1,5 @@
 import type { Component } from 'svelte';
-import type { ContextId, Session } from '@crewstead/core/protocol';
+import type { ContextId, Session, TimelineItem } from '@crewstead/core/protocol';
 
 /** Lazily imported module UI, so a turned-off module's code is never loaded. */
 export type Lazy<Props extends Record<string, unknown>> = () => Promise<{
@@ -86,6 +86,8 @@ export interface ClientModule {
   connectOptions?: ConnectOption[];
   workspaceActions?: WorkspaceAction[];
   sidebarLinks?: SidebarLink[];
+  /** How a chat shows calls of this module's own tools, by tool name, instead of the plain tool row. */
+  toolViews?: Record<string, Lazy<{ item: TimelineItem }>>;
   /** Names offered after "@" in the prompt box. */
   mentions?: () => Promise<Mention[]>;
   /**

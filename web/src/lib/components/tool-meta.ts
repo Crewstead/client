@@ -80,6 +80,7 @@ const shown: Record<string, { title: string; icon: typeof Wrench }> = {
   watch_list: { title: 'List watches', icon: Radar },
   watch_stop: { title: 'Stop watch', icon: Radar },
   plan_update: { title: 'Update the plan', icon: ListChecks },
+  plan_make: { title: 'Make a plan', icon: ListChecks },
   ask_user: { title: 'Ask you', icon: MessageCircleQuestion },
   schedule_create: { title: 'Schedule a task', icon: CalendarClock },
   schedule_list: { title: 'List scheduled tasks', icon: CalendarClock },

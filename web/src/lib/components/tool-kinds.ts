@@ -43,6 +43,7 @@ export const toolKinds: Record<string, ToolKind> = {
   watch_list: 'read',
   watch_stop: 'read',
   plan_update: 'read',
+  plan_make: 'chat',
   ask_user: 'chat',
   schedule_list: 'read',
   schedule_create: 'chat',

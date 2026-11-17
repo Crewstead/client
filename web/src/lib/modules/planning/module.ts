@@ -7,4 +7,5 @@ export const planningClient: ClientModule = {
     { slot: 'chat-panel', order: 5, load: () => import('./PanelPlans.svelte') },
     { slot: 'plan-page', order: 0, load: () => import('./PlansPage.svelte') },
   ],
+  toolViews: { plan_make: () => import('./PlanMakeCard.svelte') },
 };

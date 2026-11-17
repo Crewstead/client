@@ -38,6 +38,10 @@ export function activeModules(modules: ModuleInfo[] | undefined): ClientModule[]
   return clientModules.filter((module) => running.has(module.id));
 }
 
+/** The view a running module gives its own tool's calls in a chat, if any. */
+export const toolViewFor = (modules: ClientModule[], tool: string | undefined) =>
+  tool ? modules.find((module) => module.toolViews?.[tool])?.toolViews?.[tool] : undefined;
+
 export const connectOptionsFor = (modules: ClientModule[]): ConnectOption[] =>
   modules.flatMap((module) => module.connectOptions ?? []);
 

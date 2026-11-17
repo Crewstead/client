@@ -9,7 +9,7 @@
     type TimelineItem,
   } from '@crewstead/core/protocol';
   import Markdown from '#lib/markdown/Markdown.svelte';
-  import ToolItem from './ToolItem.svelte';
+  import ToolRow from './ToolRow.svelte';
   import QuestionCard from './QuestionCard.svelte';
   import Attachments from './attachments/Attachments.svelte';
   import ExploredGroup from './ExploredGroup.svelte';
@@ -205,7 +205,7 @@
               answer={(text) => actions?.answer(text) ?? Promise.resolve(false)}
             />
           </div>
-        {:else if item.role === 'tool'}<div class="tool-row"><ToolItem {item} {decide} /></div>
+        {:else if item.role === 'tool'}<div class="tool-row"><ToolRow {item} {decide} /></div>
         {:else if item.role === 'notice' && item.notice}
           <!-- Another model or another place from here on: what changed, and from what. -->
           <p class="summary-divider moved-divider" title={item.text}>

@@ -1,0 +1,62 @@
+/* A plan being made (plan_make): what it is doing now, and the steps it has finished. */
+.plan-make .tool-status {
+  font-variant-numeric: tabular-nums;
+}
+.plan-make-now {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  margin: 0;
+  padding: 12px 14px;
+  color: var(--text);
+  font-size: 13px;
+}
+/* The same working dot as a chat at work in the chat list. */
+.plan-make-pulse {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--amber);
+  animation: chat-working 1.4s ease-in-out infinite;
+}
+.plan-make-steps {
+  border-top: 1px solid var(--line);
+}
+.plan-make-steps > summary {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 8px 14px;
+  color: var(--muted);
+  font-size: 12px;
+  list-style: none;
+  cursor: pointer;
+}
+.plan-make-steps > summary::-webkit-details-marker {
+  display: none;
+}
+.plan-make-steps > summary:hover {
+  color: var(--text);
+}
+.plan-make-steps[open] > summary > svg {
+  transform: rotate(90deg);
+}
+.plan-make-steps ul {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0 14px 12px 33px;
+  color: var(--muted);
+  font-size: 12px;
+}
+@keyframes chat-working {
+  50% {
+    opacity: 0.35;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .plan-make-pulse {
+    animation: none;
+  }
+}
