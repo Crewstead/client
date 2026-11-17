@@ -25,6 +25,7 @@
     extract: 'Writing what was asked',
     decide: 'Listing the decisions',
     detail: 'Detailing the parts',
+    consolidate: 'Making the plan smaller',
     review: 'Reviewing',
     adversarial: 'Testing the plan',
     ground: 'Checking against the project',
