@@ -84,5 +84,10 @@ export const resolveComment = (folder: string, id: string) =>
 /** Asks the chat that made the plan to revise it for the open comments. */
 export const askRevision = (project: string, folder: string) =>
   post<{ chat: string }>(`/plans/${encodeURIComponent(folder)}/revise`, { project });
+/** Deletes the plan's folder on the computer and the hub's copy, versions, comments and runs. */
+export const deletePlan = (project: string, folder: string) =>
+  request<{ deleted: true }>(`/plans/${encodeURIComponent(folder)}?${query(project)}`, {
+    method: 'DELETE',
+  });
 export const approvePlan = (project: string, folder: string) =>
   post<{ approved: true }>(`/plans/${encodeURIComponent(folder)}/approve`, { project });

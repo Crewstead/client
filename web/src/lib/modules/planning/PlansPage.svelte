@@ -2,6 +2,7 @@
   import { LoaderCircle } from '@lucide/svelte';
   import { useWorkspace } from '#lib/workspace.svelte.ts';
   import { listPlans, readPlanDetail, type PlanDetail, type PlanSummary } from './api.ts';
+  import PlanActions from './PlanActions.svelte';
   import PlanList from './PlanList.svelte';
   import PlanView from './PlanView.svelte';
   import '@crewstead/ui/plans.css';
@@ -11,6 +12,7 @@
   let list = $state<{ plans: PlanSummary[]; offline?: boolean }>();
   let detail = $state<PlanDetail>();
   let error = $state('');
+  let problem = $state('');
   const readDetail = async () => {
     if (plan) detail = await readPlanDetail(project, plan);
   };
@@ -30,6 +32,14 @@
     <p class="error-banner" role="alert">
       This plan cannot be read: {detail.row.errors?.join(' ')}
     </p>
+    <PlanActions
+      {project}
+      {detail}
+      openComments={0}
+      reload={readDetail}
+      report={(text) => (problem = text)}
+    />
+    {#if problem}<p class="error-banner" role="alert">{problem}</p>{/if}
   </div>
 {:else if !plan && list}<PlanList
     {project}

@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
-import { mkdir, readdir, readFile, stat } from 'node:fs/promises';
-import { dirname } from 'node:path';
+import { lstat, mkdir, readdir, readFile, rm, stat } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
 import type { MachineActionResult, PlanFileAction } from '@crewstead/core/protocol';
 import {
   NOTE_FOLDER,
@@ -106,6 +106,15 @@ export async function planFiles(home: string, action: PlanFileAction): Promise<A
           ? { stale: true, plan: { folder: action.folder, ...done.current } }
           : { stale: true };
       return { plan: { folder: action.folder, content: action.content, hash: done.hash } };
+    }
+    case 'plan_delete': {
+      // The folder itself, not where a link would lead: a link is removed, never followed.
+      const { real } = await projectPath(root, PLAN_FOLDER);
+      const target = join(real, action.folder);
+      const info = await lstat(target).catch(() => undefined);
+      if (info?.isDirectory()) await rm(target, { recursive: true });
+      else if (info) await rm(target);
+      return {};
     }
     case 'plan_note_read': {
       const note = await readInside(root, `${action.folder}/${action.file}`, NOTE_MAX_BYTES);
