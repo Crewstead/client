@@ -55,6 +55,10 @@
 .turn-footer .worked {
   margin: 0;
 }
+/* After a one-line tool call (whose row has little space below), the footer starts below it. */
+.tool-row:has(> .tool-line, > .explored) + .turn-footer {
+  margin-top: 6px;
+}
 /* Editing a prompt: the bubble becomes a box with its own buttons. */
 .prompt-editor {
   display: grid;

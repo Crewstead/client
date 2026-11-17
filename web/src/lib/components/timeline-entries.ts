@@ -70,6 +70,12 @@ export function changedFiles(items: TimelineItem[]): ChangedFile[] {
   return files;
 }
 
+/** A running turn's clock; after `/continue`, the time worked before plus the time since. */
+const clockOf = (asked: TimelineItem, from: string, worked?: number) =>
+  asked.resumedAt && asked.resumedAt > from
+    ? { since: asked.resumedAt, ...(worked ? { ms: worked } : {}) }
+    : { since: from };
+
 /** `running` is true while the last turn is still going; its changes show once it ends. */
 export function timelineEntries(items: TimelineItem[], running: boolean): TimelineEntry[] {
   const entries: TimelineEntry[] = [];
@@ -99,7 +105,7 @@ export function timelineEntries(items: TimelineItem[], running: boolean): Timeli
           ? worked === undefined
             ? {}
             : { ms: worked }
-          : { since: (notes.at(-1) ?? asked).createdAt }),
+          : clockOf(asked, (notes.at(-1) ?? asked).createdAt, worked)),
         ...(finished && asked.generated && asked.generated.ms >= 250
           ? { tokensPerSecond: Math.round((asked.generated.tokens * 1000) / asked.generated.ms) }
           : {}),

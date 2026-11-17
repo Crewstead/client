@@ -2,8 +2,8 @@
   import { onMount } from 'svelte';
   import { duration } from './duration.ts';
   /**
-   * A finished turn's time, or `since` for a clock that runs while the reply is working; `speed` is
-   * how fast the model wrote, in output tokens per second.
+   * A finished turn's time, or `since` for a clock that runs while the reply is working (on top of
+   * `ms` when a turn was continued); `speed` is how fast the model wrote, in output tokens per second.
    */
   let { ms, since, speed }: { ms?: number; since?: string; speed?: number } = $props();
   let now = $state(Date.now());
@@ -13,7 +13,7 @@
     return () => clearInterval(timer);
   });
   // Replies under a second say nothing. Clocks on another device may differ a little from the hub's; never show negative time.
-  const elapsed = $derived(since ? Math.max(0, now - Date.parse(since)) : (ms ?? 0));
+  const elapsed = $derived((ms ?? 0) + (since ? Math.max(0, now - Date.parse(since)) : 0));
 </script>
 
 {#if since}<p

@@ -170,6 +170,9 @@ export class Conversation {
     // An earlier message not loaded yet: it loads as it is now when the reader gets to it.
     if (index < 0 && this.earlier && items[0] && item.createdAt < items[0].createdAt) return;
     if (index < 0) items.push(item);
+    // A running tool's output so far comes apart from its saved updates and stays until it ends.
+    else if (item.status === 'pending' && !item.progress && items[index]!.progress)
+      items[index] = { ...item, progress: items[index]!.progress };
     else items[index] = item;
   }
 
