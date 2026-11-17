@@ -122,8 +122,14 @@ a.plan-id:hover {
 }
 .plan-item-body {
   display: grid;
+  /* One column no wider than the item: a wide table scrolls in place, long paths wrap. */
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
   padding: 12px 14px 14px 36px;
+}
+.plan-full,
+.plan-findings li {
+  overflow-wrap: anywhere;
 }
 .plan-full {
   font-size: var(--text-sm);
@@ -172,12 +178,13 @@ a.plan-id:hover {
 }
 .plan-details dd {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 4px;
   min-width: 0;
   margin: 0;
+  overflow-wrap: anywhere;
 }
 .plan-details code {
-  overflow-wrap: anywhere;
   font-size: 12px;
 }
 .plan-refs {

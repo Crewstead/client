@@ -85,6 +85,7 @@
   let composer = $state<ReturnType<typeof Composer>>();
   const commands: Command[] = [
     { name: 'compact', hint: 'Summarize earlier messages to free up the model’s context' },
+    { name: 'continue', hint: 'Carry on where the last reply stopped' },
     { name: 'stats', run: () => stats?.open() },
     {
       name: 'rename',

@@ -99,8 +99,10 @@
   font-size: 13px;
   line-height: 1.55;
 }
+/* A table keeps its words whole and scrolls sideways, even in text that wraps anywhere. */
 .md-table {
   overflow-x: auto;
+  overflow-wrap: normal;
 }
 .md-table table {
   border-collapse: collapse;
