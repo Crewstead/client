@@ -42,7 +42,7 @@ export async function projectPath(
   if (options.write) {
     if (PROTECTED.test(shown)) throw new Error('Git metadata cannot be changed with these tools.');
     if (!options.plans && PLANS.test(shown))
-      throw new Error('Plans change only through the plan tools (plan_write, plan_patch).');
+      throw new Error('Plans change only through the plan tools (plan_make, plan_edit).');
     const stat = await lstat(real).catch(() => undefined);
     if (stat?.isDirectory()) throw new Error(`${shown} is a folder.`);
   }

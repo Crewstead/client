@@ -310,10 +310,6 @@
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
+  justify-content: flex-end;
   margin: 0 0 var(--space-6);
-}
-.plan-actions .plan-run {
-  margin-right: auto;
-  color: var(--muted);
-  font-size: var(--text-sm);
 }

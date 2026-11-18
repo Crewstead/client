@@ -36,7 +36,7 @@ export interface PlanDetail {
   versions: PlanVersion[];
   comments: PlanComment[];
   /** The planning run that made the plan, when one did. */
-  run?: PlanRunView;
+  review?: PlanReviewView;
 }
 
 export interface PlanComment {
@@ -47,19 +47,12 @@ export interface PlanComment {
   resolved: string | null;
 }
 
-export interface PlanRunView {
-  id: string;
-  stage: string;
-  status: 'running' | 'waiting' | 'done' | 'failed';
-  error: string | null;
-  tokens: number;
-  singleFamily: boolean;
+/** The latest review of a plan: who reviewed it, when, and what it still finds. */
+export interface PlanReviewView {
+  label: string;
+  at: string;
   findings: Finding[];
-  /** Findings the planner weighed and kept the plan as it is for, with why: settled. */
-  declined?: KeptFinding[];
 }
-
-export type KeptFinding = Finding & { why: string };
 
 const query = (project: string) => `project=${encodeURIComponent(project)}`;
 

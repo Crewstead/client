@@ -31,9 +31,6 @@
     get comments() {
       return comments;
     },
-    get kept() {
-      return detail.run?.declined ?? [];
-    },
     async add(item, text) {
       problem = '';
       try {
@@ -61,9 +58,9 @@
   });
   const plan = $derived(detail.plan!);
   const progress = $derived(detail.progress!);
-  // The checks' findings and what the planning run's reviewers left open, each once.
+  // The checks' findings and what the latest review still finds, each once.
   const findings = $derived(
-    [...detail.findings, ...(detail.run?.findings ?? [])].filter(
+    [...detail.findings, ...(detail.review?.findings ?? [])].filter(
       (finding, index, all) => all.findIndex((f) => f.message === finding.message) === index,
     ),
   );

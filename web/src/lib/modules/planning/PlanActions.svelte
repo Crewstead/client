@@ -19,20 +19,6 @@
   } = $props();
   let busy = $state(false);
   let confirming = $state(false);
-  const STAGE: Record<string, string> = {
-    route: 'Choosing how to plan',
-    explore: 'Exploring the project',
-    extract: 'Writing what was asked',
-    decide: 'Listing the decisions',
-    detail: 'Detailing the parts',
-    consolidate: 'Making the plan smaller',
-    review: 'Reviewing',
-    adversarial: 'Testing the plan',
-    ground: 'Checking against the project',
-    revise: 'Revising',
-    present: 'Finishing',
-  };
-  const run = $derived(detail.run);
   const status = $derived(detail.plan?.status);
   /** Approve, or send the open comments to the chat that made the plan; then read the plan again. */
   async function act(action: 'approve' | 'revise' | 'delete') {
@@ -55,14 +41,6 @@
 </script>
 
 <div class="plan-actions">
-  <span class="plan-run" role="status"
-    >{#if run && run.status !== 'done'}{run.status === 'failed'
-        ? `Planning stopped: ${run.error ?? ''}`
-        : run.status === 'waiting'
-          ? 'Waiting for your answers in the chat'
-          : `${STAGE[run.stage] ?? 'Planning'}…`}{:else if run?.singleFamily}Reviewed by the same
-      model family: no other was connected{/if}</span
-  >
   {#if openComments}<button
       class="button subtle small"
       disabled={busy}

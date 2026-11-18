@@ -20,14 +20,11 @@
   const rows = $derived(detailRows(section, item));
   const badge = $derived(badgeOf(section, item));
   const review = useReview();
-  const kept = $derived(review?.kept.filter((f) => f.item === item.id) ?? []);
   const open = $derived(
     review?.comments.filter((comment) => comment.item === item.id && !comment.resolved).length ?? 0,
   );
   // Everything opens when it can be commented on; else only what has more to show.
-  const more = $derived(
-    !!review || !!item.full || rows.length > 0 || findings.length > 0 || kept.length > 0,
-  );
+  const more = $derived(!!review || !!item.full || rows.length > 0 || findings.length > 0);
   const when = (iso: string) =>
     new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
 </script>
@@ -55,14 +52,9 @@
 {#if more}<details class="plan-item" id={item.id}>
     <summary><ChevronRight size={14} class="plan-chevron" />{@render head()}</summary>
     <div class="plan-item-body">
-      {#if findings.length || kept.length}<ul class="plan-findings">
+      {#if findings.length}<ul class="plan-findings">
           {#each findings as finding (finding.message)}
             <li data-severity={finding.severity}>{finding.message}</li>
-          {/each}
-          {#each kept as finding (finding.message)}
-            <li data-severity="kept">
-              {finding.message} <span class="plan-kept">Kept: {finding.why}</span>
-            </li>
           {/each}
         </ul>{/if}
       {#if item.full}<div class="markdown plan-full"><Markdown text={item.full} /></div>{/if}
