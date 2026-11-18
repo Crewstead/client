@@ -55,7 +55,11 @@ export interface PlanRunView {
   tokens: number;
   singleFamily: boolean;
   findings: Finding[];
+  /** Findings the planner weighed and kept the plan as it is for, with why: settled. */
+  declined?: KeptFinding[];
 }
+
+export type KeptFinding = Finding & { why: string };
 
 const query = (project: string) => `project=${encodeURIComponent(project)}`;
 

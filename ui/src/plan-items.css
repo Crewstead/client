@@ -161,6 +161,15 @@ a.plan-id:hover {
   border-color: var(--danger);
   background: color-mix(in srgb, var(--danger) 8%, transparent);
 }
+.plan-findings li[data-severity='kept'] {
+  border-color: var(--success);
+  background: color-mix(in srgb, var(--success) 7%, transparent);
+  color: var(--muted);
+}
+.plan-kept {
+  display: block;
+  color: var(--text);
+}
 .plan-findings li[data-severity='minor'] {
   border-color: var(--line);
   background: none;

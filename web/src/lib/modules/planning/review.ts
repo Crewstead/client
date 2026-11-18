@@ -1,9 +1,11 @@
 import { getContext, setContext } from 'svelte';
-import type { PlanComment } from './api.ts';
+import type { KeptFinding, PlanComment } from './api.ts';
 
 /** What the plan page gives its elements for review: comments, and adding or settling them. */
 export interface PlanReview {
   readonly comments: PlanComment[];
+  /** Findings weighed and kept as they are, with why. */
+  readonly kept: KeptFinding[];
   add(item: string, text: string): Promise<boolean>;
   resolve(id: string): Promise<void>;
 }

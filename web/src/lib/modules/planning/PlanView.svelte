@@ -31,6 +31,9 @@
     get comments() {
       return comments;
     },
+    get kept() {
+      return detail.run?.declined ?? [];
+    },
     async add(item, text) {
       problem = '';
       try {
