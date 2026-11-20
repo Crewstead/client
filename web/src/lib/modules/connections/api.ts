@@ -48,6 +48,12 @@ export const connections = {
     location.assign(authorizeUrl);
   },
   remove: (id: string) => request(`/connections/${id}`, send('DELETE')),
+  /** Turns an image model on or off; image_generate offers the ones that are on. */
+  updateImageModel: (id: string, modelId: string, enabled: boolean) =>
+    request<ConnectionView>(
+      `/connections/${id}/image-models/${modelId}`,
+      send('PATCH', { enabled }),
+    ),
   updateModel: (
     id: string,
     modelId: string,

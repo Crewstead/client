@@ -3,6 +3,8 @@ import { lstat, mkdir, readdir, readFile, rm, stat } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import type { MachineActionResult, PlanFileAction } from '@crewstead/core/protocol';
 import {
+  ASSET_MAX_BYTES,
+  MOCK_MAX_BYTES,
   NOTE_FOLDER,
   NOTE_MAX_BYTES,
   noteFile,
@@ -18,13 +20,13 @@ import { replaceFile } from './tools/files.ts';
 import { projectPath } from './tools/paths.ts';
 
 /**
- * A project's plans for the hub (docs/plan/33-plan-record.md): only `.crewstead/plans/<folder>/plan.yaml`
- * and its `research/*.md` notes, resolved through the same checks as the file tools, so links cannot
+ * A project's plans for the hub (docs/plan/33-plan-record.md): only `.crewstead/plans/<folder>/plan.yaml`,
+ * its `research/*.md` notes and its pictures and mocks (`assets/`, `mocks/`), resolved through the same checks as the file tools, so links cannot
  * lead outside the project.
  */
 type Answer = Omit<MachineActionResult, 'requestId'>;
 
-const sha256 = (text: string) => createHash('sha256').update(text).digest('hex');
+const sha256 = (text: string | Buffer) => createHash('sha256').update(text).digest('hex');
 
 /** A file inside the plans folder, or undefined when there is none. */
 async function readInside(root: string, path: string, limit: number) {
@@ -53,6 +55,31 @@ async function writeInside(
   const checked = await projectPath(root, full, { write: true, plans: true });
   await replaceFile(checked.real, content);
   return { stale: false as const, hash: sha256(content) };
+}
+
+const fileLimit = (file: string) => (file.startsWith('mocks/') ? MOCK_MAX_BYTES : ASSET_MAX_BYTES);
+
+/** A picture or mock of a plan, as base64 with its hash. */
+async function readFileInside(root: string, folder: string, file: string) {
+  const { real } = await projectPath(root, `${PLAN_FOLDER}/${folder}/${file}`);
+  const info = await stat(real).catch(() => undefined);
+  if (!info?.isFile()) throw new Error(`There is no ${file} in this plan.`);
+  if (info.size > fileLimit(file))
+    throw new Error(`${file} is larger than ${fileLimit(file) / 1024} KB.`);
+  const bytes = await readFile(real);
+  return { file, hash: sha256(bytes), bytes: bytes.length, data: bytes.toString('base64') };
+}
+
+/** Writes a picture or mock into the plan folder, replacing one of the same name. */
+async function writeFileInside(root: string, folder: string, file: string, bytes: Buffer) {
+  if (bytes.length > fileLimit(file))
+    throw new Error(`${file} is larger than ${fileLimit(file) / 1024} KB.`);
+  const full = `${PLAN_FOLDER}/${folder}/${file}`;
+  const { real } = await projectPath(root, full, { write: true, plans: true });
+  await mkdir(dirname(real), { recursive: true });
+  const checked = await projectPath(root, full, { write: true, plans: true });
+  await replaceFile(checked.real, bytes);
+  return { file, hash: sha256(bytes), bytes: bytes.length };
 }
 
 async function notesOf(root: string, folder: string) {
@@ -129,6 +156,28 @@ export async function planFiles(home: string, action: PlanFileAction): Promise<A
           ? { stale: true, note: { file: action.file, ...done.current } }
           : { stale: true };
       return { note: { file: action.file, content: action.content, hash: done.hash } };
+    }
+    case 'plan_file_read':
+      return { file: await readFileInside(root, action.folder, action.file) };
+    case 'plan_file_write':
+      return {
+        file: await writeFileInside(
+          root,
+          action.folder,
+          action.file,
+          Buffer.from(action.data, 'base64'),
+        ),
+      };
+    case 'plan_file_copy': {
+      // Read through the same checks as the file tools: never outside the project.
+      const { real } = await projectPath(root, action.from);
+      const info = await stat(real).catch(() => undefined);
+      if (!info?.isFile()) throw new Error(`There is no file ${action.from} in the project.`);
+      if (info.size > fileLimit(action.file))
+        throw new Error(`${action.from} is larger than ${fileLimit(action.file) / 1024} KB.`);
+      return {
+        file: await writeFileInside(root, action.folder, action.file, await readFile(real)),
+      };
     }
   }
 }

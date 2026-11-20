@@ -189,3 +189,9 @@
   max-height: calc(94vh - 48px);
   object-fit: contain;
 }
+/* A plan's sprite or icon: at least a readable size, its pixels sharp. */
+.image-viewer img.enlarge {
+  min-width: min(320px, 90vw);
+  min-height: min(320px, 70vh);
+  image-rendering: pixelated;
+}

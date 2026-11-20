@@ -1,0 +1,78 @@
+/* A plan element's pictures (thumbnails that open full size) and its live mock. */
+.plan-images {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.plan-images li {
+  position: relative;
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.plan-image {
+  display: block;
+  overflow: hidden;
+  box-sizing: border-box;
+  height: 110px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  cursor: zoom-in;
+}
+.plan-image:hover {
+  border-color: var(--line-strong, var(--muted));
+}
+.plan-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  /* Sprites stay crisp when shown larger than they are. */
+  image-rendering: pixelated;
+}
+.plan-image-caption {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: var(--text-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.plan-image-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  opacity: 0;
+}
+.plan-images li:hover .plan-image-remove,
+.plan-image-remove:focus-visible {
+  opacity: 1;
+}
+@media (hover: none) {
+  .plan-image-remove {
+    opacity: 1;
+  }
+}
+.plan-mock {
+  display: grid;
+  gap: var(--space-2);
+}
+.plan-mock .usage-toggle {
+  justify-self: start;
+}
+.plan-mock-frame {
+  justify-self: center;
+  width: 100%;
+  height: 520px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  resize: vertical;
+}
+.plan-mock-frame.phone {
+  width: min(390px, 100%);
+}

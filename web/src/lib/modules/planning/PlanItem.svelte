@@ -5,6 +5,7 @@
   import Markdown from '#lib/markdown/Markdown.svelte';
   import { detailRows } from './details.ts';
   import ItemComments from './ItemComments.svelte';
+  import PlanMedia from './PlanMedia.svelte';
   import PlanNote from './PlanNote.svelte';
   import { useReview } from './review.ts';
   import { badgeOf } from './sections.ts';
@@ -16,7 +17,14 @@
     settled = [],
   }: {
     section: PlanSection;
-    item: { id: string; title: string; short: string; full?: string } & Record<string, unknown>;
+    item: {
+      id: string;
+      title: string;
+      short: string;
+      full?: string;
+      images?: { file: string; caption: string }[];
+      mock?: string;
+    } & Record<string, unknown>;
     /** Open: the checks' and the review's undecided findings. */
     findings?: (Finding & { still?: string })[];
     /** Review findings the chat's model settled, with why. */
@@ -35,8 +43,23 @@
   );
   // Everything opens when it can be commented on; else only what has more to show.
   const more = $derived(
-    !!review || !!item.full || rows.length > 0 || findings.length > 0 || settled.length > 0,
+    !!review ||
+      !!item.full ||
+      rows.length > 0 ||
+      findings.length > 0 ||
+      settled.length > 0 ||
+      !!item.images?.length ||
+      !!item.mock,
   );
+  /** Pictures dropped on an element are shown with it. */
+  const pictures = (list: FileList | undefined | null) =>
+    [...(list ?? [])].filter((file) => file.type.startsWith('image/'));
+  function drop(event: DragEvent) {
+    const files = pictures(event.dataTransfer?.files);
+    if (!review || !files.length) return;
+    event.preventDefault();
+    void review.addImages(item.id, files);
+  }
   const when = (iso: string) =>
     new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
 </script>
@@ -63,7 +86,14 @@
 
 {#if more}<details class="plan-item" id={item.id}>
     <summary><ChevronRight size={14} class="plan-chevron" />{@render head()}</summary>
-    <div class="plan-item-body">
+    <div
+      class="plan-item-body"
+      role="group"
+      ondragover={(event) => {
+        if (review && event.dataTransfer?.types.includes('Files')) event.preventDefault();
+      }}
+      ondrop={drop}
+    >
       {#if findings.length}<ul class="plan-findings">
           {#each findings as finding (finding.message)}
             <li data-severity={finding.severity}>
@@ -84,6 +114,7 @@
             </li>
           {/each}
         </ul>{/if}
+      <PlanMedia {item} />
       {#if item.full}<div class="markdown plan-full"><Markdown text={item.full} /></div>{/if}
       {#if rows.length}<dl class="plan-details">
           {#each rows as row, index (index)}

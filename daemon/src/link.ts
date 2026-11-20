@@ -23,6 +23,7 @@ import { readConfig, writeConfig, type MachineConfig } from './config.ts';
 import { listFolders, projectAction } from './folders.ts';
 import { planFiles } from './plan-files.ts';
 import { browserLink, isBrowserAction } from './browser-link.ts';
+import { isLocalImageAction, localImages } from './local-images.ts';
 import { projectCommands, settingsTime, watchProjects } from './project-link.ts';
 import { watchCommands } from './watch-link.ts';
 import { loadPty, terminalLink } from './terminal-link.ts';
@@ -210,6 +211,8 @@ async function linkOnce(options: LinkOptions, connected: () => void) {
         answer = { requestId: command.requestId, ...(await browsers.answer(action)) };
       else if (isPlanFileAction(action))
         answer = { requestId: command.requestId, ...(await planFiles(options.tools.home, action)) };
+      else if (isLocalImageAction(action))
+        answer = { requestId: command.requestId, ...(await localImages(action)) };
       else if (action.kind.startsWith('claude_')) {
         await claudeAccountAction(
           options.claude,

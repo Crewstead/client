@@ -8,6 +8,7 @@
   import { connections } from './api.ts';
   import { money } from './format.ts';
   import ConnectionActions from './ConnectionActions.svelte';
+  import ImageModelList from './ImageModelList.svelte';
   import ModelList from './ModelList.svelte';
   import '@crewstead/ui/settings-tabs.css';
   import '@crewstead/ui/settings-cards.css';
@@ -171,7 +172,12 @@
           {/if}
         </div>
       </section>
-      <ModelList {connection} note={provider?.priceNote} {changed} />
+      {#if connection.models.length || !connection.imageModels}<ModelList
+          {connection}
+          note={provider?.priceNote}
+          {changed}
+        />{/if}
+      {#if connection.imageModels}<ImageModelList {connection} {changed} />{/if}
       {#if connection.canManage}<ConnectionActions {connection} {back} {changed} />{/if}
     </div>
   {:else if loaded}

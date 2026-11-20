@@ -5,12 +5,15 @@
   import { resolve } from '$app/paths';
   import {
     addComment,
+    addPlanImage,
     plansHref,
+    removePlanImage,
     reopenFinding,
     resolveComment,
     type PlanComment,
     type PlanDetail,
   } from './api.ts';
+  import { uploadAttachment } from '#lib/attachments.ts';
   import PlanActions from './PlanActions.svelte';
   import { provideReview } from './review.ts';
   import Readiness from './Readiness.svelte';
@@ -45,6 +48,30 @@
     async resolve(id) {
       await resolveComment(detail.row.folder, id).catch(() => {});
       comments = comments.map((c) => (c.id === id ? { ...c, resolved: 'Resolved' } : c));
+    },
+    get view() {
+      return detail.view;
+    },
+    async addImages(item, files) {
+      problem = '';
+      try {
+        for (const file of files) {
+          const uploaded = await uploadAttachment(file);
+          await addPlanImage(project, detail.row.folder, item, uploaded.id);
+        }
+      } catch (cause) {
+        problem = cause instanceof Error ? cause.message : 'The picture was not added.';
+      }
+      await reload();
+    },
+    async removeImage(item, file) {
+      problem = '';
+      try {
+        await removePlanImage(project, detail.row.folder, item, file);
+        await reload();
+      } catch (cause) {
+        problem = cause instanceof Error ? cause.message : 'The picture was not removed.';
+      }
     },
     async reopen(id) {
       problem = '';

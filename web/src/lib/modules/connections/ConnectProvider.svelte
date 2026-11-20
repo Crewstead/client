@@ -84,6 +84,11 @@
         ...(selected?.address ? { address: address.trim() } : {}),
       });
       apiKey = '';
+      // A connection for pictures only (Google) has no chat models to choose.
+      if (!view.models.length) {
+        await done();
+        dialog?.close();
+      }
     } catch (cause) {
       error = cause instanceof Error ? cause.message : 'Could not connect';
     } finally {

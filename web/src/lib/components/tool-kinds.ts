@@ -47,6 +47,10 @@ export const toolKinds: Record<string, ToolKind> = {
   plan_read: 'read',
   plan_edit: 'chat',
   plan_review: 'chat',
+  plan_image: 'chat',
+  plan_mock: 'chat',
+  // A made picture stays in view on its line, like a screenshot.
+  image_generate: 'read',
   ask_user: 'chat',
   schedule_list: 'read',
   schedule_create: 'chat',

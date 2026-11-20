@@ -1,5 +1,6 @@
 import type { Finding, Plan, planProgress } from '@crewstead/core/plans';
 import { request } from '#lib/api.ts';
+import { apiUrl } from '#lib/auth/connection.ts';
 
 /** A plan as the list shows it (the hub's row without its text). */
 export interface PlanSummary {
@@ -37,6 +38,8 @@ export interface PlanDetail {
   comments: PlanComment[];
   /** The planning run that made the plan, when one did. */
   review?: PlanReviewView;
+  /** The pass the plan's pictures and mocks load under. */
+  view?: string;
 }
 
 export interface PlanComment {
@@ -93,6 +96,20 @@ export const addComment = (project: string, folder: string, item: string, text: 
   post<PlanComment>(`/plans/${encodeURIComponent(folder)}/comments`, { project, item, text });
 export const resolveComment = (folder: string, id: string) =>
   post<{ resolved: true }>(`/plans/${encodeURIComponent(folder)}/comments/${id}/resolve`, {});
+/** Where a plan's picture or mock loads: by pass, so a sandboxed mock reaches its pictures. */
+export const planFileUrl = (view: string, file: string) => apiUrl(`/plan-view/${view}/${file}`);
+/** Shows a picture the owner uploaded with an element. */
+export const addPlanImage = (project: string, folder: string, item: string, attachment: string) =>
+  post<{ file: string }>(`/plans/${encodeURIComponent(folder)}/images`, {
+    project,
+    item,
+    attachment,
+  });
+export const removePlanImage = (project: string, folder: string, item: string, file: string) =>
+  request<{ removed: true }>(
+    `/plans/${encodeURIComponent(folder)}/images?${query(project)}&item=${item}&file=${encodeURIComponent(file)}`,
+    { method: 'DELETE' },
+  );
 /** Opens a settled review finding again; its element is no longer checked. */
 export const reopenFinding = (project: string, folder: string, id: string) =>
   post<{ reopened: true }>(
