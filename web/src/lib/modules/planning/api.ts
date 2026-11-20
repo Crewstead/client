@@ -47,11 +47,26 @@ export interface PlanComment {
   resolved: string | null;
 }
 
-/** The latest review of a plan: who reviewed it, when, and what it still finds. */
+/** A review finding, with what the chat's model (or the owner) decided about it. */
+export interface ReviewFinding extends Finding {
+  id: string;
+  decision?: {
+    outcome: 'fixed' | 'wrong' | 'not_needed' | 'later';
+    why: string;
+    by: 'agent' | 'owner';
+    at: string;
+    /** A fix the reviewer confirmed; until then it waits for a re-check. */
+    confirmed?: boolean;
+  };
+  /** The reviewer's note when a fix did not settle it. */
+  still?: string;
+}
+
+/** The latest review of a plan: who reviewed it, when, and each finding. */
 export interface PlanReviewView {
   label: string;
   at: string;
-  findings: Finding[];
+  findings: ReviewFinding[];
 }
 
 const query = (project: string) => `project=${encodeURIComponent(project)}`;
@@ -78,6 +93,12 @@ export const addComment = (project: string, folder: string, item: string, text: 
   post<PlanComment>(`/plans/${encodeURIComponent(folder)}/comments`, { project, item, text });
 export const resolveComment = (folder: string, id: string) =>
   post<{ resolved: true }>(`/plans/${encodeURIComponent(folder)}/comments/${id}/resolve`, {});
+/** Opens a settled review finding again; its element is no longer checked. */
+export const reopenFinding = (project: string, folder: string, id: string) =>
+  post<{ reopened: true }>(
+    `/plans/${encodeURIComponent(folder)}/findings/${encodeURIComponent(id)}/reopen`,
+    { project },
+  );
 /** Asks the chat that made the plan to revise it for the open comments. */
 export const askRevision = (project: string, folder: string) =>
   post<{ chat: string }>(`/plans/${encodeURIComponent(folder)}/revise`, { project });

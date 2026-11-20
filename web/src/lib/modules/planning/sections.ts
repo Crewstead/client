@@ -36,8 +36,8 @@ export const SECTIONS: {
 ];
 
 /** Findings by the element they concern; those about the whole plan under its id. */
-export function findingsByItem(findings: Finding[]) {
-  const map = new Map<string, Finding[]>();
+export function findingsByItem<T extends Finding>(findings: T[]) {
+  const map = new Map<string, T[]>();
   for (const finding of findings) {
     const key = finding.item ?? '';
     map.set(key, [...(map.get(key) ?? []), finding]);

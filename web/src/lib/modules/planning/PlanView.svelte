@@ -6,6 +6,7 @@
   import {
     addComment,
     plansHref,
+    reopenFinding,
     resolveComment,
     type PlanComment,
     type PlanDetail,
@@ -45,6 +46,15 @@
       await resolveComment(detail.row.folder, id).catch(() => {});
       comments = comments.map((c) => (c.id === id ? { ...c, resolved: 'Resolved' } : c));
     },
+    async reopen(id) {
+      problem = '';
+      try {
+        await reopenFinding(project, detail.row.folder, id);
+        await reload();
+      } catch (cause) {
+        problem = cause instanceof Error ? cause.message : 'The finding was not reopened.';
+      }
+    },
   });
   const openComments = $derived(comments.filter((c) => !c.resolved).length);
   // Research notes are read from this plan's folder (PlanNote).
@@ -58,13 +68,17 @@
   });
   const plan = $derived(detail.plan!);
   const progress = $derived(detail.progress!);
-  // The checks' findings and what the latest review still finds, each once.
+  // The checks' findings and the review's open ones, each once; the settled ones apart.
   const findings = $derived(
-    [...detail.findings, ...(detail.review?.findings ?? [])].filter(
+    [...detail.findings, ...(detail.review?.findings ?? []).filter((f) => !f.decision)].filter(
       (finding, index, all) => all.findIndex((f) => f.message === finding.message) === index,
     ),
   );
   const byItem = $derived(findingsByItem(findings));
+  const settled = $derived(
+    findingsByItem((detail.review?.findings ?? []).filter((f) => f.decision)),
+  );
+  const settledOf = (id: string) => settled.get(id) ?? [];
   const general = $derived([...(byItem.get('') ?? []), ...(byItem.get(plan.id) ?? [])]);
   let filter = $state<Filter>('all');
   const findingsOf = (id: string) => byItem.get(id) ?? [];
@@ -194,16 +208,27 @@
                   section="milestones"
                   item={group.milestone}
                   findings={findingsOf(group.milestone.id)}
+                  settled={settledOf(group.milestone.id)}
                 />
                 <div class="plan-children">
                   {#each group.tasks.filter((t) => keep(t.id)) as task (task.id)}
-                    <PlanItem section="tasks" item={task} findings={findingsOf(task.id)} />
+                    <PlanItem
+                      section="tasks"
+                      item={task}
+                      findings={findingsOf(task.id)}
+                      settled={settledOf(task.id)}
+                    />
                   {/each}
                 </div>
               </div>{/if}
           {/each}
           {#each work.loose.filter((t) => keep(t.id)) as task (task.id)}
-            <PlanItem section="tasks" item={task} findings={findingsOf(task.id)} />
+            <PlanItem
+              section="tasks"
+              item={task}
+              findings={findingsOf(task.id)}
+              settled={settledOf(task.id)}
+            />
           {/each}
         </section>{/if}
     {:else}
@@ -213,7 +238,12 @@
         >
           <h2>{section.label} <span>{items.length}</span></h2>
           {#each items.filter((x) => keep(x.id)) as item (item.id)}
-            <PlanItem section={section.key} {item} findings={findingsOf(item.id)} />
+            <PlanItem
+              section={section.key}
+              {item}
+              findings={findingsOf(item.id)}
+              settled={settledOf(item.id)}
+            />
           {/each}
         </section>{/if}
     {/if}

@@ -356,3 +356,25 @@ a.plan-id:hover {
 .plan-flag.comments {
   color: var(--muted);
 }
+/* Findings the chat's model settled: what it decided and why, the finding below, and reopening. */
+.plan-findings li small {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+}
+.plan-findings.settled li {
+  display: grid;
+  gap: 2px;
+  border-color: var(--line);
+  background: none;
+}
+.plan-findings.settled li[data-outcome='fixed'] {
+  border-color: var(--success);
+}
+.plan-findings.settled .link-button {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--text-xs);
+}

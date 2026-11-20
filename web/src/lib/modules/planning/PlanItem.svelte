@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { Check, ChevronRight, MessageSquare, TriangleAlert } from '@lucide/svelte';
+  import { Check, ChevronRight, MessageSquare, RotateCcw, TriangleAlert } from '@lucide/svelte';
   import type { Finding, PlanSection } from '@crewstead/core/plans';
+  import type { ReviewFinding } from './api.ts';
   import Markdown from '#lib/markdown/Markdown.svelte';
   import { detailRows } from './details.ts';
   import ItemComments from './ItemComments.svelte';
@@ -12,11 +13,20 @@
     section,
     item,
     findings = [],
+    settled = [],
   }: {
     section: PlanSection;
     item: { id: string; title: string; short: string; full?: string } & Record<string, unknown>;
-    findings?: Finding[];
+    /** Open: the checks' and the review's undecided findings. */
+    findings?: (Finding & { still?: string })[];
+    /** Review findings the chat's model settled, with why. */
+    settled?: ReviewFinding[];
   } = $props();
+  const OUTCOMES = { fixed: 'Fixed', wrong: 'Wrong', not_needed: 'Not needed', later: 'Later' };
+  const outcome = (f: ReviewFinding) =>
+    f.decision!.outcome === 'fixed' && !f.decision!.confirmed
+      ? 'Fixed, waiting for a re-check'
+      : OUTCOMES[f.decision!.outcome];
   const rows = $derived(detailRows(section, item));
   const badge = $derived(badgeOf(section, item));
   const review = useReview();
@@ -24,7 +34,9 @@
     review?.comments.filter((comment) => comment.item === item.id && !comment.resolved).length ?? 0,
   );
   // Everything opens when it can be commented on; else only what has more to show.
-  const more = $derived(!!review || !!item.full || rows.length > 0 || findings.length > 0);
+  const more = $derived(
+    !!review || !!item.full || rows.length > 0 || findings.length > 0 || settled.length > 0,
+  );
   const when = (iso: string) =>
     new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
 </script>
@@ -54,7 +66,22 @@
     <div class="plan-item-body">
       {#if findings.length}<ul class="plan-findings">
           {#each findings as finding (finding.message)}
-            <li data-severity={finding.severity}>{finding.message}</li>
+            <li data-severity={finding.severity}>
+              {finding.message}{#if finding.still}<small
+                  >Not settled by the fix: {finding.still}</small
+                >{/if}
+            </li>
+          {/each}
+        </ul>{/if}
+      {#if settled.length}<ul class="plan-findings settled">
+          {#each settled as finding (finding.id)}
+            <li data-outcome={finding.decision!.outcome}>
+              <span><strong>{outcome(finding)}:</strong> {finding.decision!.why}</span>
+              <small>{finding.message}</small>
+              {#if review}<button class="link-button" onclick={() => review.reopen(finding.id)}
+                  ><RotateCcw size={12} /> Reopen</button
+                >{/if}
+            </li>
           {/each}
         </ul>{/if}
       {#if item.full}<div class="markdown plan-full"><Markdown text={item.full} /></div>{/if}
