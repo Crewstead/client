@@ -101,7 +101,8 @@ it.skipIf(!browserInstalled())(
     // Closing one chat's browser closes its tabs only.
     const before = app.pages().length;
     await pool.close('chat-a#b1');
-    expect(app.pages().length).toBe(before - 2);
+    // The app hears of each closed page a moment after it closes.
+    await expect.poll(() => app.pages().length).toBe(before - 2);
     expect(pool.has('chat-b#b1')).toBe(true);
 
     // The app quitting ends its sessions; they open again on the next call.
