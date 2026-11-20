@@ -7,6 +7,7 @@ import {
   type WebContents,
   type WebPreferences,
 } from 'electron';
+import { chromeClientHints, chromeRequestHeaders, tabUserAgent } from './tab-identity.ts';
 
 /** The browser's one kept profile, apart from the window's own (the hub sign-in). */
 export const PARTITION = 'persist:crewstead-browser';
@@ -41,6 +42,15 @@ export class BrowserTabs {
     session.on('will-download', (event) => event.preventDefault());
     session.setPermissionRequestHandler((_contents, _permission, done) => done(false));
     session.setPermissionCheckHandler(() => false);
+    // Sites see plain Chrome: Cloudflare and others challenge or turn away Electron's own identity.
+    const defaultUa = session.getUserAgent();
+    if (!/Chrome\//.test(defaultUa))
+      console.warn('browser tabs: user agent has no Chrome/ token, left as is');
+    session.setUserAgent(tabUserAgent(defaultUa));
+    const hints = chromeClientHints(defaultUa);
+    session.webRequest.onBeforeSendHeaders((details, done) =>
+      done({ requestHeaders: chromeRequestHeaders(details.url, details.requestHeaders, hints) }),
+    );
   }
 
   /** Opens a blank tab; resolves the unique address it shows, by which the service finds it. */
