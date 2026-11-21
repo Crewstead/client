@@ -46,21 +46,28 @@
       >
     </div>
   </header>
-  <p class="daily-focus" aria-live="polite">
-    {#if focus}
-      <strong>{dayLabel(focus.day, 'long')}</strong> · {compact(valueOf(focus))}
-      {measure}{#if measure === 'tokens'}{#each segments(focus).filter((part) => part.value) as part (part.id)}<span
-            class="daily-part"
-            ><i style:background={part.colour}></i>{part.id === 'other' ? 'Other' : label(part.id)}
-            {compact(part.value)}</span
-          >{/each}{/if}
-    {:else}
+  <!-- Every day's line sits in one cell, only the pointed one visible, so the box is always as tall
+       as the longest and the chart below never moves. -->
+  <div class="daily-focus" aria-live="polite">
+    <p class="daily-line" class:shown={!focus}>
       <strong>{compact(total)}</strong>
       {measure} over {daily.length}
       {daily.length === 1 ? 'day' : 'days'}
       <span class="daily-hint">· point at a day for details</span>
-    {/if}
-  </p>
+    </p>
+    {#each daily as day (day.day)}
+      <p class="daily-line" class:shown={focus === day}>
+        <strong>{dayLabel(day.day, 'long')}</strong> · {compact(valueOf(day))}
+        {measure}{#if measure === 'tokens'}{#each segments(day).filter((part) => part.value) as part (part.id)}<span
+              class="daily-part"
+              ><i style:background={part.colour}></i>{part.id === 'other'
+                ? 'Other'
+                : label(part.id)}
+              {compact(part.value)}</span
+            >{/each}{/if}
+      </p>
+    {/each}
+  </div>
   <div class="daily-chart" class:dense={daily.length > 60}>
     <span class="daily-axis">{compact(top)}</span>
     <div
