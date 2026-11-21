@@ -27,6 +27,7 @@ import {
   STOPPED_FOR_GOOD,
   uninstall,
 } from './service.ts';
+import { Askpass } from './tools/askpass.ts';
 import { sandboxAvailable } from './tools/command.ts';
 
 const HELP = `Crewstead on this computer
@@ -200,19 +201,30 @@ async function run(home: string) {
       ? new BrowserPool()
       : undefined;
   if (app && browser) app.serve(browser);
+  // sudo in approved whole-computer commands asks the owner in the app (not on the hub's own service).
+  const askpass =
+    process.env.CREWSTEAD_HOSTED === '1' ? undefined : await Askpass.start().catch(() => undefined);
   try {
     await keepLinked({
       config,
       claude: claudeBinary(),
       work: workFolder(home),
       log: (line) => log(`[crewstead] ${line}`),
-      tools: { home, sandbox: sandboxAvailable(), hidden: [home, hubDataFolder()], browser },
+      tools: {
+        home,
+        sandbox: sandboxAvailable(),
+        hidden: [home, hubDataFolder()],
+        browser,
+        ...(askpass ? { askpass } : {}),
+      },
       signal: controller.signal,
     });
   } catch (error) {
     if (!(error instanceof Disconnected)) throw error;
     process.exitCode = STOPPED_FOR_GOOD;
     throw new Error(`${error.message} Connect it again from the hub's Settings.`, { cause: error });
+  } finally {
+    await askpass?.stop();
   }
 }
 

@@ -4,7 +4,9 @@ import type {
   MachineCommand,
   MachineToolProgress,
   MachineToolResult,
+  PasswordPrompt,
 } from '@crewstead/core/protocol';
+import { PasswordPrompts } from './tools/password-prompts.ts';
 import { runProjectTool, type ToolHost } from './tools/run.ts';
 
 /**
@@ -21,23 +23,37 @@ export function projectCommands(
   progress: (update: MachineToolProgress) => Promise<void>,
 ) {
   const active = new Map<string, AbortController>();
+  const prompts = new PasswordPrompts();
   return {
     /** Handles tool commands; returns false for any other command. */
     handle(command: MachineCommand) {
       if (command.type === 'cancel_tool') active.get(command.toolId)?.abort();
+      else if (command.type === 'tool_password') prompts.answer(command);
       else if (command.type === 'tool') {
         const controller = new AbortController();
         active.set(command.toolId, controller);
         let latest = '';
+        let asking: PasswordPrompt | undefined;
         let timer: NodeJS.Timeout | undefined;
+        const send = () => {
+          clearTimeout(timer);
+          timer = undefined;
+          void progress({
+            toolId: command.toolId,
+            output: latest.slice(-PROGRESS_CHARS),
+            ...(asking ? { password: asking } : {}),
+          });
+        };
         const onOutput = (output: string) => {
           latest = output;
-          timer ??= setTimeout(() => {
-            timer = undefined;
-            void progress({ toolId: command.toolId, output: latest.slice(-PROGRESS_CHARS) });
-          }, PROGRESS_MS);
+          timer ??= setTimeout(send, PROGRESS_MS);
         };
-        void runProjectTool(host, command, controller.signal, onOutput)
+        // A sudo question shows at once, and goes away as soon as it is answered.
+        const askPassword = prompts.asker(command.toolId, controller.signal, (prompt) => {
+          asking = prompt;
+          send();
+        });
+        void runProjectTool(host, command, controller.signal, onOutput, askPassword)
           .then(post, () => undefined)
           .finally(() => {
             clearTimeout(timer);

@@ -92,6 +92,13 @@
   background: var(--surface-hover);
   color: var(--text);
 }
+.md-copy.failed {
+  color: var(--danger);
+}
+.md-code-actions {
+  display: inline-flex;
+  gap: 2px;
+}
 .md-code pre {
   margin: 0;
   padding: var(--space-3);

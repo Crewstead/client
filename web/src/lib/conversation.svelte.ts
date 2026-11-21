@@ -121,7 +121,11 @@ export class Conversation {
       if (!current() || !this.session) return;
       const progress = JSON.parse(event.data) as ToolProgress;
       const item = this.session.items.find((candidate) => candidate.id === progress.itemId);
-      if (item?.status === 'pending') item.progress = progress.output;
+      if (item?.status !== 'pending') return;
+      item.progress = progress.output;
+      // A sudo question shows while it is open; a report without one closes it.
+      if (progress.password) item.password = progress.password;
+      else delete item.password;
     });
     source.addEventListener('update', (event) => {
       if (!current() || !this.session) return;
@@ -171,9 +175,14 @@ export class Conversation {
     if (index < 0 && this.earlier && items[0] && item.createdAt < items[0].createdAt) return;
     if (index < 0) items.push(item);
     // A running tool's output so far comes apart from its saved updates and stays until it ends.
-    else if (item.status === 'pending' && !item.progress && items[index]!.progress)
-      items[index] = { ...item, progress: items[index]!.progress };
-    else items[index] = item;
+    else if (
+      item.status === 'pending' &&
+      !item.progress &&
+      (items[index]!.progress || items[index]!.password)
+    ) {
+      const { progress, password } = items[index]!;
+      items[index] = { ...item, progress, ...(password ? { password } : {}) };
+    } else items[index] = item;
   }
 
   /** Loads up to `count` messages before the loaded ones, or all of them when absent. */

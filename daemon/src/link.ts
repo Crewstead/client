@@ -250,6 +250,7 @@ async function linkOnce(options: LinkOptions, connected: () => void) {
       if (projects.handle(command) || browsers.handle(command) || watches.handle(command)) continue;
       if (terminals.handle(command)) continue;
       if (command.type === 'tool' || command.type === 'cancel_tool') continue;
+      if (command.type === 'tool_password') continue;
       if (command.type === 'watch' || command.type === 'watch_stop') continue;
       if (command.type === 'browser_watch' || command.type === 'browser_unwatch') continue;
       if (command.type === 'project_action') {

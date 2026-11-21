@@ -2,6 +2,7 @@
   import { Check, ChevronRight, X, ShieldCheck, ShieldX, ShieldQuestion } from '@lucide/svelte';
   import type { TimelineItem } from '@crewstead/core/protocol';
   import DiffView from './DiffView.svelte';
+  import SudoPassword from './SudoPassword.svelte';
   import ToolLine from './ToolLine.svelte';
   import { metaFor } from './tool-meta.ts';
   import { commandSummary, resultSummary } from './tool-result.ts';
@@ -138,6 +139,7 @@
     {#if item.status === 'pending' && item.progress}<pre
         class="tool-output live"
         aria-label="Output so far">{item.progress}</pre>{/if}
+    {#if item.status === 'pending' && item.password}<SudoPassword prompt={item.password} />{/if}
     <!-- A declined call's result holds instructions for the model; the review line says it for people. -->
     {#if item.result && review?.outcome !== 'declined'}{#if meta.kind === 'command' && item.status === 'completed'}
         {@const ran = commandSummary(item.result)}

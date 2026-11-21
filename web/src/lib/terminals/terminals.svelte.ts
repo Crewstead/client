@@ -73,18 +73,26 @@ export class ChatTerminals {
     if (this.active === id) this.active = this.shown.at(-1);
   }
 
-  async open(size: TerminalSize) {
-    if (!this.projectId) return;
+  /** Opens a shell; with `run`, the shell runs that command at once (a code block's Run). */
+  async open(size: TerminalSize, run?: string) {
+    if (!this.projectId) return false;
     this.error = '';
     try {
       const info = await request<TerminalInfo>('/terminals', {
         method: 'POST',
-        body: JSON.stringify({ projectId: this.projectId, sessionId: this.sessionId, ...size }),
+        body: JSON.stringify({
+          projectId: this.projectId,
+          sessionId: this.sessionId,
+          ...size,
+          ...(run ? { run } : {}),
+        }),
       });
       this.list = [info, ...this.list];
       this.show(info.id);
+      return true;
     } catch (error) {
       this.error = error instanceof Error ? error.message : 'Could not open a terminal.';
+      return false;
     }
   }
 

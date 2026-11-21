@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { mkdir, readdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises';
+import { mkdir, open, readdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises';
 import { dirname, join, relative } from 'node:path';
 import type { ProjectToolArguments } from '@crewstead/core/protocol';
 import { diffStats, unifiedDiff } from '@crewstead/core/policy';
@@ -59,8 +59,51 @@ async function readText(real: string, shown: string) {
   return buffer.toString('utf8');
 }
 
-export async function readProjectFile(root: string, args: ProjectToolArguments<'read_file'>) {
+/** Pictures a model can look at, by their first bytes. */
+const PICTURES: [Buffer, 'image/png' | 'image/jpeg'][] = [
+  [Buffer.from([0x89, 0x50, 0x4e, 0x47]), 'image/png'],
+  [Buffer.from([0xff, 0xd8, 0xff]), 'image/jpeg'],
+];
+/** Largest picture read_file shows: what a model takes in one picture, with room to spare. */
+const PICTURE_BYTES = 5 * 1024 * 1024;
+
+/** A PNG or JPEG file, returned as a picture for the model to look at; undefined for any other file. */
+async function readPicture(real: string, shown: string) {
+  const info = await stat(real);
+  if (!info.isFile()) return undefined;
+  const head = Buffer.alloc(8);
+  const file = await open(real, 'r');
+  try {
+    await file.read(head, 0, 8, 0);
+  } finally {
+    await file.close();
+  }
+  const mediaType = PICTURES.find(([magic]) => head.subarray(0, magic.length).equals(magic))?.[1];
+  if (!mediaType) {
+    if (/\.(gif|webp|bmp|tiff?)$/i.test(shown))
+      throw new Error(`${shown} is a picture read_file cannot show; convert it to PNG first.`);
+    return undefined;
+  }
+  if (info.size > PICTURE_BYTES)
+    throw new Error(`${shown} is larger than 5 MB; make a smaller copy to look at it.`);
+  const bytes = await readFile(real);
+  // A PNG says its size in its header; a JPEG's takes parsing, so it is left out.
+  const size =
+    mediaType === 'image/png' ? ` ${bytes.readUInt32BE(16)}×${bytes.readUInt32BE(20)}` : '';
+  return {
+    output: `${shown}: a${size} ${mediaType === 'image/png' ? 'PNG' : 'JPEG'} picture, shown to you.`,
+    image: { mediaType, data: bytes.toString('base64') },
+  };
+}
+
+/** A text file with line numbers, or a PNG or JPEG picture for the model to look at. */
+export async function readProjectFile(
+  root: string,
+  args: ProjectToolArguments<'read_file'>,
+): Promise<{ output: string; image?: { mediaType: 'image/png' | 'image/jpeg'; data: string } }> {
   const { real, shown } = await projectPath(root, args.path);
+  const picture = await readPicture(real, shown);
+  if (picture) return picture;
   const text = await readText(real, shown);
   // A final newline ends the last line; it does not start another one.
   const lines = (text.endsWith('\n') ? text.slice(0, -1) : text).split('\n');

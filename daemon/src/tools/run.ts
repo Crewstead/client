@@ -10,6 +10,7 @@ import {
 import { runBrowserTool, type BrowserPool } from '@crewstead/core/browser';
 import { computerSettings } from '../computer.ts';
 import { openProject } from '../projects.ts';
+import type { Askpass, AskPassword } from './askpass.ts';
 import { runComputerTool } from './computer.ts';
 import { runCommand, type SandboxOptions } from './command.ts';
 import { editProjectFile, listFiles, readProjectFile, writeProjectFile } from './files.ts';
@@ -23,6 +24,8 @@ export interface ToolHost extends SandboxOptions {
   sandbox?: boolean;
   /** Headless browsers for the browser tools; without one they are refused. */
   browser?: BrowserPool;
+  /** sudo's password questions, where sudo is installed. */
+  askpass?: Askpass;
 }
 
 /**
@@ -35,6 +38,8 @@ export async function runProjectTool(
   signal: AbortSignal,
   /** A running command's output so far. */
   onOutput?: (output: string) => void,
+  /** Asks the owner for a password sudo wants, in an approved whole-computer command. */
+  askPassword?: AskPassword,
 ): Promise<MachineToolResult> {
   const result = (
     output: string,
@@ -56,8 +61,8 @@ export async function runProjectTool(
     const args = parsed.data;
     if (command.projectId === COMPUTER_PLACE) {
       if (!isBrowserTool(command.name)) {
-        const outcome = await runComputerTool(host, command, args, signal, onOutput);
-        return result(outcome.output, false, outcome.diff);
+        const outcome = await runComputerTool(host, command, args, signal, onOutput, askPassword);
+        return result(outcome.output, false, outcome.diff, outcome.image);
       }
       const settings = computerSettings(host.home);
       if (!settings.enabled || !settings.browser)
@@ -94,7 +99,7 @@ export async function runProjectTool(
       return result(output, false, undefined, image);
     }
     const apply = !command.preview;
-    let outcome: { output: string; diff?: string };
+    let outcome: { output: string; diff?: string; image?: MachineToolResult['image'] };
     switch (command.name) {
       case 'edit_file':
         outcome = await editProjectFile(root, args as ProjectToolArguments<'edit_file'>, apply);
@@ -124,7 +129,7 @@ export async function runProjectTool(
             onOutput,
           );
     }
-    return result(outcome.output, false, outcome.diff);
+    return result(outcome.output, false, outcome.diff, outcome.image);
   } catch (error) {
     signal.throwIfAborted();
     return result(error instanceof Error ? error.message : 'The tool failed.', true);

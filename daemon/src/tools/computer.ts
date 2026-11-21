@@ -7,11 +7,13 @@ import {
   PROTECTED_SYSTEM,
   protectedPlace,
   type MachineCommand,
+  type MachineToolResult,
   type ProjectToolArguments,
   type ProjectToolName,
 } from '@crewstead/core/protocol';
 import { computerSettings } from '../computer.ts';
 import { workFolder } from '../config.ts';
+import type { AskPassword } from './askpass.ts';
 import { runCommand } from './command.ts';
 import { editProjectFile, listFiles, readProjectFile, writeProjectFile } from './files.ts';
 import { projectPath } from './paths.ts';
@@ -46,7 +48,8 @@ export async function runComputerTool(
   args: Record<string, unknown>,
   signal: AbortSignal,
   onOutput?: (output: string) => void,
-): Promise<{ output: string; diff?: string }> {
+  askPassword?: AskPassword,
+): Promise<{ output: string; diff?: string; image?: MachineToolResult['image'] }> {
   const settings = computerSettings(host.home);
   if (!settings.enabled) throw new Error('Whole-computer chats are turned off on this computer.');
   const home = homedir();
@@ -54,6 +57,7 @@ export async function runComputerTool(
     if (!settings.commands) throw new Error('Commands are turned off for whole-computer chats.');
     return computerCommand(host, command, args as ProjectToolArguments<'run_command'>, signal, {
       onOutput,
+      askPassword,
     });
   }
   const name = command.name as FileTool;
@@ -105,7 +109,10 @@ async function computerCommand(
   command: ToolCommand,
   args: ProjectToolArguments<'run_command'>,
   signal: AbortSignal,
-  { onOutput }: { onOutput?: ((output: string) => void) | undefined },
+  {
+    onOutput,
+    askPassword,
+  }: { onOutput?: ((output: string) => void) | undefined; askPassword?: AskPassword | undefined },
 ) {
   if (command.preview) return { output: '' };
   const cwd = chatFolder(host, command.session);
@@ -115,14 +122,26 @@ async function computerCommand(
     return runCommand(cwd, { ...args, network: false }, signal, { ...host, hidden }, onOutput);
   }
   const shell = ownerShell(args.command);
-  return runProcess(
-    shell.file,
-    shell.argv,
-    { cwd, env: ownerEnv(), detached: process.platform !== 'win32', windowsHide: true },
-    args.timeout_seconds ?? 120,
-    signal,
-    { onOutput, missing: `${shell.file} is missing on this computer.` },
-  );
+  const env = ownerEnv();
+  // sudo asks the owner in the app; the model only sees that it asked.
+  const sudo = askPassword && host.askpass?.session(env.PATH, askPassword);
+  try {
+    return await runProcess(
+      shell.file,
+      shell.argv,
+      {
+        cwd,
+        env: { ...env, ...sudo?.env },
+        detached: process.platform !== 'win32',
+        windowsHide: true,
+      },
+      args.timeout_seconds ?? 120,
+      signal,
+      { onOutput, missing: `${shell.file} is missing on this computer.` },
+    );
+  } finally {
+    sudo?.end();
+  }
 }
 
 /** A whole-computer chat's own work folder, where its commands start. */

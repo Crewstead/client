@@ -75,6 +75,19 @@ describe('file tools', () => {
     expect(page.output).toBe('     2  const b = 2;\n… 1 more line; read on from 3.');
   });
 
+  it('shows a PNG to the model as a picture, and refuses pictures it cannot show', async () => {
+    // A PNG header that says 16×16; the rest of the file is not read for this.
+    const head = Buffer.from('89504e470d0a1a0a0000000d4948445200000010000000100806000000', 'hex');
+    await writeFile(join(root, 'sprite.png'), head);
+    const read = await readProjectFile(root, { path: 'sprite.png' });
+    expect(read.output).toBe('sprite.png: a 16×16 PNG picture, shown to you.');
+    expect(read.image).toEqual({ mediaType: 'image/png', data: head.toString('base64') });
+    await writeFile(join(root, 'sprite.webp'), 'RIFF....WEBP');
+    await expect(readProjectFile(root, { path: 'sprite.webp' })).rejects.toThrow(
+      'convert it to PNG',
+    );
+  });
+
   it('previews an edit as a diff without changing the file, then applies it', async () => {
     const args = { path: 'src/app.ts', old_text: 'const b = 2;', new_text: 'const b = 3;' };
     const preview = await editProjectFile(root, args, false);

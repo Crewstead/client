@@ -107,6 +107,7 @@
 .attachment-images {
   display: flex;
   flex-wrap: wrap;
+  align-items: flex-start;
   gap: 8px;
 }
 .attachments[data-align='end'] .attachment-images {
@@ -114,6 +115,8 @@
 }
 .attachment-image {
   display: block;
+  /* The cap sits on the frame: a percentage on the picture would leave the frame as wide as the file. */
+  max-width: min(320px, 100%);
   padding: 0;
   overflow: hidden;
   background: none;
@@ -126,7 +129,7 @@
   display: block;
   min-width: 64px;
   min-height: 64px;
-  max-width: min(320px, 100%);
+  max-width: 100%;
   max-height: 220px;
   object-fit: contain;
   background: var(--surface);
@@ -151,8 +154,10 @@
 .tool-line-files {
   margin: 2px 0 12px 21px;
 }
-.tool-line-files .attachment-image img {
+.tool-line-files .attachment-image {
   max-width: min(480px, 100%);
+}
+.tool-line-files .attachment-image img {
   max-height: 300px;
 }
 

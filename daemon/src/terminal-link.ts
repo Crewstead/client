@@ -17,6 +17,8 @@ const FLUSH_MS = 25;
 const FLUSH_CHARS = 131_072;
 /** Shells open at once on this computer. */
 const MAX_SHELLS = 8;
+/** How long a new shell stays quiet before a Run command is typed into it. */
+const RUN_QUIET_MS = 250;
 
 let module: typeof import('node-pty') | null | undefined;
 /** node-pty, when it is installed here (an optional dependency); terminals need it. */
@@ -127,8 +129,28 @@ export function terminalLink(
         try {
           if (shells.size >= MAX_SHELLS)
             throw new Error(`At most ${MAX_SHELLS} terminals are open at once on a computer.`);
-          run(id, shellLaunch(host, terminal), terminal, () => undefined);
+          // The owner's Run on a reply's code block: typed in with Enter once the shell has shown its
+          // prompt and gone quiet (or after a while if it prints nothing), so it shows once.
+          let typeIn = terminal.run;
+          let timer: NodeJS.Timeout | undefined;
+          const later = (ms: number) => {
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+              if (typeIn) shell.write(`${typeIn}\r`);
+              typeIn = undefined;
+            }, ms);
+          };
+          const shell = run(
+            id,
+            shellLaunch(host, terminal),
+            terminal,
+            () => clearTimeout(timer),
+            () => {
+              if (typeIn) later(RUN_QUIET_MS);
+            },
+          );
           shells.add(id);
+          if (typeIn) later(3_000);
         } catch (error) {
           void post({
             terminalId: id,

@@ -214,6 +214,9 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 6px;
 }
+.panel-files .attachment-image {
+  max-width: none;
+}
 .panel-files .attachment-image img,
 .panel-files .attachment-placeholder {
   width: 100%;

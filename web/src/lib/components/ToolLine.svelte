@@ -4,6 +4,7 @@
   import { metaFor } from './tool-meta.ts';
   import { commandSummary } from './tool-result.ts';
   import Attachments from './attachments/Attachments.svelte';
+  import SudoPassword from './SudoPassword.svelte';
   let { item }: { item: TimelineItem } = $props();
   const meta = $derived(metaFor(item.toolName));
   const Icon = $derived(meta.icon);
@@ -55,6 +56,7 @@
 {#if item.status === 'pending' && item.progress}<pre
     class="tool-output live tool-line-live"
     aria-label="Output so far">{item.progress}</pre>{/if}
+{#if item.status === 'pending' && item.password}<SudoPassword prompt={item.password} />{/if}
 <!-- A screenshot stays in view: it is what the agent looked at. -->
 {#if item.attachments?.length}<div class="tool-line-files">
     <Attachments files={item.attachments} />
