@@ -3,6 +3,8 @@
     ArrowLeft,
     ArrowRight,
     ExternalLink,
+    Maximize2,
+    Minimize2,
     MonitorPlay,
     MousePointer2,
     RotateCw,
@@ -25,6 +27,7 @@
   import LiveScreen from './LiveScreen.svelte';
   import LiveTabs from './LiveTabs.svelte';
   import '@crewstead/ui/live-browser.css';
+  import '@crewstead/ui/live-zoom.css';
   const workspace = useWorkspace();
   const live = new LiveBrowsers();
   const bases = $derived(liveSources(activeModules(workspace.catalog?.modules)));
@@ -59,6 +62,8 @@
   };
   let error = $state('');
   let controlling = $state(false);
+  /** The browser takes the whole screen (for a phone): no sidebar, no heading. */
+  let full = $state(false);
   /** The desktop app shows its real tab, which takes clicks and keys itself: no control to take. */
   let direct = $state(false);
   $effect(() => {
@@ -92,6 +97,7 @@
   }
 </script>
 
+<svelte:window onkeydown={(event) => event.key === 'Escape' && full && (full = false)} />
 <section class="live-browsers" aria-label="Live browsers">
   <header class="live-header">
     <h1><MonitorPlay size={16} /> Live browsers</h1>
@@ -99,7 +105,7 @@
   </header>
   {#if live.sessions.length}
     <!-- One browser window: its tabs on top, then the address bar, then the page. -->
-    <div class="live-window">
+    <div class="live-window" class:full>
       <LiveTabs
         sessions={live.sessions}
         selected={selectedId}
@@ -134,12 +140,23 @@
               aria-pressed={controlling}
               title="Click, scroll and type in the page yourself"
               onclick={() => (controlling = !controlling)}
-              ><MousePointer2 size={13} />{controlling ? 'Stop control' : 'Take control'}</button
+              aria-label={controlling ? 'Stop control' : 'Take control'}
+              ><MousePointer2 size={13} /><span class="live-label"
+                >{controlling ? 'Stop control' : 'Take control'}</span
+              ></button
             >{/if}
           <button
             class="button subtle small"
+            aria-label="Open chat"
             onclick={() => goto(resolve('/sessions/[id]', { id: selected.chatId }))}
-            ><ExternalLink size={13} /> Open chat</button
+            ><ExternalLink size={13} /><span class="live-label">Open chat</span></button
+          >
+          <button
+            class="icon-button"
+            aria-label={full ? 'Leave full screen' : 'Full screen'}
+            aria-pressed={full}
+            onclick={() => (full = !full)}
+            >{#if full}<Minimize2 size={15} />{:else}<Maximize2 size={15} />{/if}</button
           >
         </div>
         {#if error}<p class="error-banner" role="alert">{error}</p>{/if}

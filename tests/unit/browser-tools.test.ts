@@ -108,7 +108,7 @@ it.skipIf(!browserInstalled())(
 
     const shot = await tool('browser_screenshot');
     expect(shot.output).toBe(
-      `Screenshot of the visible page (1280×800) at ${base}/search?q=socks.`,
+      `Screenshot of the visible page (1280×800 px) at ${base}/search?q=socks.`,
     );
     expect(shot.image).toMatchObject({
       mediaType: 'image/jpeg',
@@ -118,7 +118,9 @@ it.skipIf(!browserInstalled())(
       element: 'Results text',
       ref: ref((await tool('browser_snapshot')).output, 'paragraph'),
     });
-    expect(heading.output).toMatch(/^Screenshot of Results text at /);
+    // A small element comes sharp, as a PNG, with its size, so a model sees what it caught.
+    expect(heading.output).toMatch(/^Screenshot of Results text \(\d+×\d+ px\) at /);
+    expect(heading.image?.mediaType).toBe('image/png');
     expect(Buffer.from(heading.image!.data, 'base64').length).toBeLessThan(
       Buffer.from(shot.image!.data, 'base64').length,
     );

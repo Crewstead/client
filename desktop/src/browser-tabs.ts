@@ -83,7 +83,10 @@ export class BrowserTabs {
     return true;
   }
 
-  /** A JPEG of a tab, or of part of it. Needs the window on screen where windows hidden do not draw. */
+  /**
+   * A JPEG of a tab, or of part of it; a PNG at quality 100 (a small element, kept sharp). Needs the
+   * window on screen where windows hidden do not draw.
+   */
   async capture(target: string, quality: number, clip?: Rectangle) {
     const view = await this.find(target);
     if (!view) throw new Error('This tab is not open any more.');
@@ -95,7 +98,7 @@ export class BrowserTabs {
       throw new Error(
         'The page could not be drawn: open the Crewstead window on that computer, then try again.',
       );
-    return image.toJPEG(quality);
+    return quality >= 100 ? image.toPNG() : image.toJPEG(quality);
   }
 
   private add(view: WebContentsView) {

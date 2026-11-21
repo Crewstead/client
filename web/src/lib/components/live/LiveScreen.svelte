@@ -1,7 +1,9 @@
 <script lang="ts">
-  import { Keyboard, LoaderCircle } from '@lucide/svelte';
+  import { Keyboard, LoaderCircle, Minus, Plus, Scan } from '@lucide/svelte';
   import type { LiveEvent, LiveInput } from '@crewstead/core/protocol';
   import LiveControl from './LiveControl.svelte';
+  import { Zoom } from './zoom.svelte.ts';
+  import '@crewstead/ui/live-zoom.css';
   import { apiUrl, withAccount } from '#lib/auth/connection.ts';
   import { canEmbed, embedTab } from '#lib/desktop/browser-panel.ts';
   let {
@@ -69,6 +71,11 @@
   // In the desktop app, a browser of this computer is the app's own: its real tab lies over this
   // spot, and no pictures are streamed. Undefined while the app is asked.
   let screen = $state<HTMLDivElement>();
+  // On a phone the page is small: pinch, double tap or the buttons zoom into it.
+  const zoom = new Zoom(
+    () => screen,
+    () => control,
+  );
   let embedded = $state<boolean | undefined>(canEmbed() ? undefined : false);
   $effect(() => {
     if (!screen || embedded === false) return;
@@ -123,35 +130,52 @@
       ? `${frame.width} / ${frame.height}`
       : '16 / 10'}
   style:--page-ratio={frame ? frame.width / frame.height : 1.6}
+  class:zoomed={zoom.zoomed}
   role="region"
   aria-label="Live view of the browser"
   data-behind={behind}
+  onpointerdown={zoom.down}
+  onpointermove={zoom.move}
+  onpointerup={zoom.up}
+  onpointercancel={zoom.up}
+  onwheel={zoom.wheel}
 >
-  <canvas bind:this={canvas} class:hidden={!frame}></canvas>
-  {#if !frame && !embedded}<p class="live-waiting">
-      {#if failed}This browser is not available.{:else}<LoaderCircle size={18} class="spin" /> Connecting
-        to the browser…{/if}
-    </p>{/if}
-  {#if frame && cursor}
-    <span
-      class="live-cursor"
-      data-kind={cursor.kind}
-      style:left={`${(cursor.x / frame.width) * 100}%`}
-      style:top={`${(cursor.y / frame.height) * 100}%`}
-    >
-      <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"
-        ><path
-          d="M4 2.5 19.5 13l-6.6 1.2 3.9 7.3-2.7 1.4-3.9-7.3L5.3 20Z"
-          fill="#fff"
-          stroke="#111"
-          stroke-width="1.4"
-          stroke-linejoin="round"
-        /></svg
+  <div class="live-stage" style:transform={zoom.transform}>
+    <canvas bind:this={canvas} class:hidden={!frame}></canvas>
+    {#if !frame && !embedded}<p class="live-waiting">
+        {#if failed}This browser is not available.{:else}<LoaderCircle size={18} class="spin" /> Connecting
+          to the browser…{/if}
+      </p>{/if}
+    {#if frame && cursor}
+      <span
+        class="live-cursor"
+        data-kind={cursor.kind}
+        style:left={`${(cursor.x / frame.width) * 100}%`}
+        style:top={`${(cursor.y / frame.height) * 100}%`}
       >
-      {#key cursor.seq}<span class="live-ripple"></span>{/key}
-      {#if cursor.kind === 'type'}<span class="live-typing"><Keyboard size={11} /> typing</span
-        >{/if}
-    </span>
-  {/if}
-  {#if frame && control}<LiveControl width={frame.width} height={frame.height} {send} />{/if}
+        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"
+          ><path
+            d="M4 2.5 19.5 13l-6.6 1.2 3.9 7.3-2.7 1.4-3.9-7.3L5.3 20Z"
+            fill="#fff"
+            stroke="#111"
+            stroke-width="1.4"
+            stroke-linejoin="round"
+          /></svg
+        >
+        {#key cursor.seq}<span class="live-ripple"></span>{/key}
+        {#if cursor.kind === 'type'}<span class="live-typing"><Keyboard size={11} /> typing</span
+          >{/if}
+      </span>
+    {/if}
+    {#if frame && control}<LiveControl width={frame.width} height={frame.height} {send} />{/if}
+  </div>
+  {#if frame && !embedded}<div class="live-zoom" role="group" aria-label="Zoom">
+      <button class="icon-button" aria-label="Zoom out" onclick={() => zoom.zoomCentre(1 / 1.5)}
+        ><Minus size={15} /></button
+      >{#if zoom.zoomed}<button class="icon-button" aria-label="Fit" onclick={() => zoom.reset()}
+          ><Scan size={15} /></button
+        >{/if}<button class="icon-button" aria-label="Zoom in" onclick={() => zoom.zoomCentre(1.5)}
+        ><Plus size={15} /></button
+      >
+    </div>{/if}
 </div>

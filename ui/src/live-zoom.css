@@ -1,0 +1,78 @@
+/* The page on its stage, zoomed and moved on small screens (components/live/zoom.svelte.ts). */
+.live-stage {
+  position: absolute;
+  inset: 0;
+  transform-origin: 0 0;
+}
+/* Fingers scroll the chat past the page, until it is zoomed or takes the whole screen. */
+.live-screen {
+  touch-action: pan-y;
+}
+.live-screen.zoomed,
+.live-window.full .live-screen {
+  touch-action: none;
+}
+.live-zoom {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  z-index: 4;
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  background: rgb(20 21 26 / 82%);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.live-zoom .icon-button {
+  width: 32px;
+  height: 32px;
+}
+/* With a mouse they show on hover; on a touch screen they stay. */
+@media (hover: hover) and (pointer: fine) {
+  .live-zoom {
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .live-screen:hover .live-zoom,
+  .live-zoom:focus-within {
+    opacity: 1;
+  }
+}
+
+/* Full screen: the browser over everything, the page as large as the screen allows. */
+.live-window.full {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  border: 0;
+  border-radius: 0;
+}
+.live-window.full .live-screen:not(.fill) {
+  width: min(100%, calc((100dvh - 96px) * var(--page-ratio, 1.6)));
+  margin: auto;
+}
+
+@media (max-width: 700px) {
+  .live-header p,
+  .live-label {
+    display: none;
+  }
+  .live-address {
+    margin: 0 4px;
+    padding: 4px 10px;
+  }
+  .live-window > .live-toolbar {
+    gap: 2px;
+    padding: 4px 6px;
+  }
+}
+/* A phone on its side: in full screen the tabs give their row to the page. */
+@media (max-height: 500px) {
+  .live-window.full > .live-tab-row {
+    display: none;
+  }
+  .live-window.full .live-screen:not(.fill) {
+    width: min(100%, calc((100dvh - 52px) * var(--page-ratio, 1.6)));
+  }
+}

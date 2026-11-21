@@ -114,7 +114,11 @@
   justify-content: flex-end;
 }
 .attachment-image {
-  display: block;
+  display: grid;
+  place-items: center;
+  /* A small picture keeps its own size (stretched, it blurs); the frame stays big enough to click. */
+  min-width: 64px;
+  min-height: 64px;
   /* The cap sits on the frame: a percentage on the picture would leave the frame as wide as the file. */
   max-width: min(320px, 100%);
   padding: 0;
@@ -127,8 +131,6 @@
 .attachment-image img,
 .attachment-placeholder {
   display: block;
-  min-width: 64px;
-  min-height: 64px;
   max-width: 100%;
   max-height: 220px;
   object-fit: contain;
@@ -136,6 +138,7 @@
 }
 .attachment-placeholder {
   width: 160px;
+  min-height: 64px;
   height: 100px;
 }
 .attachment-placeholder.missing {
