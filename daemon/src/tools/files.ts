@@ -59,26 +59,34 @@ async function readText(real: string, shown: string) {
   return buffer.toString('utf8');
 }
 
-/** Pictures a model can look at, by their first bytes. */
-const PICTURES: [Buffer, 'image/png' | 'image/jpeg'][] = [
-  [Buffer.from([0x89, 0x50, 0x4e, 0x47]), 'image/png'],
-  [Buffer.from([0xff, 0xd8, 0xff]), 'image/jpeg'],
-];
-/** Largest picture read_file shows: what a model takes in one picture, with room to spare. */
+type PictureType = 'image/png' | 'image/jpeg' | 'image/gif' | 'image/webp';
+/** Largest picture shown: what a model takes in one picture, with room to spare. */
 const PICTURE_BYTES = 5 * 1024 * 1024;
+
+/** A file's picture type, by its first bytes; undefined for anything else. */
+async function pictureType(real: string): Promise<PictureType | undefined> {
+  const head = Buffer.alloc(12);
+  const file = await open(real, 'r');
+  try {
+    await file.read(head, 0, 12, 0);
+  } finally {
+    await file.close();
+  }
+  const starts = (bytes: number[] | string, at = 0) =>
+    head.subarray(at, at + bytes.length).equals(Buffer.from(bytes as never));
+  if (starts([0x89, 0x50, 0x4e, 0x47])) return 'image/png';
+  if (starts([0xff, 0xd8, 0xff])) return 'image/jpeg';
+  if (starts('GIF8')) return 'image/gif';
+  if (starts('RIFF') && starts('WEBP', 8)) return 'image/webp';
+  return undefined;
+}
 
 /** A PNG or JPEG file, returned as a picture for the model to look at; undefined for any other file. */
 async function readPicture(real: string, shown: string) {
   const info = await stat(real);
   if (!info.isFile()) return undefined;
-  const head = Buffer.alloc(8);
-  const file = await open(real, 'r');
-  try {
-    await file.read(head, 0, 8, 0);
-  } finally {
-    await file.close();
-  }
-  const mediaType = PICTURES.find(([magic]) => head.subarray(0, magic.length).equals(magic))?.[1];
+  const found = await pictureType(real);
+  const mediaType = found === 'image/png' || found === 'image/jpeg' ? found : undefined;
   if (!mediaType) {
     if (/\.(gif|webp|bmp|tiff?)$/i.test(shown))
       throw new Error(`${shown} is a picture read_file cannot show; convert it to PNG first.`);
@@ -92,6 +100,23 @@ async function readPicture(real: string, shown: string) {
     mediaType === 'image/png' ? ` ${bytes.readUInt32BE(16)}×${bytes.readUInt32BE(20)}` : '';
   return {
     output: `${shown}: a${size} ${mediaType === 'image/png' ? 'PNG' : 'JPEG'} picture, shown to you.`,
+    image: { mediaType, data: bytes.toString('base64') },
+  };
+}
+
+/** show_picture: a picture file for the owner, shown in the chat (not to the model). */
+export async function showPicture(root: string, args: ProjectToolArguments<'show_picture'>) {
+  const { real, shown } = await projectPath(root, args.path);
+  const info = await stat(real);
+  if (!info.isFile()) throw new Error(`${shown} is not a file.`);
+  const mediaType = await pictureType(real);
+  if (!mediaType)
+    throw new Error(`${shown} is not a PNG, JPEG, GIF or WebP picture; convert it to PNG first.`);
+  if (info.size > PICTURE_BYTES)
+    throw new Error(`${shown} is larger than 5 MB; make a smaller copy to show it.`);
+  const bytes = await readFile(real);
+  return {
+    output: `Shown to the user in the chat: ${shown}.`,
     image: { mediaType, data: bytes.toString('base64') },
   };
 }

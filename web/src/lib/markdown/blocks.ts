@@ -4,7 +4,8 @@ export type Align = 'left' | 'center' | 'right' | undefined;
 export type Block =
   | { type: 'heading'; level: number; content: Inline[] }
   | { type: 'paragraph'; content: Inline[] }
-  | { type: 'code'; language: string; text: string }
+  /** `closed`: its end fence came (a reply still streaming may not have it yet). */
+  | { type: 'code'; language: string; text: string; closed: boolean }
   | { type: 'list'; ordered: boolean; start: number; items: Block[][] }
   | { type: 'quote'; blocks: Block[] }
   | { type: 'table'; align: Align[]; head: Inline[][]; rows: Inline[][][] }
@@ -51,8 +52,9 @@ export function parseBlocks(source: string): Block[] {
       const body: string[] = [];
       i++;
       while (i < lines.length && !lines[i]!.trim().startsWith(open[1]!)) body.push(lines[i++]!);
+      const closed = i < lines.length;
       i++;
-      blocks.push({ type: 'code', language: open[2] ?? '', text: body.join('\n') });
+      blocks.push({ type: 'code', language: open[2] ?? '', text: body.join('\n'), closed });
       continue;
     }
     const title = heading.exec(line);

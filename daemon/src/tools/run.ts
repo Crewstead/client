@@ -13,7 +13,13 @@ import { openProject } from '../projects.ts';
 import type { Askpass, AskPassword } from './askpass.ts';
 import { runComputerTool } from './computer.ts';
 import { runCommand, type SandboxOptions } from './command.ts';
-import { editProjectFile, listFiles, readProjectFile, writeProjectFile } from './files.ts';
+import {
+  editProjectFile,
+  listFiles,
+  readProjectFile,
+  showPicture,
+  writeProjectFile,
+} from './files.ts';
 import { searchProject } from './search.ts';
 
 export interface ToolHost extends SandboxOptions {
@@ -113,6 +119,8 @@ export async function runProjectTool(
           outcome = await listFiles(root, args as ProjectToolArguments<'list_files'>);
         else if (command.name === 'read_file')
           outcome = await readProjectFile(root, args as ProjectToolArguments<'read_file'>);
+        else if (command.name === 'show_picture')
+          outcome = await showPicture(root, args as ProjectToolArguments<'show_picture'>);
         else if (command.name === 'search_files')
           outcome = await searchProject(
             root,

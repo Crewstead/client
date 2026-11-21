@@ -4,7 +4,9 @@ export type Inline =
   | { type: 'break' }
   | { type: 'code'; text: string }
   | { type: 'strong' | 'em' | 'del'; children: Inline[] }
-  | { type: 'link'; href: string; children: Inline[] };
+  | { type: 'link'; href: string; children: Inline[] }
+  /** `![caption](src)`: a picture in the chat, or a file on the chat's computer. */
+  | { type: 'image'; src: string; alt: string };
 
 /** Only these link targets are kept; anything else (javascript:, data:, …) stays plain text. */
 export function safeHref(raw: string) {
@@ -51,6 +53,13 @@ export function parseInline(source: string): Inline[] {
       flush();
       out.push({ type: 'code', text: code[2]!.replace(/^ (.*) $/, '$1') });
       i += code[0].length;
+      continue;
+    }
+    const image = /^!\[([^\]\n]*)\]\(<?([^)\n<>]+?)>?\)/.exec(rest);
+    if (image) {
+      flush();
+      out.push({ type: 'image', alt: image[1]!, src: image[2]!.trim() });
+      i += image[0].length;
       continue;
     }
     const link = /^\[([^\]\n]+)\]\(([^)\s]+)\)/.exec(rest);

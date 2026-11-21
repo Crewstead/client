@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Inline } from './inline.ts';
   import Self from './Inline.svelte';
+  import InlinePicture from './InlinePicture.svelte';
   let { nodes }: { nodes: Inline[] } = $props();
 </script>
 
@@ -13,4 +14,4 @@
       href={node.href}
       target="_blank"
       rel="noopener noreferrer nofollow"><Self nodes={node.children} /></a
-    >{/if}{/each}
+    >{:else if node.type === 'image'}<InlinePicture src={node.src} alt={node.alt} />{/if}{/each}

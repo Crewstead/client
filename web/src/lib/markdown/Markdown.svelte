@@ -14,7 +14,11 @@
   {:else if block.type === 'heading'}<svelte:element this={`h${Math.min(block.level + 2, 6)}`}
       ><Inline nodes={block.content} /></svelte:element
     >
-  {:else if block.type === 'code'}<CodeBlock language={block.language} text={block.text} />
+  {:else if block.type === 'code'}<CodeBlock
+      language={block.language}
+      text={block.text}
+      closed={block.closed}
+    />
   {:else if block.type === 'list'}
     <svelte:element
       this={block.ordered ? 'ol' : 'ul'}

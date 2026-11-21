@@ -32,6 +32,14 @@ describe('Markdown inline', () => {
       { type: 'text', text: '.' },
     ]);
   });
+  it('reads pictures, also paths with spaces in angle brackets', () => {
+    expect(parseInline('See ![the sprite](out/sprite.png) and ![](<my pics/a b.png>)')).toEqual([
+      { type: 'text', text: 'See ' },
+      { type: 'image', alt: 'the sprite', src: 'out/sprite.png' },
+      { type: 'text', text: ' and ' },
+      { type: 'image', alt: '', src: 'my pics/a b.png' },
+    ]);
+  });
   it('never turns markup into HTML: angle brackets stay text', () => {
     expect(parseInline('<img src=x onerror=alert(1)>')).toEqual([
       { type: 'text', text: '<img src=x onerror=alert(1)>' },
@@ -50,7 +58,11 @@ describe('Markdown blocks', () => {
   it('runs an unclosed code fence to the end, as while a reply is streaming', () => {
     expect(parseBlocks('Run:\n```bash\nnpm test\nnpm run')).toEqual([
       { type: 'paragraph', content: [{ type: 'text', text: 'Run:' }] },
-      { type: 'code', language: 'bash', text: 'npm test\nnpm run' },
+      { type: 'code', language: 'bash', text: 'npm test\nnpm run', closed: false },
+    ]);
+    // A diagram or a page renders only once its block has ended.
+    expect(parseBlocks('```mermaid\ngraph TD\n```')).toEqual([
+      { type: 'code', language: 'mermaid', text: 'graph TD', closed: true },
     ]);
   });
   it('reads nested and numbered lists', () => {

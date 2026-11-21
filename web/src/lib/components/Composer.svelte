@@ -151,6 +151,14 @@
   onMount(() => {
     text = sessionStorage.getItem(draftKey) ?? '';
     initialized = true;
+    // A page in a reply (crewstead.compose) puts text here; the owner reads it and sends it.
+    const compose = (event: Event) => {
+      const added = (event as CustomEvent<string>).detail;
+      text = text.trim() ? `${text.trimEnd()}\n\n${added}` : added;
+      input?.focus();
+    };
+    window.addEventListener('crewstead:compose', compose);
+    return () => window.removeEventListener('crewstead:compose', compose);
   });
   $effect(() => {
     if (initialized && typeof sessionStorage !== 'undefined')

@@ -34,6 +34,7 @@
   import { livePlan } from '#lib/components/timeline-entries.ts';
   import { ChatTerminals, provideTerminals } from '#lib/terminals/terminals.svelte.ts';
   import TerminalDrawer from '#lib/terminals/TerminalDrawer.svelte';
+  import { ChatPictures, providePictures } from '#lib/markdown/pictures.ts';
   import '@crewstead/ui/conversation.css';
   import '@crewstead/ui/tools.css';
   import '@crewstead/ui/composer.css';
@@ -43,6 +44,7 @@
   const workspace = useWorkspace();
   const conversation = new Conversation();
   const terminals = provideTerminals(new ChatTerminals());
+  providePictures(new ChatPictures(() => conversation.session?.id));
   const terminalsFor = $derived(
     conversation.session && `${conversation.session.id}|${conversation.session.projectId ?? ''}`,
   );

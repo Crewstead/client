@@ -124,3 +124,64 @@
   background: var(--surface);
   font-weight: 600;
 }
+/* A picture a reply shows: as large as it reads well, opening full size. */
+.md-picture {
+  display: block;
+  max-width: min(560px, 100%);
+  margin: 8px 0;
+  padding: 0;
+  overflow: hidden;
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  cursor: zoom-in;
+}
+.md-picture img {
+  display: block;
+  max-width: 100%;
+  max-height: 420px;
+  min-width: 48px;
+  object-fit: contain;
+  background: var(--surface);
+}
+.md-picture-loading,
+.md-picture-missing {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+.md-picture-loading {
+  animation: md-picture-wait 1.2s ease-in-out infinite;
+}
+@keyframes md-picture-wait {
+  50% {
+    opacity: 0.45;
+  }
+}
+/* A diagram or a live page from a reply, in place of its code. */
+.md-diagram-box {
+  padding: var(--space-3);
+  overflow-x: auto;
+}
+.md-diagram {
+  display: block;
+  max-width: 100%;
+  margin: 0 auto;
+}
+.md-diagram-wait {
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+.md-diagram-error {
+  margin: 0 0 8px;
+  color: var(--danger);
+  font-size: var(--text-sm);
+}
+.md-live-html {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: transparent;
+}

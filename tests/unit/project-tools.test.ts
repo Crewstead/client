@@ -9,6 +9,7 @@ import {
   editProjectFile,
   listFiles,
   readProjectFile,
+  showPicture,
   writeProjectFile,
 } from '../../daemon/src/tools/files.ts';
 import { projectPath } from '../../daemon/src/tools/paths.ts';
@@ -86,6 +87,10 @@ describe('file tools', () => {
     await expect(readProjectFile(root, { path: 'sprite.webp' })).rejects.toThrow(
       'convert it to PNG',
     );
+    // show_picture shows the user any picture a browser shows, WebP too.
+    const shown = await showPicture(root, { path: 'sprite.webp' });
+    expect(shown.image.mediaType).toBe('image/webp');
+    await expect(showPicture(root, { path: 'src/app.ts' })).rejects.toThrow('not a PNG');
   });
 
   it('previews an edit as a diff without changing the file, then applies it', async () => {

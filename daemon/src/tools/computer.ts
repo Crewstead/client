@@ -15,7 +15,13 @@ import { computerSettings } from '../computer.ts';
 import { workFolder } from '../config.ts';
 import type { AskPassword } from './askpass.ts';
 import { runCommand } from './command.ts';
-import { editProjectFile, listFiles, readProjectFile, writeProjectFile } from './files.ts';
+import {
+  editProjectFile,
+  listFiles,
+  readProjectFile,
+  showPicture,
+  writeProjectFile,
+} from './files.ts';
 import { projectPath } from './paths.ts';
 import { runProcess } from './process.ts';
 import type { ToolHost } from './run.ts';
@@ -75,6 +81,7 @@ export async function runComputerTool(
       if (name === 'list_files')
         return listFiles('/', withPath, (folder) => !!protectedPlace(folder, home));
       if (name === 'read_file') return readProjectFile('/', withPath);
+      if (name === 'show_picture') return showPicture('/', withPath);
       return searchProject('/', withPath, signal, host.ripgrep, PROTECTED_HOME_ENTRIES);
   }
 }
