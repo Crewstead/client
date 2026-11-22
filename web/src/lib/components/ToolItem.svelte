@@ -1,4 +1,5 @@
 <script lang="ts">
+  import '@crewstead/ui/tool-file.css';
   import { Check, ChevronRight, X, ShieldCheck, ShieldX, ShieldQuestion } from '@lucide/svelte';
   import type { TimelineItem } from '@crewstead/core/protocol';
   import DiffView from './DiffView.svelte';
@@ -38,6 +39,11 @@
     } catch {
       return '';
     }
+  });
+  // The file's name in full, then its folder, which gives way first when the header is narrow.
+  const file = $derived.by(() => {
+    const at = Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\'));
+    return { name: path.slice(at + 1), folder: at > 0 ? path.slice(0, at) : '' };
   });
   const network = $derived(item.text.startsWith('[network] '));
   const footer = $derived(
@@ -109,8 +115,12 @@
     aria-label={note ? 'Request to write a note' : `Request: ${meta.title}`}
   >
     <header>
-      <Icon size={17} /><strong>{meta.title}</strong>{#if path && meta.kind === 'change'}<code
-          class="tool-file">{path}</code
+      <Icon size={17} /><strong>{meta.title}</strong>{#if path && meta.kind === 'change'}<span
+          class="tool-file"
+          title={path}
+          ><code class="tool-file-name">{file.name}</code>{#if file.folder}<span
+              class="tool-file-folder">&lrm;{file.folder}&lrm;</span
+            >{/if}</span
         >{/if}<span class="tool-status">{status}</span>
     </header>
     {#if item.diff}<DiffView diff={item.diff} />{:else}<div class="tool-body">

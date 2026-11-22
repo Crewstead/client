@@ -134,12 +134,18 @@
   box-shadow: 0 4px 14px #0006;
   cursor: grabbing;
 }
+/* Right under the projects; when they outgrow the bar, it stays at its foot and they scroll under it. */
 .rail-add {
+  position: sticky;
+  bottom: -12px;
+  z-index: 1;
   display: flex;
+  flex: none;
   justify-content: center;
   width: 100%;
-  margin-top: auto;
-  padding-top: 8px;
+  margin-bottom: -12px;
+  padding: 8px 0 12px;
+  background: var(--sidebar);
 }
 .rail-add .rail-tile {
   border: 1px dashed var(--line);

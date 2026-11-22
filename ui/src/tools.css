@@ -16,14 +16,18 @@
   color: var(--muted);
 }
 .tool-card strong {
+  flex: none;
   color: var(--text);
   font-size: 12px;
   font-weight: 550;
+  white-space: nowrap;
 }
 .tool-status {
+  flex: none;
   margin-left: auto;
   color: var(--muted);
   font-size: 12px;
+  white-space: nowrap;
 }
 /* Sentence case: only the first letter of a status is capital. */
 .tool-status::first-letter {
@@ -163,13 +167,6 @@
 }
 .tool-review[data-outcome='unavailable'] svg {
   color: var(--amber);
-}
-.tool-file {
-  overflow: hidden;
-  color: var(--muted);
-  font-size: 12px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 .tool-output {
   margin: 0;
