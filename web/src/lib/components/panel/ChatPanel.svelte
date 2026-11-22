@@ -46,6 +46,9 @@
   const workspace = useWorkspace();
   let tab = $state(savedTab());
   const files = $derived(chatFiles(session));
+  // The newest files; a few over that are shown rather than hidden behind the button.
+  let allFiles = $state(false);
+  const shownFiles = $derived(allFiles || files.length <= 12 ? files : files.slice(0, 8));
   const changes = $derived(changedFiles(session.items));
   const tokens = $derived(
     Object.values(session.usage ?? {}).reduce((sum, usage) => sum + usage.input + usage.output, 0),
@@ -127,7 +130,13 @@
         count={files.length || undefined}
         empty={!files.length}
       >
-        <div class="panel-files"><Attachments {files} /></div>
+        <div class="panel-files"><Attachments files={shownFiles} /></div>
+        {#if shownFiles.length < files.length || allFiles}<button
+            class="change-more"
+            aria-expanded={allFiles}
+            onclick={() => (allFiles = !allFiles)}
+            >{allFiles ? 'Show fewer' : `Show all ${files.length}`}</button
+          >{/if}
       </PanelSection>
 
       {#if session.projectId}

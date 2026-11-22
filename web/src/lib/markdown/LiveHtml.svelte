@@ -14,14 +14,35 @@
   // Tells the chat its height, and lets a form put text in the message box: crewstead.compose(text).
   const bridge = `<script>(() => {
   const post = (message) => parent.postMessage({ crewstead: true, ...message }, '*');
+  // The page's height is the root's box, which keeps a heading's margin that collapses through the body.
+  // A page sized to the window (100vh plus padding) outgrows each new frame height by the same amount:
+  // the frame stops there and hides that overflow instead of growing to its cap with a scrollbar.
+  let sent = 0;
+  let over = 0;
   const size = () => {
+    const root = document.documentElement;
     const body = document.body;
     if (!body) return;
     const style = getComputedStyle(body);
-    const height = body.scrollHeight + parseFloat(style.marginTop) + parseFloat(style.marginBottom);
-    post({ kind: 'size', height: Math.ceil(height) });
+    const height = Math.ceil(
+      Math.max(
+        root.getBoundingClientRect().height,
+        body.scrollHeight + parseFloat(style.marginTop) + parseFloat(style.marginBottom),
+      ),
+    );
+    const extra = height - innerHeight;
+    const stuck = sent && Math.abs(innerHeight - sent) <= 1 && extra > 0 && Math.abs(extra - over) <= 1;
+    root.style.overflowY = stuck ? 'hidden' : '';
+    if (stuck) return;
+    sent = height;
+    over = extra;
+    post({ kind: 'size', height });
   };
-  addEventListener('DOMContentLoaded', () => new ResizeObserver(size).observe(document.body));
+  addEventListener('DOMContentLoaded', () => {
+    const watch = new ResizeObserver(size);
+    watch.observe(document.documentElement);
+    watch.observe(document.body);
+  });
   addEventListener('load', size);
   window.crewstead = { compose: (text) => post({ kind: 'compose', text: String(text) }) };
 })();${END_SCRIPT}`;

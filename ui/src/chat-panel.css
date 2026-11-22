@@ -211,10 +211,12 @@
 }
 .panel-files .attachment-images {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
 }
 .panel-files .attachment-image {
+  min-width: 0;
+  min-height: 0;
   max-width: none;
 }
 .panel-files .attachment-image img,
@@ -222,7 +224,8 @@
   width: 100%;
   min-width: 0;
   max-width: none;
-  height: 64px;
+  height: 52px;
+  min-height: 0;
   max-height: none;
   object-fit: cover;
 }
