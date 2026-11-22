@@ -279,13 +279,18 @@ export class Conversation {
     return sent;
   }
 
-  /** Takes a waiting message out of the queue. */
-  unqueue(id: string, context: ContextId) {
+  /**
+   * Takes a waiting message out of the queue. Once the hub has it: one shown before the hub answered
+   * would otherwise stay queued there and be sent after all.
+   */
+  async unqueue(id: string, context: ContextId) {
+    await this.queueing;
     return this.command(`/sessions/${this.session!.id}/queue/${id}`, context, undefined, 'DELETE');
   }
 
   /** Sends the waiting messages now, or just `message`, stopping a running reply first. */
-  sendQueued(context: ContextId, message?: string) {
+  async sendQueued(context: ContextId, message?: string) {
+    await this.queueing;
     return this.command(
       `/sessions/${this.session!.id}/queue/next`,
       context,

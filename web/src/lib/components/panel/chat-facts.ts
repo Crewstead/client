@@ -1,8 +1,16 @@
 import type { Attachment, Session, TimelineItem } from '@crewstead/core/protocol';
 
-/** Every file in a chat, newest first: what the user attached and what tools took. */
-export const chatFiles = (session: Session): Attachment[] =>
-  session.items.flatMap((item) => item.attachments ?? []).reverse();
+/**
+ * Every file in a chat, newest first: what the user attached and what tools took. A file in two
+ * messages (one sent twice) is listed once.
+ */
+export function chatFiles(session: Session): Attachment[] {
+  const seen = new Set<string>();
+  return session.items
+    .flatMap((item) => item.attachments ?? [])
+    .reverse()
+    .filter((file) => !seen.has(file.id) && !!seen.add(file.id));
+}
 
 const argument = (item: TimelineItem, key: string) => {
   try {
