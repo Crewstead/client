@@ -107,17 +107,19 @@
         title="Edit"
         onclick={() => edit(task)}><Pencil size={13} /></button
       >
-      {#if confirming === task.id}<button
-          class="button danger small"
-          onclick={() => act(() => tasks.remove(task.id))}
-          onblur={() => (confirming = '')}
-          {@attach (node) => node.focus()}>Delete</button
-        >{:else}<button
-          class="icon-button"
-          aria-label={`Delete ${task.title}`}
-          title="Delete"
-          onclick={() => (confirming = task.id)}><Trash2 size={13} /></button
-        >{/if}
+      <span class="task-delete"
+        >{#if confirming === task.id}<button
+            class="button danger small"
+            onclick={() => act(() => tasks.remove(task.id))}
+            onblur={() => (confirming = '')}
+            {@attach (node) => node.focus()}>Delete</button
+          >{:else}<button
+            class="icon-button"
+            aria-label={`Delete ${task.title}`}
+            title="Delete"
+            onclick={() => (confirming = task.id)}><Trash2 size={13} /></button
+          >{/if}</span
+      >
     </li>
   {/each}
 </ul>

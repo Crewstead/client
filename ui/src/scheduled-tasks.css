@@ -64,6 +64,10 @@
   gap: 5px;
   min-width: 0;
 }
+.task-schedule svg,
+.task-chat svg {
+  flex-shrink: 0;
+}
 .task-chat {
   color: var(--muted);
   text-decoration: none;
@@ -102,6 +106,42 @@
   width: 26px;
   height: 26px;
   flex-shrink: 0;
+}
+/* Delete keeps the icon's slot; its confirm button lies over the row from there, so nothing moves. */
+.task-delete {
+  position: relative;
+  display: inline-flex;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+}
+.task-delete .button {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  z-index: 1;
+  min-height: 26px;
+  padding: 4px 10px;
+  transform: translateY(-50%);
+}
+/* On a phone the text takes the whole width and the buttons go on a row of their own below it. */
+@media (max-width: 560px) {
+  .task-cards .task-row {
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+  .task-cards .task-text {
+    flex-basis: 100%;
+    margin-right: 0;
+  }
+  .task-cards .task-text + .icon-button {
+    margin-left: -5px;
+  }
+  /* The buttons start at the left here, so the confirm button opens into the free space on the right. */
+  .task-cards .task-delete .button {
+    right: auto;
+    left: 0;
+  }
 }
 
 .task-dialog {
@@ -152,8 +192,14 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* The schedule keeps its whole text before the chat's name gets any room, but never more than the
+   line: a long one ends in an ellipsis instead of running under the buttons. */
 .task-cards .task-schedule {
   flex-shrink: 0;
+  max-width: 100%;
+}
+.task-cards .task-meta {
+  overflow: hidden;
 }
 .task-chat-name {
   overflow: hidden;
