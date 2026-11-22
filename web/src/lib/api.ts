@@ -73,11 +73,7 @@ export async function request<T>(path: string, options?: RequestInit): Promise<T
 }
 
 /** A chat as the list has it: no messages, and when its last one was written. */
-export type ChatSummary = Omit<Session, 'items'> & {
-  lastMessageAt?: string;
-  /** Only scheduled runs wrote in it. */
-  scheduledOnly?: boolean;
-};
+export type ChatSummary = Omit<Session, 'items'> & { lastMessageAt?: string };
 
 export const scoped = (path: string, context: ContextId) => `${path}?context=${context}`;
 export const getSession = (id: string, context: ContextId) =>

@@ -15,8 +15,8 @@
     toSection,
   }: {
     blocks: ListBlock[];
-    /** One chat's row; `side` for a subagent's chat under its own. */
-    row: Snippet<[Chat, boolean]>;
+    /** One chat's row; `side` for a subagent's chat under its own, `last` for the last of those. */
+    row: Snippet<[Chat, boolean, boolean]>;
     /** The side chats to show under a chat; none unless the list shows them. */
     sideOf: (id: string) => Chat[];
     /** A new section is being named. */
@@ -30,17 +30,18 @@
   } = $props();
   type Entry =
     | { kind: 'heading'; key: string; block: ListBlock }
-    | { kind: 'chat'; key: string; chat: Chat; side: boolean };
+    | { kind: 'chat'; key: string; chat: Chat; side: boolean; last: boolean };
   const entries = $derived(
     blocks.flatMap((block): Entry[] => [
       ...(block.label ? [{ kind: 'heading' as const, key: `heading:${block.key}`, block }] : []),
       ...block.chats.flatMap((chat) => [
-        { kind: 'chat' as const, key: chat.id, chat, side: false },
-        ...sideOf(chat.id).map((side) => ({
+        { kind: 'chat' as const, key: chat.id, chat, side: false, last: false },
+        ...sideOf(chat.id).map((side, at, all) => ({
           kind: 'chat' as const,
           key: side.id,
           chat: side,
           side: true,
+          last: at === all.length - 1,
         })),
       ]),
     ]),
@@ -123,5 +124,5 @@
           />{/if}
       </h3>
     {/if}
-  {:else}{@render row(entry.chat, entry.side)}{/if}
+  {:else}{@render row(entry.chat, entry.side, entry.last)}{/if}
 {/each}

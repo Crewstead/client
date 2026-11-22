@@ -148,3 +148,24 @@ export function placeState(place: Place, unseen: ReadonlyMap<string, 'done' | 'f
   if (endings.includes('done')) return { kind: 'done', text: 'New replies' };
   return undefined;
 }
+
+const LAST_CHATS = 'crewstead:last-chats';
+/** The chat last open in each place of a workspace, on this device; nothing when storage is off. */
+function lastChats(context: string): Record<string, string> {
+  try {
+    const saved: unknown = JSON.parse(localStorage.getItem(`${LAST_CHATS}:${context}`) ?? '{}');
+    return saved && typeof saved === 'object' ? (saved as Record<string, string>) : {};
+  } catch {
+    return {};
+  }
+}
+export const lastChat = (context: string, place: string) => lastChats(context)[place];
+export function rememberChat(context: string, place: string, chat: string) {
+  try {
+    const saved = lastChats(context);
+    if (saved[place] === chat) return;
+    localStorage.setItem(`${LAST_CHATS}:${context}`, JSON.stringify({ ...saved, [place]: chat }));
+  } catch {
+    // Without storage, choosing a place opens its first chat.
+  }
+}

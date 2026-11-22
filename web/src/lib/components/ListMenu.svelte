@@ -30,9 +30,7 @@
   ] as const;
   const shows = [
     { key: 'metadata', label: 'Metadata' },
-    { key: 'scheduled', label: 'Scheduled' },
     { key: 'side', label: 'Side chats' },
-    { key: 'empty', label: 'Empty projects' },
   ] as const;
   const plain = $derived(
     view.group === DEFAULT_LIST_VIEW.group &&

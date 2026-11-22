@@ -54,15 +54,17 @@
   overflow-y: auto;
   flex: 1;
   min-height: 0;
-  /* Messages fade out above the prompt box instead of being cut off at its edge. */
-  mask-image: linear-gradient(to bottom, #000 calc(100% - 40px), transparent);
 }
-/* The chat runs on behind the prompt box's tab row, so the fade ends at the box itself; not when
-   terminals sit in between. */
+/*
+ * The chat runs on behind the prompt box's tab row and fades out there instead of being cut off at its
+ * edge; not when terminals sit in between. The fade is a gradient over the messages, not a mask on the
+ * scrolling list: Chromium sometimes repaints a masked scroller wrongly, leaving old text over new.
+ */
 .conversation-main:not(:has(.terminal-drawer)) .timeline ~ .composer-area {
   position: relative;
   margin-top: -40px;
   pointer-events: none;
+  background: linear-gradient(to bottom, transparent, var(--bg) 40px);
 }
 .conversation-main:not(:has(.terminal-drawer)) .timeline ~ .composer-area > * {
   pointer-events: auto;

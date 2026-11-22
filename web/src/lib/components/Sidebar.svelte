@@ -2,6 +2,7 @@
   import ResizeHandle from './ResizeHandle.svelte';
   import { sidebarWidth } from '#lib/panel-widths.svelte.ts';
   import { resolve } from '$app/paths';
+  import { goto } from '$app/navigation';
   import { LoaderCircle, MonitorPlay, Plus, Search } from '@lucide/svelte';
   import { page } from '$app/state';
   import { busy, useWorkspace } from '#lib/workspace.svelte.ts';
@@ -10,6 +11,7 @@
   import ProjectRail from './ProjectRail.svelte';
   import ListMenu from './ListMenu.svelte';
   import ChatBlocks from './ChatBlocks.svelte';
+  import { SideFolds } from './side-folds.svelte.ts';
   import type { ChatSummary } from '#lib/api.ts';
   import { ago } from './plan-usage.ts';
   import {
@@ -19,7 +21,14 @@
     type ListSection,
     type ListView,
   } from './list-view.ts';
-  import { CLOUD, chatOrder, placesOf, rearranged } from './sidebar-places.ts';
+  import {
+    CLOUD,
+    chatOrder,
+    lastChat,
+    placesOf,
+    rearranged,
+    rememberChat,
+  } from './sidebar-places.ts';
   import { PlaceReorder } from './place-reorder.svelte.ts';
   import AccountMenu from './AccountMenu.svelte';
   import UpdateBar from '#lib/desktop/UpdateBar.svelte';
@@ -84,6 +93,31 @@
     chosen = id;
     search = '';
   }
+  // The open chat is remembered for its place, so choosing that place again goes back to it.
+  $effect(() => {
+    const chat = page.params.id;
+    const place = following;
+    if (chat && place) rememberChat(workspace.context, place, chat);
+  });
+  /** A tile opens its place's chat open last here, else its first chat, else a new chat there. */
+  function openPlace(id: string) {
+    choose(id);
+    const place = places.find((entry) => entry.id === id);
+    if (!place) return;
+    const chats = arrange(place.chats, view, {
+      pinnedOrder: workspace.catalog?.preferences.pinnedOrder,
+      modelLabel,
+    }).flatMap((block) => block.chats);
+    const remembered = lastChat(workspace.context, id);
+    const target = chats.find((chat) => chat.id === remembered) ?? chats[0];
+    if (target) {
+      if (target.id !== page.params.id) void goto(resolve('/sessions/[id]', { id: target.id }));
+    } else {
+      const href = `${resolve('/new')}${id === CLOUD ? '' : `?project=${encodeURIComponent(id)}`}`;
+      // eslint-disable-next-line svelte/no-navigation-without-resolve -- built with resolve()
+      void goto(href);
+    }
+  }
   const words = $derived(search.trim().toLowerCase());
   const matching = $derived(
     (shown?.chats ?? []).filter((session) => session.title.toLowerCase().includes(words)),
@@ -110,20 +144,15 @@
     );
   });
   const empty = $derived(blocks.every((block) => !block.chats.length) && !view.sections.length);
-  const sideOf = (id: string) =>
+  // Side chats show under their chat, which folds them away (remembered on this device).
+  const folds = new SideFolds();
+  const sidesOf = (id: string) =>
     view.show.side ? workspace.sideChats.filter((chat) => chat.parent?.id === id) : [];
+  const sideOf = (id: string) => (folds.folded.has(id) ? [] : sidesOf(id));
   const meta = (chat: ChatSummary) =>
     view.show.metadata
       ? `${modelLabel(chat.modelId)} · ${ago(chat.lastMessageAt ?? chat.createdAt)}`
       : undefined;
-  // The projects bar leaves out projects without chats when asked, but never the one shown.
-  const tiles = $derived(
-    view.show.empty
-      ? places
-      : places.filter(
-          (place) => place.chats.length || place.kind === 'cloud' || place.id === shown?.id,
-        ),
-  );
   let naming = $state(false);
   function saveView(next: ListView) {
     void workspace.setListView(next).catch(() => {
@@ -239,10 +268,19 @@
   };
 </script>
 
-{#snippet chatRow(session: ChatSummary, side: boolean)}
+{#snippet chatRow(session: ChatSummary, side: boolean, last: boolean)}
+  {@const sides = side ? 0 : sidesOf(session.id).length}
   <ChatRow
     {session}
     {side}
+    {last}
+    fold={sides
+      ? {
+          count: sides,
+          open: !folds.folded.has(session.id),
+          toggle: () => folds.toggle(session.id),
+        }
+      : undefined}
     selected={page.params.id === session.id}
     {close}
     meta={meta(session)}
@@ -270,9 +308,9 @@
 <aside class="sidebar" class:open class:has-rail={!cloudOnly && workspace.ready} id="navigation">
   <ResizeHandle panel={sidebarWidth} edge="right" label="Resize the sidebar" />
   {#if !cloudOnly && workspace.ready}<ProjectRail
-      places={tiles}
+      {places}
       chosen={shown?.id ?? CLOUD}
-      {choose}
+      choose={openPlace}
       {over}
       drop={dropZone}
       {reorder}

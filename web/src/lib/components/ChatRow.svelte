@@ -1,6 +1,6 @@
 <script lang="ts">
   import { resolve } from '$app/paths';
-  import { Pin, PinOff, Archive, FolderInput, Ellipsis } from '@lucide/svelte';
+  import { Pin, PinOff, Archive, FolderInput, Ellipsis, ChevronRight } from '@lucide/svelte';
   import MoveChat from './MoveChat.svelte';
   import ChatActionsSheet from './ChatActionsSheet.svelte';
   import { tick } from 'svelte';
@@ -15,6 +15,8 @@
     reorder,
     meta,
     side = false,
+    last = false,
+    fold,
     sections,
   }: {
     session: Omit<Session, 'items'>;
@@ -26,8 +28,11 @@
     reorder?: { over: () => void; key: (event: KeyboardEvent) => void };
     /** A line under the title: its model and when (the list's Metadata). */
     meta?: string | undefined;
-    /** A subagent's chat, under the chat that started it. */
+    /** A subagent's chat, under the chat that started it; `last` ends the line joining them. */
     side?: boolean;
+    last?: boolean;
+    /** This chat's side chats, shown under it or folded away. */
+    fold?: { count: number; open: boolean; toggle: () => void } | undefined;
     /** The list's sections, for the touch screens' actions sheet. */
     sections?: { name: string; has: boolean; run: () => void }[];
   } = $props();
@@ -58,7 +63,14 @@
   }
 </script>
 
-<div class="chat-row" class:selected class:side aria-label={session.title}>
+<div
+  class="chat-row"
+  class:selected
+  class:side
+  class:last-side={last}
+  class:has-fold={!!fold}
+  aria-label={session.title}
+>
   <a
     class="chat-link"
     class:pinned={session.pinned}
@@ -97,6 +109,13 @@
         ><span class="sr-only">{ending === 'done' ? 'New reply' : 'The reply failed'}</span></i
       >{/if}
   </a>
+  {#if fold}<button
+      class="side-fold"
+      aria-expanded={fold.open}
+      aria-label={`${fold.open ? 'Fold' : 'Show'} ${fold.count} side ${fold.count === 1 ? 'chat' : 'chats'}`}
+      title={fold.open ? 'Fold side chats' : 'Show side chats'}
+      onclick={fold.toggle}>{fold.count}<ChevronRight size={13} /></button
+    >{/if}
   <div class="chat-actions">
     <button
       bind:this={pinButton}

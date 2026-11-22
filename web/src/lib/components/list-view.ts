@@ -15,12 +15,8 @@ export interface ListView {
   show: {
     /** The model and when, under each title. */
     metadata: boolean;
-    /** Chats only scheduled runs wrote in. */
-    scheduled: boolean;
     /** Subagents' chats, under the chat that started them. */
     side: boolean;
-    /** Projects without chats in the projects bar. */
-    empty: boolean;
   };
   sections: ListSection[];
 }
@@ -28,7 +24,7 @@ export interface ListView {
 export const DEFAULT_LIST_VIEW: ListView = {
   group: 'none',
   sort: 'updated',
-  show: { metadata: false, scheduled: true, side: false, empty: true },
+  show: { metadata: false, side: false },
   sections: [],
 };
 
@@ -72,9 +68,8 @@ export function arrange(
   view: ListView,
   options: { pinnedOrder?: string[]; modelLabel: (id: string) => string; now?: Date },
 ): ListBlock[] {
-  const listed = view.show.scheduled ? chats : chats.filter((chat) => !chat.scheduledOnly);
   const pinned = chatOrder(
-    listed.filter((chat) => chat.pinned),
+    chats.filter((chat) => chat.pinned),
     options.pinnedOrder,
   );
   const inSection = new Set(view.sections.flatMap((section) => section.chats));
@@ -83,12 +78,12 @@ export function arrange(
     label: section.name,
     section,
     chats: sorted(
-      listed.filter((chat) => !chat.pinned && section.chats.includes(chat.id)),
+      chats.filter((chat) => !chat.pinned && section.chats.includes(chat.id)),
       view.sort,
     ),
   }));
   const rest = sorted(
-    listed.filter((chat) => !chat.pinned && !inSection.has(chat.id)),
+    chats.filter((chat) => !chat.pinned && !inSection.has(chat.id)),
     view.sort,
   );
   const groups: ListBlock[] = [];
