@@ -4,6 +4,7 @@ const KEY = 'crewstead-effort';
 export type EffortChoice = Effort | 'auto';
 export const efforts: Array<{ value: EffortChoice; label: string }> = [
   { value: 'auto', label: 'Auto' },
+  { value: 'off', label: 'Off' },
   { value: 'low', label: 'Low' },
   { value: 'medium', label: 'Medium' },
   { value: 'high', label: 'High' },
