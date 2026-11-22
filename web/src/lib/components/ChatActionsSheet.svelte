@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Archive, FolderInput, Pin, PinOff } from '@lucide/svelte';
+  import { Archive, FolderInput, ListPlus, ListX, Pin, PinOff } from '@lucide/svelte';
   import '@crewstead/ui/action-sheet.css';
   let {
     title,
@@ -7,6 +7,7 @@
     pin,
     move,
     archive,
+    sections = [],
     close,
   }: {
     title: string;
@@ -14,6 +15,8 @@
     pin: () => void;
     move: () => void;
     archive: () => void;
+    /** The list's sections: the chat goes into one, or out of the one it is in. */
+    sections?: { name: string; has: boolean; run: () => void }[];
     close: () => void;
   } = $props();
   let dialog: HTMLDialogElement;
@@ -42,6 +45,11 @@
     >
     <button onclick={choose(move)}><FolderInput size={18} />Move</button>
     <button onclick={choose(archive)}><Archive size={18} />Archive</button>
+    {#each sections as section (section.name)}<button onclick={choose(section.run)}
+        >{#if section.has}<ListX size={18} />Out of “{section.name}”{:else}<ListPlus
+            size={18}
+          />Into “{section.name}”{/if}</button
+      >{/each}
   </div>
   <button class="action-sheet-cancel" onclick={() => dialog.close()}>Cancel</button>
 </dialog>

@@ -13,6 +13,9 @@
     close,
     drag,
     reorder,
+    meta,
+    side = false,
+    sections,
   }: {
     session: Omit<Session, 'items'>;
     selected: boolean;
@@ -21,6 +24,12 @@
     drag?: (dragging: boolean) => void;
     /** A pinned chat: another dragged over it takes its place; Alt with the arrows moves it. */
     reorder?: { over: () => void; key: (event: KeyboardEvent) => void };
+    /** A line under the title: its model and when (the list's Metadata). */
+    meta?: string | undefined;
+    /** A subagent's chat, under the chat that started it. */
+    side?: boolean;
+    /** The list's sections, for the touch screens' actions sheet. */
+    sections?: { name: string; has: boolean; run: () => void }[];
   } = $props();
   let moving = $state(false);
   /** On touch screens the actions live behind one button, so titles keep the row's width. */
@@ -49,7 +58,7 @@
   }
 </script>
 
-<div class="chat-row" class:selected aria-label={session.title}>
+<div class="chat-row" class:selected class:side aria-label={session.title}>
   <a
     class="chat-link"
     class:pinned={session.pinned}
@@ -71,7 +80,9 @@
     }}
     ondragend={() => drag?.(false)}
   >
-    <span>{session.title}</span>
+    <span
+      >{session.title}{#if meta}<small class="chat-meta">{meta}</small>{/if}</span
+    >
     {#if session.pinned}<Pin size={12} class="pin-marker" aria-label="Pinned" />{/if}
     {#if session.status === 'running'}<i class="chat-state working" title="Working"
         ><span class="sr-only">Working</span></i
@@ -123,6 +134,7 @@
     pin={() => void update({ pinned: !session.pinned })}
     move={() => (moving = true)}
     archive={() => void update({ archived: true })}
+    {sections}
     close={() => (menu = false)}
   />{/if}
 {#if error}<p class="chat-error" role="alert">{error}</p>{/if}

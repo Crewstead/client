@@ -119,3 +119,32 @@ export function chatOrder(chats: Chat[], pinnedOrder: string[] = []): Chat[] {
       written(b).localeCompare(written(a)),
   );
 }
+
+/** A project's tile in the projects bar: up to two letters of its name ("agent-hub" → "AH"). */
+export function initials(name: string) {
+  const words = name
+    .split(/[^\p{L}\p{N}]+|(?<=\p{Ll})(?=\p{Lu})/u)
+    .filter(Boolean)
+    .map((word) => [...word]);
+  const letters = words.length > 1 ? [words[0]![0], words[1]![0]] : (words[0] ?? ['?']).slice(0, 2);
+  return letters.join('').toUpperCase();
+}
+
+/** One of the six chart colours, the same for a name every time. */
+export function hueOf(name: string) {
+  let hash = 0;
+  for (const char of name) hash = (hash * 31 + char.codePointAt(0)!) >>> 0;
+  return (hash % 6) + 1;
+}
+
+/** The most pressing state among a place's chats, as the chat rows show it. */
+export function placeState(place: Place, unseen: ReadonlyMap<string, 'done' | 'failed'>) {
+  if (place.chats.some((chat) => chat.status === 'awaiting_approval'))
+    return { kind: 'waiting', text: 'A chat waits for you' };
+  if (place.chats.some((chat) => chat.status === 'running'))
+    return { kind: 'working', text: 'A chat is working' };
+  const endings = place.chats.map((chat) => unseen.get(chat.id));
+  if (endings.includes('failed')) return { kind: 'failed', text: 'A reply failed' };
+  if (endings.includes('done')) return { kind: 'done', text: 'New replies' };
+  return undefined;
+}

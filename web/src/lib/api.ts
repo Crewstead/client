@@ -1,4 +1,5 @@
 import { accountHeaders, apiUrl, csrfHeaders, transportRevision } from './auth/connection.ts';
+import type { ListView } from './components/list-view.ts';
 import type {
   ApprovalMode,
   ChatBranch,
@@ -29,6 +30,8 @@ export interface Catalog {
     pinnedOrder?: string[];
     /** The model chosen last in this workspace, which a new chat starts with. */
     lastModelId?: string;
+    /** How the left panel lists chats; the defaults until the owner changes them. */
+    listView?: ListView;
   };
 }
 
@@ -70,7 +73,11 @@ export async function request<T>(path: string, options?: RequestInit): Promise<T
 }
 
 /** A chat as the list has it: no messages, and when its last one was written. */
-export type ChatSummary = Omit<Session, 'items'> & { lastMessageAt?: string };
+export type ChatSummary = Omit<Session, 'items'> & {
+  lastMessageAt?: string;
+  /** Only scheduled runs wrote in it. */
+  scheduledOnly?: boolean;
+};
 
 export const scoped = (path: string, context: ContextId) => `${path}?context=${context}`;
 export const getSession = (id: string, context: ContextId) =>

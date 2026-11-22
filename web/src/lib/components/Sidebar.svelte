@@ -2,20 +2,30 @@
   import ResizeHandle from './ResizeHandle.svelte';
   import { sidebarWidth } from '#lib/panel-widths.svelte.ts';
   import { resolve } from '$app/paths';
-  import { ChevronLeft, Laptop, LoaderCircle, MonitorPlay, Plus, Search } from '@lucide/svelte';
+  import { LoaderCircle, MonitorPlay, Plus, Search } from '@lucide/svelte';
   import { page } from '$app/state';
   import { busy, useWorkspace } from '#lib/workspace.svelte.ts';
   import { notifier } from '#lib/notifications.svelte.ts';
   import ChatRow from './ChatRow.svelte';
-  import PlaceRow from './PlaceRow.svelte';
-  import AddProject from './AddProject.svelte';
-  import { CLOUD, chatOrder, groupsOf, placesOf, rearranged } from './sidebar-places.ts';
+  import ProjectRail from './ProjectRail.svelte';
+  import ListMenu from './ListMenu.svelte';
+  import ChatBlocks from './ChatBlocks.svelte';
+  import type { ChatSummary } from '#lib/api.ts';
+  import { ago } from './plan-usage.ts';
+  import {
+    DEFAULT_LIST_VIEW,
+    arrange,
+    moveToSection,
+    type ListSection,
+    type ListView,
+  } from './list-view.ts';
+  import { CLOUD, chatOrder, placesOf, rearranged } from './sidebar-places.ts';
   import { PlaceReorder } from './place-reorder.svelte.ts';
-  import { flip } from 'svelte/animate';
   import AccountMenu from './AccountMenu.svelte';
   import UpdateBar from '#lib/desktop/UpdateBar.svelte';
   import WorkspaceMenu from './WorkspaceMenu.svelte';
   import { activeModules } from '#lib/modules/registry.ts';
+  import '@crewstead/ui/sidebar-places.css';
   let {
     open = false,
     close,
@@ -49,13 +59,9 @@
   });
   /** With only the cloud there is nothing to choose between: its chats are the list. */
   const cloudOnly = $derived(workspace.ready && places.length === 1);
-  // The place whose chats show: the one chosen in the panel, else the open chat's (or the new chat's).
-  let chosen = $state<string | null>();
-  $effect(() => {
-    void page.url.href;
-    chosen = undefined;
-    search = '';
-  });
+  // The place whose chats show: the one picked in the projects bar, which follows the open chat (or
+  // the new chat's place) and stays on other pages; the cloud at first.
+  let chosen = $state(CLOUD);
   const following = $derived.by(() => {
     // Archived ones too: archiving the open chat keeps its place's chats showing.
     const chat = workspace.sessions.find((session) => session.id === page.params.id);
@@ -63,9 +69,18 @@
     if (page.url.pathname === '/new') return page.url.searchParams.get('project') ?? undefined;
     return undefined;
   });
-  const shownId = $derived(cloudOnly ? CLOUD : chosen !== undefined ? chosen : following);
-  const shown = $derived(places.find((place) => place.id === shownId));
-  function choose(id: string | null) {
+  $effect(() => {
+    void page.url.href;
+    search = '';
+    const place = following;
+    if (place !== undefined) chosen = place;
+  });
+  // A place that went away (its last chat archived, its computer removed) gives way to the cloud.
+  const shown = $derived(
+    places.find((place) => place.id === (cloudOnly ? CLOUD : chosen)) ??
+      places.find((place) => place.id === CLOUD),
+  );
+  function choose(id: string) {
     chosen = id;
     search = '';
   }
@@ -77,14 +92,61 @@
   // shown while dragging.
   let pinLive = $state<string[] | null>(null);
   const pinnedIds = $derived(matching.filter((chat) => chat.pinned).map((chat) => chat.id));
-  const chats = $derived(
-    pinLive
-      ? [
-          ...pinLive.flatMap((id) => matching.filter((chat) => chat.id === id)),
-          ...matching.filter((chat) => !chat.pinned),
-        ]
-      : matching,
+  // How the list shows its chats (its options menu): pinned, sections, then groups.
+  const view = $derived(workspace.catalog?.preferences.listView ?? DEFAULT_LIST_VIEW);
+  const modelLabel = (id: string) =>
+    workspace.catalog?.models.find((model) => model.id === id)?.label ?? 'Other models';
+  const blocks = $derived.by(() => {
+    const arranged = arrange(matching, view, {
+      pinnedOrder: workspace.catalog?.preferences.pinnedOrder,
+      modelLabel,
+    });
+    const live = pinLive;
+    if (!live) return arranged;
+    return arranged.map((block) =>
+      block.key === 'pinned'
+        ? { ...block, chats: live.flatMap((id) => block.chats.filter((chat) => chat.id === id)) }
+        : block,
+    );
+  });
+  const empty = $derived(blocks.every((block) => !block.chats.length) && !view.sections.length);
+  const sideOf = (id: string) =>
+    view.show.side ? workspace.sideChats.filter((chat) => chat.parent?.id === id) : [];
+  const meta = (chat: ChatSummary) =>
+    view.show.metadata
+      ? `${modelLabel(chat.modelId)} · ${ago(chat.lastMessageAt ?? chat.createdAt)}`
+      : undefined;
+  // The projects bar leaves out projects without chats when asked, but never the one shown.
+  const tiles = $derived(
+    view.show.empty
+      ? places
+      : places.filter(
+          (place) => place.chats.length || place.kind === 'cloud' || place.id === shown?.id,
+        ),
   );
+  let naming = $state(false);
+  function saveView(next: ListView) {
+    void workspace.setListView(next).catch(() => {
+      moveError = 'The list options could not be saved.';
+    });
+  }
+  function nameSection(text: string | null) {
+    naming = false;
+    if (text)
+      saveView({
+        ...view,
+        sections: [...view.sections, { id: crypto.randomUUID(), name: text, chats: [] }],
+      });
+  }
+  const renameSection = (section: ListSection, name: string) =>
+    saveView({
+      ...view,
+      sections: view.sections.map((entry) =>
+        entry.id === section.id ? { ...entry, name } : entry,
+      ),
+    });
+  const removeSection = (section: ListSection) =>
+    saveView({ ...view, sections: view.sections.filter((entry) => entry.id !== section.id) });
   /** Saves `local` (pinned chats shown here) into the workspace's order of every pinned chat. */
   function savePinned(local: string[], id: string) {
     const all = chatOrder(
@@ -118,20 +180,7 @@
     order.splice(at + step, 0, id);
     savePinned(order, id);
   }
-  const listed = $derived.by(() => {
-    const matching = places.filter((place) =>
-      `${place.name} ${place.machine ?? ''}`.toLowerCase().includes(words),
-    );
-    const live = reorder.live;
-    if (!live) return matching;
-    const order = rearranged(
-      matching.map((place) => place.id),
-      live,
-    );
-    return order.flatMap((id) => matching.filter((place) => place.id === id));
-  });
-  const groups = $derived(groupsOf(listed));
-  // While a chat is dragged, the other places show above the chats, as places to drop it.
+  // A chat dragged onto a tile in the projects bar moves there.
   let dragging = $state<{ id: string; from: string }>();
   let over = $state('');
   let moveError = $state('');
@@ -190,148 +239,117 @@
   };
 </script>
 
+{#snippet chatRow(session: ChatSummary, side: boolean)}
+  <ChatRow
+    {session}
+    {side}
+    selected={page.params.id === session.id}
+    {close}
+    meta={meta(session)}
+    sections={view.sections.map((section) => {
+      const has = section.chats.includes(session.id);
+      return {
+        name: section.name,
+        has,
+        run: () => saveView(moveToSection(view, session.id, has ? undefined : section.id)),
+      };
+    })}
+    {...side ? {} : { drag: dragOf(session) }}
+    {...session.pinned && !side
+      ? {
+          reorder: {
+            over: () => pinOver(session.id),
+            key: (event: KeyboardEvent) => pinKey(event, session.id),
+          },
+        }
+      : {}}
+  />
+{/snippet}
+
 {#if open}<button class="nav-scrim" aria-label="Close navigation" onclick={close}></button>{/if}
-<aside class="sidebar" class:open id="navigation">
+<aside class="sidebar" class:open class:has-rail={!cloudOnly && workspace.ready} id="navigation">
   <ResizeHandle panel={sidebarWidth} edge="right" label="Resize the sidebar" />
-  <WorkspaceMenu {close} />
-  <button class="sidebar-link sidebar-search-button" onclick={openSearch}
-    ><Search size={15} />Search<kbd aria-hidden="true">{shortcut}</kbd></button
-  >
-  <a
-    class="sidebar-link"
-    class:active={page.url.pathname.startsWith('/browsers')}
-    href={resolve('/browsers')}
-    onclick={close}><MonitorPlay size={15} />Live browsers</a
-  >
-  {#each links as link (link.href)}
-    {@const Icon = link.icon}
+  {#if !cloudOnly && workspace.ready}<ProjectRail
+      places={tiles}
+      chosen={shown?.id ?? CLOUD}
+      {choose}
+      {over}
+      drop={dropZone}
+      {reorder}
+      added={choose}
+      problem={(text) => (moveError = text)}
+      {close}
+    />{/if}
+  <div class="sidebar-main">
+    <WorkspaceMenu {close} />
+    <button class="sidebar-link sidebar-search-button" onclick={openSearch}
+      ><Search size={15} />Search<kbd aria-hidden="true">{shortcut}</kbd></button
+    >
     <a
       class="sidebar-link"
-      class:active={`${page.url.pathname}${page.url.search}` === link.href}
-      href={resolve(link.href as '/')}
-      onclick={close}><Icon size={15} />{link.label}</a
+      class:active={page.url.pathname.startsWith('/browsers')}
+      href={resolve('/browsers')}
+      onclick={close}><MonitorPlay size={15} />Live browsers</a
     >
-  {/each}
-  {#if shown && !cloudOnly}
-    <div class="sessions-heading place-heading-open">
-      <button
-        class="place-back"
-        aria-label="All projects"
-        title="All projects"
-        onclick={() => choose(null)}><ChevronLeft size={16} /></button
+    {#each links as link (link.href)}
+      {@const Icon = link.icon}
+      <a
+        class="sidebar-link"
+        class:active={`${page.url.pathname}${page.url.search}` === link.href}
+        href={resolve(link.href as '/')}
+        onclick={close}><Icon size={15} />{link.label}</a
       >
-      <h2 title={shown.machine ? `${shown.name} on ${shown.machine}` : shown.name}>
-        {shown.name}{#if shown.machine}<small>{shown.machine}</small>{/if}
+    {/each}
+    <div class="sessions-heading place-heading-open">
+      <h2 title={shown?.machine ? `${shown.name} on ${shown.machine}` : shown?.name}>
+        {cloudOnly ? 'Chats' : (shown?.name ?? 'Cloud')}{#if shown?.machine && !cloudOnly}<small
+            >{shown.machine}</small
+          >{/if}
       </h2>
+      <ListMenu {view} change={saveView} addSection={() => (naming = true)} />
       <!-- eslint-disable svelte/no-navigation-without-resolve -- built with resolve() -->
       <a
         class="new-session"
-        href={`${resolve('/new')}?project=${encodeURIComponent(shown.id)}`}
+        href={!shown || shown.id === CLOUD
+          ? resolve('/new')
+          : `${resolve('/new')}?project=${encodeURIComponent(shown.id)}`}
         onclick={close}
-        aria-label={`New chat in ${shown.name}`}
-        title={`New chat in ${shown.name}`}><Plus size={16} /></a
+        aria-label={!shown || cloudOnly ? 'New chat' : `New chat in ${shown.name}`}
+        title={!shown || cloudOnly ? 'New chat' : `New chat in ${shown.name}`}><Plus size={16} /></a
       >
       <!-- eslint-enable svelte/no-navigation-without-resolve -->
     </div>
-  {:else}
-    <div class="sessions-heading">
-      <h2>{cloudOnly ? 'Chats' : 'Projects'}</h2>
-      {#if cloudOnly}<a
-          class="new-session"
-          href={resolve('/new')}
-          onclick={close}
-          aria-label="New chat"
-          title="New chat"><Plus size={16} /></a
-        >{:else}<AddProject
-          added={(id) => choose(id)}
-          problem={(text) => (moveError = text)}
-          {close}
-        />{/if}
-    </div>
-  {/if}
-  {#if (shown ? shown.chats.length : places.length) > 8}<div class="sidebar-search">
-      <Search size={14} /><input
-        aria-label={shown ? 'Search chats' : 'Search projects'}
-        placeholder={shown ? `Search chats in ${shown.name}` : 'Search projects'}
-        bind:value={search}
-      />
-    </div>{/if}
-  <nav class="session-list" class:dragging aria-label="Chats">
-    {#if moveError}<p class="chat-error" role="alert">{moveError}</p>{/if}
-    {#if !workspace.ready}<p class="place-empty" role="status" aria-label="Loading chats">
-        <LoaderCircle size={16} class="place-spin" />
-      </p>
-    {:else if shown}
-      {#if dragging && !cloudOnly}
-        <section class="drop-places" aria-label="Move to">
-          <p>Move to</p>
-          {#each places.filter((place) => place.id !== shown.id) as place (place.id)}
-            <PlaceRow {place} open={() => {}} over={over === place.id} drop={dropZone(place.id)} />
-          {/each}
-        </section>
-      {/if}
-      {#each chats as session (session.id)}
-        <ChatRow
-          {session}
-          selected={page.params.id === session.id}
-          {close}
-          drag={dragOf(session)}
-          {...session.pinned
-            ? {
-                reorder: {
-                  over: () => pinOver(session.id),
-                  key: (event: KeyboardEvent) => pinKey(event, session.id),
-                },
-              }
-            : {}}
+    {#if (shown?.chats.length ?? 0) > 8}<div class="sidebar-search">
+        <Search size={14} /><input
+          aria-label="Search chats"
+          placeholder={`Search chats in ${shown?.name ?? 'Cloud'}`}
+          bind:value={search}
         />
+      </div>{/if}
+    <nav class="session-list" class:dragging aria-label="Chats">
+      {#if moveError}<p class="chat-error" role="alert">{moveError}</p>{/if}
+      {#if !workspace.ready}<p class="place-empty" role="status" aria-label="Loading chats">
+          <LoaderCircle size={16} class="place-spin" />
+        </p>
       {:else}
-        <p class="place-empty">{words ? 'No chats match.' : 'No chats here yet.'}</p>
-      {/each}
-    {:else}
-      <div class="place-list">
-        {#each groups as group (group.machine ?? CLOUD)}
-          {@const ids = group.places.map((place) => place.id)}
-          <section
-            class="place-group"
-            aria-label={group.machine ? `Projects on ${group.machine}` : 'Cloud'}
-          >
-            {#if group.machine}<h3 class="place-group-heading">
-                <Laptop size={12} aria-hidden="true" />{group.machine}
-              </h3>{/if}
-            {#each group.places as place (place.id)}
-              <div animate:flip={{ duration: 150 }}>
-                <PlaceRow
-                  {place}
-                  machineShown={false}
-                  open={() => choose(place.id)}
-                  over={over === place.id}
-                  drop={dropZone(place.id)}
-                  {...words || ids.length < 2
-                    ? {}
-                    : {
-                        reorder: {
-                          moving: reorder.moving === place.id,
-                          press: (event: PointerEvent) =>
-                            reorder.press(
-                              event,
-                              place.id,
-                              ids,
-                              (event.currentTarget as HTMLElement).closest('.place-group')!,
-                            ),
-                          key: (event: KeyboardEvent) => reorder.key(event, place.id, ids),
-                        },
-                      }}
-                />
-              </div>
-            {/each}
-          </section>
-        {/each}
-      </div>
-    {/if}
-  </nav>
-  <footer class="sidebar-footer">
-    <UpdateBar />
-    {#key open}<AccountMenu {close} />{/key}
-  </footer>
+        <ChatBlocks
+          {blocks}
+          row={chatRow}
+          {sideOf}
+          {naming}
+          name={nameSection}
+          rename={renameSection}
+          remove={removeSection}
+          toSection={(chat, section) => saveView(moveToSection(view, chat, section))}
+        />
+        {#if empty && !naming}<p class="place-empty">
+            {words ? 'No chats match.' : 'No chats here yet.'}
+          </p>{/if}
+      {/if}
+    </nav>
+    <footer class="sidebar-footer">
+      <UpdateBar />
+      {#key open}<AccountMenu {close} />{/key}
+    </footer>
+  </div>
 </aside>

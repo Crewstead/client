@@ -2,24 +2,35 @@
   --sidebar-inset: 10px;
   /* One height for every row in the panel: links, places and chats. */
   --sidebar-row-height: 34px;
+  /* The projects bar beside the list, when there are places to choose between (ProjectRail). */
+  --rail-width: 0px;
   /* Never so wide that the page beside it (and the details panel) leave the conversation under 440px. */
   --sidebar-width: clamp(
     200px,
     var(--sidebar-size, 256px),
-    calc(100vw - 440px - var(--panel-room, 0px))
+    calc(100vw - 440px - var(--panel-room, 0px) - var(--rail-width))
   );
-  width: var(--sidebar-width);
+  width: calc(var(--sidebar-width) + var(--rail-width));
   flex-shrink: 0;
   background: var(--sidebar);
   border-right: 1px solid var(--line-subtle);
   display: flex;
-  flex-direction: column;
-  padding: 12px;
   position: sticky;
   top: 0;
   /* Above the page beside it, so its resize handle's outer half still takes the pointer. */
   z-index: 3;
   height: 100dvh;
+}
+.sidebar.has-rail {
+  --rail-width: 56px;
+}
+/* The list beside the projects bar: links, the chosen place's chats, and the account. */
+.sidebar-main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  padding: 12px;
 }
 .brand {
   display: flex;
@@ -140,8 +151,8 @@
     display: none;
     position: fixed;
     z-index: 21;
-    /* Most of a phone's width, so chat titles have room. */
-    --sidebar-width: min(340px, 88vw);
+    /* Most of a phone's width, so chat titles have room beside the projects bar. */
+    --sidebar-width: calc(min(340px + var(--rail-width), 92vw) - var(--rail-width));
     left: 0;
   }
   .sidebar.open {

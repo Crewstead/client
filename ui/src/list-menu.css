@@ -1,0 +1,98 @@
+/*
+ * The chat list's options menu (as in Claude Code): Group by, Sort by and Show open their choices beside
+ * the menu; on a phone they open below their item instead, inside the panel.
+ */
+.list-menu {
+  position: relative;
+}
+.list-menu > .new-session {
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.list-menu > .new-session.active {
+  color: var(--text);
+}
+.list-menu-panel,
+.list-menu-sub {
+  z-index: 30;
+  display: grid;
+  min-width: 200px;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-raised);
+  box-shadow: 0 8px 24px #0003;
+}
+.list-menu-panel {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+}
+.list-menu-item {
+  position: relative;
+}
+.list-menu-sub {
+  position: absolute;
+  top: -6px;
+  left: calc(100% + 8px);
+  min-width: 170px;
+}
+.list-menu-panel button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 34px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: var(--text-sm);
+  text-align: left;
+  cursor: pointer;
+}
+.list-menu-panel button:hover:not(:disabled),
+.list-menu-panel button.current {
+  background: var(--surface-hover);
+}
+.list-menu-panel button:disabled {
+  color: var(--faint);
+  cursor: default;
+}
+.list-menu-panel button > svg {
+  flex: none;
+  margin-left: auto;
+  color: var(--muted);
+}
+.list-menu-value {
+  margin-left: auto;
+  color: var(--muted);
+}
+.list-menu-value:empty {
+  display: none;
+}
+.list-menu-value + svg {
+  margin-left: 0;
+}
+.list-menu-panel hr {
+  width: 100%;
+  margin: 4px 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+@media (max-width: 700px) {
+  .list-menu-panel {
+    right: -4px;
+    left: auto;
+  }
+  .list-menu-sub {
+    position: static;
+    margin: 2px 0 4px 12px;
+    padding: 0;
+    border: 0;
+    box-shadow: none;
+  }
+}

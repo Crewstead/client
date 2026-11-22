@@ -1,4 +1,7 @@
+/* One column as wide as the longest line, so a coloured line runs on when scrolled sideways. */
 .diff-view {
+  display: grid;
+  grid-template-columns: auto;
   margin: 0;
   max-height: 420px;
   overflow: auto;
@@ -9,7 +12,6 @@
   color: var(--text);
 }
 .diff-view > span {
-  display: block;
   padding: 0 14px;
   white-space: pre;
   min-height: 1.6em;

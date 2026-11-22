@@ -10,6 +10,7 @@
     added,
     problem,
     close,
+    tile = false,
   }: {
     /** A project was added and the hub lists it: open it. */
     added: (id: string) => void;
@@ -17,6 +18,8 @@
     problem: (text: string) => void;
     /** Closes the panel on a phone, when a link leaves it. */
     close: () => void;
+    /** Shown as a tile at the foot of the projects bar. */
+    tile?: boolean;
   } = $props();
   const workspace = useWorkspace();
   /** Inside the Crewstead app, which can pick a folder on this computer; absent in a browser. */
@@ -57,7 +60,7 @@
 </script>
 
 <button
-  class="new-session"
+  class={tile ? 'rail-tile plain' : 'new-session'}
   aria-label="Add project"
   title={desktop?.addProject ? 'Add project: pick a folder on this computer' : 'Add project'}
   disabled={adding}
@@ -78,7 +81,7 @@
     <h2 class="dialog-title" id="add-project-title">Add a project</h2>
     <p class="dialog-description">
       A project is a folder on one of your computers, so it is added there. Open the Crewstead app
-      on that computer and press <strong>+</strong> next to Projects to pick a folder.
+      on that computer and press <strong>+</strong> under the projects on the left to pick a folder.
     </p>
     <p class="muted-text">Or, in a terminal on that computer:</p>
     <pre><code>crewstead add &lt;folder&gt; [name]</code></pre>

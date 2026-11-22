@@ -1,0 +1,153 @@
+/*
+ * The projects bar at the left of the panel: the cloud, then each computer's projects as tiles, with a
+ * line between computers. A bar at the left edge marks the place shown beside it (tall) or one with new
+ * replies (short); a dot on a tile, a chat that works or waits for you.
+ */
+.project-rail {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: var(--rail-width);
+  padding: 12px 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+  border-right: 1px solid var(--line-subtle);
+}
+.rail-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+.rail-group + .rail-group::before {
+  content: '';
+  width: 24px;
+  height: 1px;
+  background: var(--line);
+}
+.rail-item {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+.rail-pill {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 4px;
+  height: 0;
+  border-radius: 0 4px 4px 0;
+  background: var(--text);
+  transform: translateY(-50%);
+  transition: height 0.15s;
+}
+.rail-item:hover .rail-pill {
+  height: 16px;
+}
+.rail-pill.new {
+  height: 8px;
+}
+.rail-item.chosen .rail-pill {
+  height: 32px;
+}
+.rail-tile {
+  --tile: var(--muted);
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 14px;
+  background: color-mix(in oklab, var(--tile) 22%, var(--sidebar));
+  color: color-mix(in oklab, var(--tile) 80%, var(--text));
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  transition:
+    border-radius 0.15s,
+    background 0.15s;
+}
+.rail-tile:hover,
+.rail-item.chosen .rail-tile {
+  border-radius: 11px;
+  background: color-mix(in oklab, var(--tile) 34%, var(--sidebar));
+}
+.rail-tile.plain {
+  background: var(--surface);
+  color: var(--muted);
+}
+.rail-tile.plain:hover,
+.rail-item.chosen .rail-tile.plain {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+.rail-tile[data-hue='1'] {
+  --tile: var(--chart-1);
+}
+.rail-tile[data-hue='2'] {
+  --tile: var(--chart-2);
+}
+.rail-tile[data-hue='3'] {
+  --tile: var(--chart-3);
+}
+.rail-tile[data-hue='4'] {
+  --tile: var(--chart-4);
+}
+.rail-tile[data-hue='5'] {
+  --tile: var(--chart-5);
+}
+.rail-tile[data-hue='6'] {
+  --tile: var(--chart-6);
+}
+/* Its computer is not connected: its chats still open, to read. */
+.rail-tile.offline {
+  opacity: 0.45;
+}
+.rail-tile .chat-state {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  width: 11px;
+  height: 11px;
+  margin: 0;
+  border: 2px solid var(--sidebar);
+  box-sizing: border-box;
+}
+.rail-tile .chat-state.waiting {
+  background: var(--amber);
+  box-shadow: none;
+}
+.rail-tile.drop-over {
+  box-shadow: inset 0 0 0 2px #8fb6ff;
+}
+.rail-item.moving .rail-tile {
+  box-shadow: 0 4px 14px #0006;
+  cursor: grabbing;
+}
+.rail-add {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: auto;
+  padding-top: 8px;
+}
+.rail-add .rail-tile {
+  border: 1px dashed var(--line);
+  background: none;
+}
+@media (pointer: coarse) {
+  .rail-tile {
+    width: 44px;
+    height: 44px;
+  }
+}

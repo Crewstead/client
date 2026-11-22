@@ -2,6 +2,7 @@ import { getContext } from 'svelte';
 import type { ApprovalMode, ContextId, Session } from '@crewstead/core/protocol';
 import { SvelteMap } from 'svelte/reactivity';
 import { request, scoped, type Catalog, type ChatSummary } from './api';
+import type { ListView } from './components/list-view.ts';
 import { newReply, notifier } from './notifications.svelte.ts';
 
 /** A chat whose reply is still going (working, or waiting for the owner). */
@@ -14,6 +15,8 @@ export class Workspace {
   context = $state<ContextId>('personal');
   catalog = $state<Catalog | null>(null);
   sessions = $state<ChatSummary[]>([]);
+  /** Subagents' chats, which the left panel lists under their chat when it shows side chats. */
+  sideChats = $state<ChatSummary[]>([]);
   /** Chats whose reply finished (or failed) while the owner was in another chat. */
   unseen = new SvelteMap<string, 'done' | 'failed'>();
   /** The chat open now; its own endings are seen as they happen. */
@@ -51,6 +54,24 @@ export class Workspace {
       body: JSON.stringify({ placeOrder: ids, context: this.context }),
     });
     if (this.catalog) this.catalog.preferences = result;
+  }
+
+  /** How the left panel lists chats (its options menu); shown at once, saved for every device. */
+  async setListView(view: ListView) {
+    if (this.catalog) this.catalog.preferences = { ...this.catalog.preferences, listView: view };
+    const result = await request<Catalog['preferences']>('/preferences', {
+      method: 'PATCH',
+      body: JSON.stringify({ listView: view, context: this.context }),
+    });
+    if (this.catalog) this.catalog.preferences = result;
+  }
+
+  /** Chats go to the list, subagents' chats beside it. */
+  private listChats(all: ChatSummary[]) {
+    const chats = all.filter((chat) => !chat.parent);
+    this.noteEndings(chats);
+    this.sessions = chats;
+    this.sideChats = all.filter((chat) => chat.parent);
   }
 
   /** The order of this workspace's pinned chats; shown at once, saved for every device. */
@@ -119,12 +140,11 @@ export class Workspace {
   async refreshChats() {
     if (this.disposed) return;
     const context = this.context;
-    const sessions = await request<ChatSummary[]>(scoped('/sessions', context)).catch(
+    const all = await request<ChatSummary[]>(`${scoped('/sessions', context)}&side=1`).catch(
       () => undefined,
     );
-    if (!sessions || context !== this.context) return;
-    this.noteEndings(sessions);
-    this.sessions = sessions;
+    if (!all || context !== this.context) return;
+    this.listChats(all);
   }
 
   /** Replies that ended while their chat was not open: marked until it is opened, and notified. */
@@ -195,12 +215,11 @@ export class Workspace {
     try {
       const [catalog, sessions] = await Promise.all([
         request<Catalog>(scoped('/catalog', context)),
-        request<ChatSummary[]>(scoped('/sessions', context)),
+        request<ChatSummary[]>(`${scoped('/sessions', context)}&side=1`),
       ]);
       if (generation !== this.generation) return;
       this.catalog = catalog;
-      this.noteEndings(sessions);
-      this.sessions = sessions;
+      this.listChats(sessions);
       this.error = '';
       this.ready = true;
     } catch (error) {

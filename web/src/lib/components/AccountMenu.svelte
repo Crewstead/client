@@ -4,6 +4,7 @@
   import { ChartColumn, ChevronsUpDown, Settings2, LogOut, Check, Plus } from '@lucide/svelte';
   import { useAuthentication } from '#lib/auth/auth.svelte.ts';
   import SavedAccounts from '#lib/auth/SavedAccounts.svelte';
+  import SignOutDialog from './SignOutDialog.svelte';
   import '@crewstead/ui/account-menu.css';
   let { close }: { close: () => void } = $props();
   const auth = useAuthentication();
@@ -15,6 +16,8 @@
   const serverLabel = $derived(auth.server ? new URL(auth.server).host : '');
   let expanded = $state(false);
   let busy = $state(false);
+  /** Sign out was chosen: it asks first. */
+  let asking = $state(false);
   let error = $state('');
   async function signOut() {
     if (busy) return;
@@ -111,8 +114,18 @@
   <a class="account-menu-action" href={resolve('/settings')} onclick={settings}
     ><Settings2 size={16} />Settings</a
   >
-  <button class="account-menu-action" onclick={signOut} disabled={busy}
-    ><LogOut size={15} />{busy ? 'Signing out…' : 'Sign out'}</button
+  <button
+    class="account-menu-action"
+    onclick={() => {
+      menu?.hidePopover();
+      asking = true;
+    }}><LogOut size={15} />Sign out</button
   >
   {#if error}<p class="account-menu-error" role="alert">{error}</p>{/if}
 </div>
+{#if asking}<SignOutDialog
+    server={serverLabel}
+    {busy}
+    signOut={() => void signOut().then(() => (asking = false))}
+    close={() => (asking = false)}
+  />{/if}

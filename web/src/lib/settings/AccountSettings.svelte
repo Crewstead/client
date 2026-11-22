@@ -5,6 +5,7 @@
   import { resolve } from '$app/paths';
   import { useAuthentication } from '#lib/auth/auth.svelte.ts';
   import { sameAccount } from '#lib/auth/saved-accounts.ts';
+  import SignOutDialog from '#lib/components/SignOutDialog.svelte';
   import '@crewstead/ui/settings-cards.css';
   import '@crewstead/ui/account-settings.css';
   const auth = useAuthentication();
@@ -20,6 +21,8 @@
     }
   };
   let busy = $state(false);
+  /** Sign out was chosen: it asks first. */
+  let asking = $state(false);
   let error = $state('');
   async function signOut() {
     busy = true;
@@ -49,11 +52,15 @@
         <dd class="muted-text" title={auth.server}>{auth.server}</dd>
       </div>
     </dl>
-    <button class="button subtle small" onclick={signOut} disabled={busy}
-      >{busy ? 'Signing out…' : 'Sign out'}</button
-    >
+    <button class="button subtle small" onclick={() => (asking = true)}>Sign out</button>
   </div>
   {#if error}<p class="error-banner" role="alert">{error}</p>{/if}
+  {#if asking}<SignOutDialog
+      server={auth.server}
+      {busy}
+      signOut={() => void signOut().then(() => (asking = false))}
+      close={() => (asking = false)}
+    />{/if}
 </section>
 
 <section class="settings-section" aria-label="Other accounts">
