@@ -1,5 +1,14 @@
 <script lang="ts">
-  import { Archive, FolderInput, ListPlus, ListX, Pin, PinOff } from '@lucide/svelte';
+  import {
+    Archive,
+    ChevronDown,
+    ChevronRight,
+    FolderInput,
+    ListPlus,
+    ListX,
+    Pin,
+    PinOff,
+  } from '@lucide/svelte';
   import '@crewstead/ui/action-sheet.css';
   let {
     title,
@@ -8,6 +17,7 @@
     move,
     archive,
     sections = [],
+    fold,
     close,
   }: {
     title: string;
@@ -17,6 +27,8 @@
     archive: () => void;
     /** The list's sections: the chat goes into one, or out of the one it is in. */
     sections?: { name: string; has: boolean; run: () => void }[];
+    /** Its side chats, shown under it or folded away. */
+    fold?: { count: number; open: boolean; toggle: () => void } | undefined;
     close: () => void;
   } = $props();
   let dialog: HTMLDialogElement;
@@ -45,6 +57,11 @@
     >
     <button onclick={choose(move)}><FolderInput size={18} />Move</button>
     <button onclick={choose(archive)}><Archive size={18} />Archive</button>
+    {#if fold}<button onclick={choose(fold.toggle)}
+        >{#if fold.open}<ChevronDown size={18} />Hide side chats{:else}<ChevronRight
+            size={18}
+          />Show side chats{/if}</button
+      >{/if}
     {#each sections as section (section.name)}<button onclick={choose(section.run)}
         >{#if section.has}<ListX size={18} />Out of “{section.name}”{:else}<ListPlus
             size={18}

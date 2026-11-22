@@ -1,6 +1,14 @@
 <script lang="ts">
   import { resolve } from '$app/paths';
-  import { Pin, PinOff, Archive, FolderInput, Ellipsis, ChevronRight } from '@lucide/svelte';
+  import {
+    Pin,
+    PinOff,
+    Archive,
+    FolderInput,
+    Ellipsis,
+    ChevronDown,
+    ChevronRight,
+  } from '@lucide/svelte';
   import MoveChat from './MoveChat.svelte';
   import ChatActionsSheet from './ChatActionsSheet.svelte';
   import { tick } from 'svelte';
@@ -96,6 +104,11 @@
       >{session.title}{#if meta}<small class="chat-meta">{meta}</small>{/if}</span
     >
     {#if session.pinned}<Pin size={12} class="pin-marker" aria-label="Pinned" />{/if}
+    {#if fold && !fold.open}<ChevronRight
+        size={13}
+        class="fold-marker"
+        aria-label={`${fold.count} side chats hidden`}
+      />{/if}
     {#if session.status === 'running'}<i class="chat-state working" title="Working"
         ><span class="sr-only">Working</span></i
       >{:else if session.status === 'awaiting_approval'}<i
@@ -109,14 +122,14 @@
         ><span class="sr-only">{ending === 'done' ? 'New reply' : 'The reply failed'}</span></i
       >{/if}
   </a>
-  {#if fold}<button
-      class="side-fold"
-      aria-expanded={fold.open}
-      aria-label={`${fold.open ? 'Fold' : 'Show'} ${fold.count} side ${fold.count === 1 ? 'chat' : 'chats'}`}
-      title={fold.open ? 'Fold side chats' : 'Show side chats'}
-      onclick={fold.toggle}>{fold.count}<ChevronRight size={13} /></button
-    >{/if}
   <div class="chat-actions">
+    {#if fold}<button
+        aria-expanded={fold.open}
+        aria-label={fold.open ? 'Hide side chats' : `Show ${fold.count} side chats`}
+        title={fold.open ? 'Hide side chats' : 'Show side chats'}
+        onclick={fold.toggle}
+        >{#if fold.open}<ChevronDown size={14} />{:else}<ChevronRight size={14} />{/if}</button
+      >{/if}
     <button
       bind:this={pinButton}
       aria-label={session.pinned ? 'Unpin chat' : 'Pin chat'}
@@ -154,6 +167,7 @@
     move={() => (moving = true)}
     archive={() => void update({ archived: true })}
     {sections}
+    {fold}
     close={() => (menu = false)}
   />{/if}
 {#if error}<p class="chat-error" role="alert">{error}</p>{/if}

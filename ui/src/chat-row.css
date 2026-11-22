@@ -37,10 +37,14 @@
   text-overflow: ellipsis;
 }
 /*
- * A subagent's chat, under the chat that started it: its title lines up with that chat's, and a line in
- * the margin joins them, ending in a turn at the last one.
+ * A subagent's chat, under the chat that started it: a shorter, quieter row set in from that chat, with
+ * one straight line under the start of that chat's name running past its side chats.
  */
 .chat-row.side .chat-link {
+  min-height: 30px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: calc(var(--sidebar-inset) + 18px);
   color: var(--muted);
 }
 .chat-row.side::before {
@@ -48,53 +52,31 @@
   position: absolute;
   top: -2px;
   bottom: 0;
-  left: 3px;
+  left: calc(var(--sidebar-inset) + 5px);
   border-left: 1px solid var(--line);
 }
+.chat-row:not(.side) + .chat-row.side::before {
+  top: 3px;
+}
 .chat-row.side.last-side::before {
-  bottom: 50%;
-  width: 4px;
-  border-bottom: 1px solid var(--line);
-  border-bottom-left-radius: 4px;
+  bottom: 5px;
 }
-/* Folds a chat's side chats away, or shows them: their count and a turning arrow. */
-.side-fold {
-  position: absolute;
-  top: 50%;
-  right: 4px;
-  display: flex;
-  align-items: center;
-  gap: 1px;
-  height: 24px;
-  padding: 0 3px 0 6px;
-  border: 0;
-  border-radius: 5px;
-  background: none;
+/* Side chats folded away: a quiet arrow at the end of the row, like the pin; hovering shows the actions. */
+.fold-marker {
+  flex-shrink: 0;
+  margin-left: auto;
   color: var(--faint);
-  font: inherit;
-  font-size: var(--text-xs);
-  transform: translateY(-50%);
-  cursor: pointer;
 }
-.side-fold:hover {
-  background: #ffffff0b;
-  color: var(--text);
+.pin-marker + .fold-marker {
+  margin-left: 2px;
 }
-.side-fold svg {
-  transition: transform 0.15s;
-}
-.side-fold[aria-expanded='true'] svg {
-  transform: rotate(90deg);
-}
-.chat-row.has-fold .chat-link {
-  padding-right: 40px;
-}
-.chat-row.has-fold .chat-actions {
-  right: 38px;
+.chat-row:hover .fold-marker,
+.chat-row:focus-within .fold-marker {
+  display: none;
 }
 .chat-row.has-fold:hover .chat-link,
 .chat-row.has-fold:focus-within .chat-link {
-  padding-right: 132px;
+  padding-right: 124px;
 }
 .chat-row.selected .chat-link,
 .chat-row:hover .chat-link,
@@ -201,10 +183,6 @@
   }
   .chat-link {
     padding-right: 44px;
-  }
-  .chat-row.has-fold .chat-link,
-  .chat-row.has-fold:hover .chat-link {
-    padding-right: 80px;
   }
   .pin-marker {
     display: none;

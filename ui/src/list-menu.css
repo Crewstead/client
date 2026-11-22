@@ -6,12 +6,21 @@
   position: relative;
 }
 .list-menu > .new-session {
+  position: relative;
   border: 0;
   background: none;
   cursor: pointer;
 }
-.list-menu > .new-session.active {
-  color: var(--text);
+/* Options changed from the defaults: a dot on the icon, which keeps the colour of the + beside it. */
+.list-menu > .new-session.active::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #8fb6ff;
 }
 .list-menu-panel,
 .list-menu-sub {

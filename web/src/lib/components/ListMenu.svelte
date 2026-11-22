@@ -61,8 +61,8 @@
   <button
     class="new-session"
     class:active={!plain}
-    aria-label="List options"
-    title="List options"
+    aria-label={plain ? 'List options' : 'List options (changed)'}
+    title={plain ? 'List options' : 'List options (changed)'}
     aria-haspopup="menu"
     aria-expanded={open}
     onclick={() => (open ? close() : (open = true))}><ListFilter size={15} /></button
