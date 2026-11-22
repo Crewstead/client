@@ -1,5 +1,6 @@
 import { app, BrowserWindow, shell } from 'electron';
 import { join } from 'node:path';
+import { contextMenu } from './context-menu.ts';
 
 /**
  * The app's one window. It shows the app's own interface at the hub's address (local-interface.ts)
@@ -45,6 +46,7 @@ export function createWindow(icon: string) {
       event.preventDefault();
     });
   }
+  contextMenu(window);
   window.once('ready-to-show', () => {
     if (!process.argv.includes('--hidden')) window.show();
   });

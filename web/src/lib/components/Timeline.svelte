@@ -304,7 +304,7 @@
                     </details>
                   {/if}
                   {#if item.text}<div class="message-text markdown">
-                      <Markdown text={item.text} />
+                      <Markdown text={item.text} item={item.id} />
                     </div>{/if}
                 {:else if item.text}<div class="message-text">{item.text}</div>{/if}
                 {#if item.status === 'interrupted'}<small class="muted-text">Stopped</small

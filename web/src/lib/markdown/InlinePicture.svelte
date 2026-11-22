@@ -3,16 +3,17 @@
   import type { Attachment } from '@crewstead/core/protocol';
   import { attachmentUrl } from '#lib/attachments.ts';
   import ImageViewer from '#lib/components/attachments/ImageViewer.svelte';
-  import { usePictures } from './pictures.ts';
+  import { usePictureOwner, usePictures } from './pictures.ts';
   let { src, alt }: { src: string; alt: string } = $props();
   const pictures = usePictures();
+  const owner = usePictureOwner();
   // A web address is never loaded by itself (it would tell that site who reads the chat): a link.
   const web = $derived(/^https?:\/\//i.test(src));
   let viewing = $state<Attachment>();
   const found = $derived(
     !web && pictures
       ? pictures
-          .find(src)
+          .find(src, owner)
           .then(async (picture) => ({ picture, url: await attachmentUrl(picture.id) }))
       : undefined,
   );

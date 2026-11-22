@@ -3,9 +3,21 @@
   import CodeBlock from './CodeBlock.svelte';
   import Inline from './Inline.svelte';
   import Self from './Markdown.svelte';
+  import { providePictureOwner } from './pictures.ts';
   import '@crewstead/ui/markdown.css';
   /** Either Markdown text, or already parsed blocks (for nested lists and quotes). */
-  let { text, blocks: given }: { text?: string; blocks?: Block[] } = $props();
+  let {
+    text,
+    blocks: given,
+    item,
+  }: {
+    text?: string;
+    blocks?: Block[];
+    /** The reply this text is, for the pictures it shows. */
+    item?: string;
+  } = $props();
+  // svelte-ignore state_referenced_locally
+  if (item) providePictureOwner(item);
   const blocks = $derived(given ?? parseBlocks(text ?? ''));
 </script>
 
