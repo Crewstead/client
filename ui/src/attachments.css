@@ -191,6 +191,42 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* The picture's frame: it keeps the fitted size while the picture is zoomed and dragged inside it. */
+.image-viewer-frame {
+  overflow: hidden;
+  touch-action: none;
+  cursor: zoom-in;
+}
+.image-viewer-frame.zoomed {
+  cursor: grab;
+}
+.image-viewer-frame.zoomed:active {
+  cursor: grabbing;
+}
+.image-viewer img {
+  transform-origin: 0 0;
+  user-select: none;
+}
+.image-viewer img.sharp {
+  image-rendering: pixelated;
+}
+.image-viewer-zoom {
+  min-width: 48px;
+  height: 28px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.image-viewer-zoom:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
 .image-viewer img {
   display: block;
   max-width: calc(94vw - 2px);
