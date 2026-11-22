@@ -240,14 +240,43 @@ export class Conversation {
     });
   }
 
-  /** Sends a message once the running reply ends (at once when none runs). */
+  /** Queued messages go to the hub one after another, so two sent quickly both keep their place. */
+  private queueing: Promise<unknown> = Promise.resolve();
+
+  /**
+   * Sends a message once the running reply ends (at once when none runs). It shows as waiting at once;
+   * the hub's own list replaces it when that arrives, and a failed one is taken back out.
+   */
   queue(text: string, context: ContextId, options: SendChoices & { attachments?: string[] } = {}) {
+    const session = this.session;
+    if (!session || !this.connected) return Promise.resolve(false);
     const { attachments, ...choices } = options;
-    return this.post('queue', context, {
-      text,
-      ...(attachments?.length ? { attachments } : {}),
-      ...this.choices(choices),
+    const id = newId();
+    const generation = this.generation;
+    const files = attachments?.length ? { attachments } : {};
+    const body = JSON.stringify({ text, ...files, ...this.choices(choices), requestId: id });
+    // eslint-disable-next-line svelte/prefer-svelte-reactivity -- only read once, for a timestamp
+    const createdAt = new Date().toISOString();
+    session.queued = [...(session.queued ?? []), { id, text, ...files, createdAt }];
+    const drop = () => (session.queued = (session.queued ?? []).filter((entry) => entry.id !== id));
+    const sent = this.queueing.then(async () => {
+      try {
+        const result = await request<{ queued?: boolean }>(
+          scoped(`/sessions/${session.id}/queue`, context),
+          { method: 'POST', body },
+        );
+        // Nothing ran and nothing waited: the hub sent it as a message instead.
+        if (!result?.queued) drop();
+        return true;
+      } catch (error) {
+        drop();
+        if (generation === this.generation)
+          this.error = error instanceof Error ? error.message : 'Send failed';
+        return false;
+      }
     });
+    this.queueing = sent;
+    return sent;
   }
 
   /** Takes a waiting message out of the queue. */

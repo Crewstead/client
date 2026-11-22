@@ -190,9 +190,17 @@
     }
     if (!ready || (busy && !queue) || !connected || !enabled || paused || sending) return;
     const original = text;
-    // While a reply runs, the message waits for it to end.
-    const deliver = busy && queue ? queue : send;
-    if (await deliver(original.trim(), pending.ids)) {
+    // While a reply runs, the message waits for it to end: the box empties at once, as it shows waiting.
+    const waits = busy && !!queue;
+    const deliver = waits ? queue : send;
+    const files = [...pending.ids];
+    if (waits) {
+      text = '';
+      pending.clear();
+    }
+    const delivered = await deliver(original.trim(), files);
+    if (waits && !delivered && !text) text = original;
+    if (delivered) {
       if (text === original) text = '';
       pending.clear();
       // A new chat opens another page, so this composer may be gone: clear the saved draft directly.
