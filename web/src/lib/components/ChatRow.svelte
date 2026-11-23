@@ -9,7 +9,7 @@
     ChevronDown,
     ChevronRight,
   } from '@lucide/svelte';
-  import MoveChat from './MoveChat.svelte';
+  import PlaceDialog from './PlaceDialog.svelte';
   import ChatActionsSheet from './ChatActionsSheet.svelte';
   import { tick } from 'svelte';
   import type { Session } from '@crewstead/core/protocol';
@@ -171,4 +171,11 @@
     close={() => (menu = false)}
   />{/if}
 {#if error}<p class="chat-error" role="alert">{error}</p>{/if}
-{#if moving}<MoveChat {session} close={() => (moving = false)} />{/if}
+{#if moving}<PlaceDialog
+    label={`Move “${session.title}”`}
+    projects={workspace.catalog?.projects ?? []}
+    value={session.projectId ?? ''}
+    choose={(id) =>
+      id === (session.projectId ?? '') ? undefined : workspace.move(session.id, id || null)}
+    close={() => (moving = false)}
+  />{/if}

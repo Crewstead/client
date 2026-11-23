@@ -33,6 +33,10 @@
   margin: auto;
   padding: 56px 40px;
 }
+/* A page scrolls as a whole: keep the scrollbar's room, so content never shifts when it shows. */
+html:has(.page-container):not(:has(.chat-loading)) {
+  scrollbar-gutter: stable;
+}
 .page-container h1 {
   font-size: 24px;
   font-weight: 500;

@@ -32,16 +32,26 @@
   const date = (iso: string) =>
     new Date(iso).toLocaleDateString(undefined, { dateStyle: 'medium' });
   const time = (iso: string) => new Date(iso).toLocaleTimeString(undefined, { timeStyle: 'short' });
+  // The cost is read with the chat and again whenever a reply ends, not on opening: read then, it
+  // arrived after the dialog showed and added its column under the reader's eyes.
+  let costOf = '';
+  $effect(() => {
+    if (session.status === 'running' || session.status === 'awaiting_approval') return;
+    void session.updatedAt;
+    const asked = session.id;
+    if (costOf !== asked) cost = undefined;
+    costOf = asked;
+    request<NonNullable<typeof cost>>(scoped(`/sessions/${asked}/cost`, workspace.context))
+      .then((value) => {
+        if (costOf === asked) cost = value;
+      })
+      // Cost is optional: without the billing module the dialog simply leaves it out.
+      .catch(() => {});
+  });
   /** Opened from the context meter in the prompt box. */
-  export async function open() {
+  export function open() {
     dialog?.showModal();
     void loadAll?.();
-    cost = undefined;
-    try {
-      cost = await request(scoped(`/sessions/${session.id}/cost`, workspace.context));
-    } catch {
-      // Cost is optional: without the billing module the panel simply leaves it out.
-    }
   }
 </script>
 

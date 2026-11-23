@@ -1,0 +1,50 @@
+/* Stand-ins while a workspace loads, shaped like the tiles and chat rows they stand for. */
+.skeleton {
+  display: block;
+  background:
+    linear-gradient(
+        90deg,
+        transparent 0%,
+        color-mix(in oklab, var(--text) 7%, transparent) 50%,
+        transparent 100%
+      )
+      0 0 / 200% 100% no-repeat,
+    color-mix(in oklab, var(--text) 7%, var(--sidebar));
+  animation: skeleton-sweep 1.4s ease-in-out infinite;
+}
+.skeleton-tile {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+}
+.list-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 2px;
+}
+.skeleton-row {
+  /* As tall as a chat row's text, in a row of the usual height. */
+  height: 12px;
+  margin: calc((var(--sidebar-row-height) - 12px) / 2) var(--sidebar-inset);
+  max-width: calc(100% - 2 * var(--sidebar-inset));
+  border-radius: 6px;
+}
+@keyframes skeleton-sweep {
+  from {
+    background-position:
+      150% 0,
+      0 0;
+  }
+  to {
+    background-position:
+      -50% 0,
+      0 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}

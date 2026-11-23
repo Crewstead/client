@@ -1,7 +1,16 @@
 <script lang="ts">
   import { tick } from 'svelte';
   import { resolve } from '$app/paths';
-  import { ArrowDown, Bot, ChevronRight, Clock, Cloud, Folder, Sparkles } from '@lucide/svelte';
+  import {
+    ArrowDown,
+    Bot,
+    ChevronRight,
+    Clock,
+    Cloud,
+    Folder,
+    ListCollapse,
+    Sparkles,
+  } from '@lucide/svelte';
   import {
     QUESTION_TOOL,
     questionsOf,
@@ -252,9 +261,10 @@
           <!-- Everything above stays readable; the model continues from this summary. -->
           <details class="summary-divider">
             <summary
-              ><ChevronRight size={13} aria-hidden="true" /><span
-                >Earlier messages summarized to save context</span
-              ></summary
+              ><ChevronRight size={13} aria-hidden="true" /><ListCollapse
+                size={14}
+                aria-hidden="true"
+              /><span>Earlier messages summarized to save context</span></summary
             >
             <div class="summary-text markdown"><Markdown text={item.text} /></div>
           </details>

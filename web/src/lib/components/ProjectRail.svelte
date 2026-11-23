@@ -20,6 +20,7 @@
     places,
     chosen,
     choose,
+    aim,
     over,
     drop,
     reorder,
@@ -31,6 +32,8 @@
     /** The place whose chats show beside the bar. */
     chosen: string;
     choose: (id: string) => void;
+    /** The pointer rests on a place: its chat can start loading. */
+    aim?: (id: string) => void;
     /** The place a dragged chat is over. */
     over: string;
     /** Takes a chat dropped on a place. */
@@ -92,6 +95,7 @@
               ? `Whole computer · ${place.machine}`
               : `${place.name}${place.machine ? ` · ${place.machine}` : ''}${place.offline ? ' · offline' : ''}`}
             onclick={() => choose(place.id)}
+            onpointerenter={() => aim?.(place.id)}
             onpointerdown={movable
               ? (event) =>
                   reorder.press(

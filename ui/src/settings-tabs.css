@@ -99,7 +99,3 @@
     margin-top: 22px;
   }
 }
-/* The page scrolls as a whole: keep the scrollbar's room, so content never shifts when it shows. */
-html:has(.settings-page) {
-  scrollbar-gutter: stable;
-}

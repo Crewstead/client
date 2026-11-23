@@ -341,3 +341,14 @@
     white-space: nowrap;
   }
 }
+/* Voice input's place beside send: shown, not working yet. */
+.composer-mic {
+  width: 32px;
+  height: 32px;
+  color: var(--faint);
+  cursor: default;
+}
+.composer-mic:hover {
+  background: none;
+  color: var(--muted);
+}

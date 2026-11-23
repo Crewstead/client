@@ -114,3 +114,66 @@
   opacity: 0.55;
   cursor: default;
 }
+/* The approval menu: modes with their icons, and under Auto-review the reviewer's models. */
+.approval-options {
+  min-width: 210px;
+}
+.approval-options button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 34px;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: var(--text-sm);
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.approval-options button:hover,
+.approval-options button:focus-visible {
+  background: var(--surface-hover);
+  outline: none;
+}
+.approval-options button > svg {
+  flex-shrink: 0;
+  margin-left: 0;
+  color: var(--muted);
+}
+.approval-options button > .option-check,
+.approval-options button > .option-more {
+  margin-left: auto;
+  color: var(--text);
+}
+.approval-options button > small {
+  margin-left: auto;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: var(--text-xs);
+  text-overflow: ellipsis;
+}
+.approval-options button > small + .option-more {
+  margin-left: 0;
+  color: var(--muted);
+}
+.approval-options .option-back {
+  color: var(--muted);
+}
+.approval-options hr {
+  margin: 4px 2px;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+.approval-options .option-list {
+  max-height: 260px;
+  overflow-y: auto;
+}
+.picker-aside {
+  margin-left: 4px;
+  color: var(--muted);
+}

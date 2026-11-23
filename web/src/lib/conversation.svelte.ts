@@ -1,3 +1,4 @@
+import { untrack } from 'svelte';
 import { apiUrl, withAccount } from './auth/connection.ts';
 import type {
   ContextId,
@@ -11,10 +12,9 @@ import type {
 import { getEarlier, getLatest, request, scoped } from './api';
 import { addUsage } from '@crewstead/core/protocol';
 import { newId } from './ids.ts';
+import { LATEST, forgetChat, keepChat, keptChat } from './recent-chats.ts';
 
 const RETRY_MAX_MS = 30_000;
-/** Messages a chat opens with; earlier ones load as the reader scrolls up. */
-const LATEST = 200;
 
 /** The model, effort and project picked in the prompt box, sent when they change. */
 type SendChoices = { effort?: Effort; modelId?: string; projectId?: string };
@@ -38,8 +38,17 @@ export class Conversation {
     this.close();
     const generation = this.generation;
     this.error = '';
-    // The chat on screen stays until the next one has loaded, so switching does not blank the page;
-    // the page treats it as read-only meanwhile (its id is not the one in the address).
+    // A chat seen lately shows at once and catches up from where the page left it; any other
+    // replaces the one on screen with the loading circle at once, so a switch never waits.
+    const seen = keptChat(id, context);
+    this.session = seen?.session ?? null;
+    if (seen) {
+      this.earlier = seen.earlier;
+      this.cursor = seen.cursor;
+      this.context = context;
+      this.connect(id, context, generation, seen.cursor);
+      return;
+    }
     try {
       const snapshot = await getLatest(id, context, LATEST);
       if (generation !== this.generation) return;
@@ -86,8 +95,9 @@ export class Conversation {
     };
     source.addEventListener('deleted', () => {
       if (!current()) return;
-      this.close();
       this.session = null;
+      this.close();
+      forgetChat(id, context);
       this.error = 'This chat was deleted.';
     });
     source.addEventListener('snapshot', (event) => {
@@ -141,13 +151,15 @@ export class Conversation {
       } else if (update.event.type === 'session.model') this.session.modelId = update.event.modelId;
       else if (update.event.type === 'session.approvals')
         this.session.approvalMode = update.event.mode;
+      else if (update.event.type === 'session.reviewer')
+        this.session.reviewModelId = update.event.modelId;
       else if (update.event.type === 'session.context') {
         this.session.contextUsed = update.event.tokens;
         this.session.contextParts = update.event.parts;
       } else if (update.event.type === 'session.usage')
         this.session.usage = addUsage(
           this.session.usage,
-          this.session.modelId,
+          update.event.modelId ?? this.session.modelId,
           update.event.usage,
           update.event.purpose,
         );
@@ -360,6 +372,16 @@ export class Conversation {
   }
 
   close() {
+    // The chat as it is now, for going back to it. Untracked: a page opening chats from an effect
+    // must not rerun it on every change to the chat.
+    untrack(() => {
+      if (this.session && this.context && this.cursor)
+        keepChat(this.context, {
+          session: $state.snapshot(this.session),
+          earlier: this.earlier,
+          cursor: this.cursor,
+        });
+    });
     this.generation++;
     clearTimeout(this.retry);
     this.source?.close();

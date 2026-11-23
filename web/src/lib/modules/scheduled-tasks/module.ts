@@ -13,5 +13,4 @@ export const scheduledTasksClient: ClientModule = {
     },
   ],
   sidebarLinks: [{ label: 'Scheduled', href: '/settings?tab=scheduled', icon: CalendarClock }],
-  panels: [{ slot: 'chat-panel', order: 20, load: () => import('./PanelTasks.svelte') }],
 };

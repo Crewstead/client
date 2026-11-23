@@ -8,7 +8,7 @@
   let { close }: { close: () => void } = $props();
   const workspace = useWorkspace();
   const id = $props.id();
-  const contexts = $derived(workspace.catalog?.contexts ?? []);
+  const contexts = $derived(workspace.contexts);
   const current = $derived(workspace.current);
   const actions = $derived(
     activeModules(workspace.catalog?.modules).flatMap((module) => module.workspaceActions ?? []),
@@ -27,8 +27,10 @@
     menu?.hidePopover();
     close();
     if (context === workspace.context) return;
-    await workspace.changeContext(context);
+    // The page changes at once; the workspace's lists fill in as they load.
+    const changing = workspace.changeContext(context);
     await goto(resolve('/'));
+    await changing;
   }
 </script>
 
@@ -71,6 +73,7 @@
       class="workspace-option"
       aria-current={context.id === workspace.context ? 'true' : undefined}
       onclick={() => choose(context.id)}
+      onpointerenter={() => workspace.warm(context.id)}
     >
       <span class="workspace-mark small" aria-hidden="true"
         >{#if context.kind === 'personal'}<Layers size={12} />{:else}{initial(

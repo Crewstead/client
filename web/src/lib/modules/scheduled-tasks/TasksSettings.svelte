@@ -39,9 +39,7 @@
       />
     </div>
   {:else if list}
-    <EmptyState
-      text="No scheduled tasks yet. Add one from a chat’s side panel, or ask a chat to schedule something."
-    />
+    <EmptyState text="No scheduled tasks yet. Ask a chat to schedule something." />
   {:else}
     <div class="settings-card"><LoadingRows label="Loading scheduled tasks" /></div>
   {/if}

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { untrack } from 'svelte';
   import { closeOutside } from '#lib/close-outside.ts';
   import {
     Check,
@@ -20,12 +21,16 @@
     value,
     choose,
     close,
+    label = 'Where the chat works',
   }: {
     projects: Project[];
     /** The project id, or '' for the cloud. */
     value: string;
-    choose: (id: string) => void;
+    /** Takes the place; a promise that fails keeps the dialog open with its message. */
+    choose: (id: string) => unknown;
     close: () => void;
+    /** What the dialog is for, for screen readers; by default choosing where a chat works. */
+    label?: string;
   } = $props();
   let dialog: HTMLDialogElement;
   const workspace = useWorkspace();
@@ -56,7 +61,8 @@
     problem = 'Added. It will show here once the computer reports it.';
   }
   let query = $state('');
-  let active = $state(0);
+  /** The highlighted place, by id: the list is read again every few seconds, and that must not move it. */
+  let active = $state<string>();
   const words = $derived(query.trim().toLowerCase().split(/\s+/).filter(Boolean));
   const matches = (...texts: string[]) =>
     words.every((word) => texts.some((text) => text.toLowerCase().includes(word)));
@@ -77,26 +83,39 @@
     ...(showCloud ? [''] : []),
     ...computers.flatMap((computer) => computer.projects.map((project) => project.id)),
   ]);
-  // Starts on the current place, and keeps the highlight on something shown while typing.
+  // Starts on the current place; typing moves it to the first match. Only typing moves it: a
+  // refreshed list leaves it where the pointer or the arrow keys put it.
   $effect(() => {
-    const at = choices.indexOf(value);
-    active = query ? 0 : Math.max(at, 0);
+    const typed = query;
+    untrack(() => (active = typed ? choices[0] : value));
   });
-  function pick(id: string) {
-    choose(id);
-    dialog.close();
+  let picking = $state(false);
+  async function pick(id: string) {
+    if (picking) return;
+    picking = true;
+    problem = '';
+    try {
+      await choose(id);
+      dialog.close();
+    } catch (cause) {
+      problem = cause instanceof Error ? cause.message : 'That did not work.';
+    } finally {
+      picking = false;
+    }
   }
   function keys(event: KeyboardEvent) {
+    const at = active === undefined ? -1 : choices.indexOf(active);
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault();
       if (!choices.length) return;
-      active = (active + (event.key === 'ArrowDown' ? 1 : -1) + choices.length) % choices.length;
+      const step = event.key === 'ArrowDown' ? 1 : -1;
+      active = choices[(Math.max(at, step > 0 ? -1 : 0) + step + choices.length) % choices.length];
       queueMicrotask(() =>
         dialog.querySelector('.place-choice.active')?.scrollIntoView({ block: 'nearest' }),
       );
-    } else if (event.key === 'Enter' && choices[active] !== undefined) {
+    } else if (event.key === 'Enter' && at >= 0) {
       event.preventDefault();
-      pick(choices[active]!);
+      void pick(choices[at]!);
     }
   }
 </script>
@@ -105,12 +124,13 @@
   <button
     type="button"
     class="place-choice"
-    class:active={choices[active] === id}
+    class:active={active === id}
     role="option"
     aria-selected={value === id}
     title={detail}
+    disabled={picking}
     onclick={() => pick(id)}
-    onmouseenter={() => (active = choices.indexOf(id))}
+    onmouseenter={() => (active = id)}
   >
     {#if kind === 'cloud'}<Cloud size={15} />{:else if kind === 'computer'}<Monitor
         size={15}
@@ -124,7 +144,7 @@
 <dialog
   {@attach closeOutside}
   class="dialog-content place-dialog"
-  aria-label="Where the chat works"
+  aria-label={label}
   bind:this={dialog}
   {@attach (node) => node.showModal()}
   onclose={close}

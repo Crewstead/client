@@ -82,6 +82,15 @@
   // The project for the next message, likewise: '' is none, undefined keeps the chat's own.
   let pickedProject = $state<string>();
   const project = $derived(pickedProject ?? conversation.session?.projectId ?? '');
+  // A place picked here moves the chat at once (its notice waits for the next message); during a
+  // reply, or when the move fails, it goes with the next message instead.
+  async function pickPlace(id: string) {
+    const session = conversation.session;
+    if (!session || id === (session.projectId ?? '')) return (pickedProject = undefined);
+    pickedProject = id;
+    if (session.status === 'running' || session.status === 'awaiting_approval') return;
+    await workspace.move(session.id, id || null).catch(() => {});
+  }
   const projects = $derived(workspace.catalog?.projects ?? []);
   let stats = $state<ReturnType<typeof ChatStats>>();
   let composer = $state<ReturnType<typeof Composer>>();
@@ -139,7 +148,7 @@
     workspace.catalog?.contexts.find((context) => context.id === conversation.session?.contextId)
       ?.label ?? 'Workspace',
   );
-  // While the next chat loads, the one on screen stays (read-only): no blank page, no flash.
+  // The moment between a new address and its chat opening: the old chat is never shown under it.
   const switching = $derived(!!conversation.session && conversation.session.id !== page.params.id);
   // "Reconnecting…" only once an open chat's live connection has really been down a moment: never while
   // a chat loads (a long one takes a while) or on a switch.
@@ -147,11 +156,6 @@
     () => !conversation.connected && !switching && !!conversation.session,
     1_500,
   );
-  // Only the very first chat loads onto an empty page; a slow load gets a quiet spinner.
-  const slowLoad = delayed(() => !conversation.session, 600);
-  // A switch keeps the chat on screen (no blank flash), but one that takes a while shows the loading
-  // circle instead of a chat that looks frozen.
-  const slowSwitch = delayed(() => switching, 400);
   $effect(() => {
     void page.params.id;
     picked = '';
@@ -221,7 +225,7 @@
   }
 </script>
 
-{#if conversation.session && !slowSwitch.value}
+{#if conversation.session && !switching}
   {@const session = conversation.session}
   <div class="conversation-layout">
     <div class="conversation-main">
@@ -305,7 +309,7 @@
           paused={switching}
           enabled={!!model}
           {...usageOf(model)}
-          chat={{ id: session.id, mode: session.approvalMode }}
+          chat={{ id: session.id, mode: session.approvalMode, reviewer: session.reviewModelId }}
           editLast={() => {
             const last = session.items.findLast((item) => item.role === 'user');
             if (!last || session.status === 'running' || session.status === 'awaiting_approval')
@@ -362,7 +366,7 @@
           {#snippet place()}
             {#if projects.length || project}<PlacePicker
                 {projects}
-                bind:value={() => project, (id) => (pickedProject = id)}
+                bind:value={() => project, (id) => void pickPlace(id)}
                 disabled={conversation.sending}
               />{/if}
           {/snippet}
@@ -381,8 +385,7 @@
   </div>
 {:else}<div class="page-container">
     {#if conversation.error}<div class="error-banner" role="alert">{conversation.error}</div>
-      <a class="back-link" href={resolve('/')}>Back to chats</a
-      >{:else if slowLoad.value || slowSwitch.value}<p
+      <a class="back-link" href={resolve('/')}>Back to chats</a>{:else}<p
         class="chat-loading"
         role="status"
         aria-label="Loading chat"

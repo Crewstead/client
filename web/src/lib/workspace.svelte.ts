@@ -23,6 +23,15 @@ export class Workspace {
   private open = '';
   error = $state('');
   ready = $state(false);
+  /** The workspaces this user belongs to; kept while another one loads, so its name shows at once. */
+  contexts = $state<Catalog['contexts']>([]);
+  /** Each workspace as last read, for switching back to it at once (not shown, so not reactive). */
+  // eslint-disable-next-line svelte/prefer-svelte-reactivity -- read only on a switch
+  private kept = new Map<ContextId, { catalog: Catalog; sessions: ChatSummary[] }>();
+  // eslint-disable-next-line svelte/prefer-svelte-reactivity -- loads in flight, never shown
+  private warming = new Set<ContextId>();
+  /** The list on screen is this workspace's latest, so endings are noted against it. */
+  private settled = false;
   private generation = 0;
   private disposed = false;
   constructor(private scope: string) {}
@@ -66,10 +75,13 @@ export class Workspace {
     if (this.catalog) this.catalog.preferences = result;
   }
 
-  /** Chats go to the list, subagents' chats beside it. */
-  private listChats(all: ChatSummary[]) {
+  /**
+   * Chats go to the list, subagents' chats beside it. Endings are noted against the list on screen,
+   * not against one kept from an earlier visit to the workspace.
+   */
+  private listChats(all: ChatSummary[], note = true) {
     const chats = all.filter((chat) => !chat.parent);
-    this.noteEndings(chats);
+    if (note) this.noteEndings(chats);
     this.sessions = chats;
     this.sideChats = all.filter((chat) => chat.parent);
   }
@@ -86,7 +98,9 @@ export class Workspace {
 
   async setPreferences(
     id: string,
-    patch: Partial<Pick<Session, 'pinned' | 'archived' | 'title' | 'modelId' | 'approvalMode'>>,
+    patch: Partial<Pick<Session, 'pinned' | 'archived' | 'title' | 'modelId' | 'approvalMode'>> & {
+      reviewModelId?: string | null;
+    },
   ) {
     const context = this.context;
     const updated = await request<Session>(scoped(`/sessions/${id}`, context), {
@@ -208,18 +222,25 @@ export class Workspace {
       );
   }
 
+  private read = (context: ContextId) =>
+    Promise.all([
+      request<Catalog>(scoped('/catalog', context)),
+      request<ChatSummary[]>(`${scoped('/sessions', context)}&side=1`),
+    ]);
+
   async refresh() {
     if (this.disposed) return;
     const generation = ++this.generation;
     const context = this.context;
+    const note = this.settled;
     try {
-      const [catalog, sessions] = await Promise.all([
-        request<Catalog>(scoped('/catalog', context)),
-        request<ChatSummary[]>(`${scoped('/sessions', context)}&side=1`),
-      ]);
+      const [catalog, sessions] = await this.read(context);
       if (generation !== this.generation) return;
+      this.kept.set(context, { catalog, sessions });
       this.catalog = catalog;
-      this.listChats(sessions);
+      this.contexts = catalog.contexts;
+      this.listChats(sessions, note);
+      this.settled = true;
       this.error = '';
       this.ready = true;
     } catch (error) {
@@ -246,17 +267,33 @@ export class Workspace {
 
   /** The active workspace entry (Personal or an organisation, with the caller's role). */
   get current() {
-    return this.catalog?.contexts.find((context) => context.id === this.context);
+    return this.contexts.find((context) => context.id === this.context);
   }
 
+  /** A workspace seen before shows as it was at once, and is brought up to date behind it. */
   async changeContext(context: ContextId) {
     this.generation++;
     this.context = context;
+    const seen = this.kept.get(context);
+    this.catalog = seen?.catalog ?? null;
     this.sessions = [];
-    this.catalog = null;
-    this.ready = false;
+    this.listChats(seen?.sessions ?? [], false);
+    this.ready = !!seen;
+    this.settled = false;
     localStorage.setItem(CONTEXT_KEY, context);
     await this.refresh();
+  }
+
+  /** Reads a workspace about to be opened (a pointer on it in the menu), so it opens at once. */
+  warm(context: ContextId) {
+    if (context === this.context || this.kept.has(context) || this.warming.has(context)) return;
+    this.warming.add(context);
+    void this.read(context)
+      .then(([catalog, sessions]) => {
+        if (!this.kept.has(context)) this.kept.set(context, { catalog, sessions });
+      })
+      .catch(() => {})
+      .finally(() => this.warming.delete(context));
   }
 
   /** Restores the last workspace if the user still belongs to it; otherwise Personal. */

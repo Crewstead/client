@@ -3,12 +3,13 @@
   import { sidebarWidth } from '#lib/panel-widths.svelte.ts';
   import { resolve } from '$app/paths';
   import { goto } from '$app/navigation';
-  import { LoaderCircle, MonitorPlay, Plus, Search } from '@lucide/svelte';
+  import { MonitorPlay, Plus, Search } from '@lucide/svelte';
   import { page } from '$app/state';
   import { busy, useWorkspace } from '#lib/workspace.svelte.ts';
   import { notifier } from '#lib/notifications.svelte.ts';
   import ChatRow from './ChatRow.svelte';
   import ProjectRail from './ProjectRail.svelte';
+  import SidebarSkeleton from './SidebarSkeleton.svelte';
   import ListMenu from './ListMenu.svelte';
   import ChatBlocks from './ChatBlocks.svelte';
   import { SideFolds } from './side-folds.svelte.ts';
@@ -29,6 +30,7 @@
     rearranged,
     rememberChat,
   } from './sidebar-places.ts';
+  import { prefetchChat } from '#lib/recent-chats.ts';
   import { PlaceReorder } from './place-reorder.svelte.ts';
   import AccountMenu from './AccountMenu.svelte';
   import UpdateBar from '#lib/desktop/UpdateBar.svelte';
@@ -99,17 +101,18 @@
     const place = following;
     if (chat && place) rememberChat(workspace.context, place, chat);
   });
-  /** A tile opens its place's chat open last here, else its first chat, else a new chat there. */
-  function openPlace(id: string) {
-    choose(id);
-    const place = places.find((entry) => entry.id === id);
-    if (!place) return;
-    const chats = arrange(place.chats, view, {
+  /** The chat a tile opens: its place's chat open last here, else its first (none: a new chat). */
+  function placeChat(id: string) {
+    const chats = arrange(places.find((entry) => entry.id === id)?.chats ?? [], view, {
       pinnedOrder: workspace.catalog?.preferences.pinnedOrder,
       modelLabel,
     }).flatMap((block) => block.chats);
     const remembered = lastChat(workspace.context, id);
-    const target = chats.find((chat) => chat.id === remembered) ?? chats[0];
+    return chats.find((chat) => chat.id === remembered) ?? chats[0];
+  }
+  function openPlace(id: string) {
+    choose(id);
+    const target = placeChat(id);
     if (target) {
       if (target.id !== page.params.id) void goto(resolve('/sessions/[id]', { id: target.id }));
     } else {
@@ -305,19 +308,20 @@
 {/snippet}
 
 {#if open}<button class="nav-scrim" aria-label="Close navigation" onclick={close}></button>{/if}
-<aside class="sidebar" class:open class:has-rail={!cloudOnly && workspace.ready} id="navigation">
+<aside class="sidebar" class:open class:has-rail={!cloudOnly} id="navigation">
   <ResizeHandle panel={sidebarWidth} edge="right" label="Resize the sidebar" />
   {#if !cloudOnly && workspace.ready}<ProjectRail
       {places}
       chosen={shown?.id ?? CLOUD}
       choose={openPlace}
+      aim={(id) => prefetchChat(placeChat(id)?.id, workspace.context)}
       {over}
       drop={dropZone}
       {reorder}
       added={choose}
       problem={(text) => (moveError = text)}
       {close}
-    />{/if}
+    />{:else if !workspace.ready}<SidebarSkeleton part="rail" />{/if}
   <div class="sidebar-main">
     <WorkspaceMenu {close} />
     <button class="sidebar-link sidebar-search-button" onclick={openSearch}
@@ -366,9 +370,7 @@
       </div>{/if}
     <nav class="session-list" class:dragging aria-label="Chats">
       {#if moveError}<p class="chat-error" role="alert">{moveError}</p>{/if}
-      {#if !workspace.ready}<p class="place-empty" role="status" aria-label="Loading chats">
-          <LoaderCircle size={16} class="place-spin" />
-        </p>
+      {#if !workspace.ready}<SidebarSkeleton part="list" />
       {:else}
         <ChatBlocks
           {blocks}

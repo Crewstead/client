@@ -186,10 +186,12 @@
 .summary-divider {
   margin: 4px 0 28px;
 }
+/* Lined up with tool lines: the same chevron place and spacing. */
 .summary-divider > summary {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  padding: 4px 2px;
   color: var(--muted);
   font-size: 12px;
   list-style: none;
@@ -203,7 +205,7 @@
   flex: 1;
   border-top: 1px dashed var(--line);
 }
-.summary-divider[open] > summary svg {
+.summary-divider[open] > summary > svg:first-child {
   transform: rotate(90deg);
 }
 .summary-divider > summary:hover {

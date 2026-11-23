@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ArrowUp, ListEnd, Paperclip, Square } from '@lucide/svelte';
+  import { ArrowUp, ListEnd, Mic, Paperclip, Square } from '@lucide/svelte';
   import { onMount } from 'svelte';
   import type { Snippet } from 'svelte';
   import ApprovalPicker from './ApprovalPicker.svelte';
@@ -76,7 +76,7 @@
     /** Shown just above the box, e.g. the messages waiting to be sent. */
     above?: Snippet;
     /** The open chat and its approval mode; a new chat has none yet. */
-    chat?: { id: string; mode?: ApprovalMode | undefined };
+    chat?: { id: string; mode?: ApprovalMode | undefined; reviewer?: string | undefined };
   } = $props();
   /** Puts text in the box, e.g. a waiting message taken back to edit. */
   export function fill(value: string) {
@@ -330,6 +330,14 @@
           <ApprovalPicker {chat} failed={(message) => (failure = message)} />
         </div>
         <div class="composer-send">
+          <!-- Voice input has its place here; it does nothing yet. -->
+          <button
+            type="button"
+            class="icon-button composer-mic"
+            aria-label="Voice input (coming soon)"
+            title="Voice input (coming soon)"
+            aria-disabled="true"><Mic size={16} /></button
+          >
           {#if busy && queue && ready}<button
               class="send-button"
               type="submit"
