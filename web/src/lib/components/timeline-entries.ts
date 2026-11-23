@@ -39,9 +39,14 @@ const isRead = (item: TimelineItem) =>
   (kindOf(item.toolName) === 'read' || !!item.readOnly) &&
   !item.approvalId &&
   !item.attachments?.length;
-// A step that only called tools leaves an empty, finished reply; there is nothing to show for it.
+// A step that only called tools leaves an empty reply, and every step starts as one until its first
+// words: nothing to show (the Working line says it runs), only an empty gap.
 const isEmpty = (item: TimelineItem) =>
-  item.role === 'assistant' && item.status === 'completed' && !item.text && !item.reasoning;
+  item.role === 'assistant' &&
+  (item.status === 'completed' || item.status === 'streaming') &&
+  !item.text &&
+  !item.reasoning &&
+  !item.attachments?.length;
 
 function stats(diff: string) {
   const lines = diff.split('\n');

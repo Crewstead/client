@@ -39,6 +39,10 @@ for (const name of [
   app.commandLine.appendSwitch(name);
 // Being driven over DevTools sets navigator.webdriver, which sites read as a bot; same as fresh.ts.
 app.commandLine.appendSwitch('disable-blink-features', 'AutomationControlled');
+// On Linux (seen with NVIDIA under Wayland) repainting only the changed part of a tile left pieces of
+// old text on screen: a finished "Working" line under "Worked for", an option drawn twice. Changed
+// tiles are drawn whole instead.
+if (process.platform === 'linux') app.commandLine.appendSwitch('disable-partial-raster');
 
 const assets = join(__dirname, '..', 'assets');
 const icon = join(assets, 'icon.png');

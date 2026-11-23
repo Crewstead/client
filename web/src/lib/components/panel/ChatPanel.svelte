@@ -221,9 +221,7 @@
                 class:first={index === 0}
                 title={window.resets}
               >
-                {window.level === 'full' && !window.reset
-                  ? 'Limit reached'
-                  : `${window.used}% used`}
+                {window.reached ? 'Limit reached' : `${window.used}% used`}
               </dd>
             {/each}
           {/if}

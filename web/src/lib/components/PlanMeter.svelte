@@ -40,7 +40,7 @@
       >{#each bars as bar (bar.label)}<i class={bar.level}
           ><b style:width={`${Math.min(bar.used, 100)}%`}></b></i
         >{/each}</span
-    ><span>{top.level === 'full' && !top.reset ? 'Limit' : `${top.used}%`}</span>
+    ><span>{top.reached ? 'Limit' : `${top.used}%`}</span>
   </button>
   <span class="plan-card" id={`${id}-card`} role="tooltip">
     <strong>{plan} plan usage</strong>
@@ -48,9 +48,7 @@
       <span class="plan-window {window.level}">
         <span class="plan-row"
           ><span>{window.label}</span><span
-            >{window.level === 'full' && !window.reset
-              ? 'Limit reached'
-              : `${window.used}% used`}</span
+            >{window.reached ? 'Limit reached' : `${window.used}% used`}</span
           ></span
         >
         <span class="plan-bar" aria-hidden="true"

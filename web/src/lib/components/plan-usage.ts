@@ -8,6 +8,8 @@ export interface ShownWindow {
   /** 0–100 as shown; 0 once it has reset since the provider said so. */
   used: number;
   level: Level;
+  /** Used up: the provider says so, or it is at 100%. Nearly full only turns it red. */
+  reached: boolean;
   /** "Resets in 1 h 26 min", "Resets Fri 12:00", or "Reset since" once past. */
   resets: string;
   reset: boolean;
@@ -41,17 +43,16 @@ export function shownWindows(limits: PlanLimits, now = new Date()): ShownWindow[
         label: window.label,
         used,
         level: reset ? 'ok' : level(window, used),
+        reached: !reset && (!!window.reached || used >= 100),
         resets: at ? resetsIn(at, now) : '',
         reset,
       };
     });
 }
 
-/** The window that matters most now: one at its limit, else the fullest. */
+/** The window that matters most now: one used up, else the fullest. */
 export function tightest(windows: ShownWindow[]) {
-  return [...windows].sort(
-    (a, b) => Number(b.level === 'full') - Number(a.level === 'full') || b.used - a.used,
-  )[0];
+  return [...windows].sort((a, b) => Number(b.reached) - Number(a.reached) || b.used - a.used)[0];
 }
 
 /** "3 min ago", for when the figures were reported. */
