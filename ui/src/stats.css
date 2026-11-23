@@ -16,33 +16,79 @@
 /* The chat's counts as one strip: a cell each, divided by lines. */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-  margin: 14px 0 0;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 16px 0 0;
+}
+.stats-grid > section {
+  min-width: 0;
+  padding: 14px 16px;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--surface);
-  overflow: hidden;
 }
-.stats-grid > div {
-  padding: 9px 12px;
-  box-shadow: -1px 0 0 var(--line-subtle);
-}
-.stats-grid dt {
+.stats-grid h3 {
+  margin: 0;
   color: var(--muted);
   font-size: 12px;
+  font-weight: 400;
 }
-.stats-grid dd {
-  margin: 2px 0 0;
-  font-size: 15px;
+.stats-grid .stats-value {
+  margin: 4px 0 10px;
+  font-size: 22px;
   font-weight: 550;
+  line-height: 1.2;
   font-variant-numeric: tabular-nums;
 }
-.stats-grid small {
-  display: block;
-  margin-top: 1px;
-  line-height: 1.4;
+.stats-grid .stats-value span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 400;
 }
-.stats-grid small,
+.stats-grid dl,
+.stats-model-cards dl {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px;
+  margin: 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--line-subtle);
+}
+.stats-grid dl > div,
+.stats-model-cards dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12.5px;
+}
+/* A value too long for its line (a date) goes under its name. */
+.stats-grid dl > .stats-stacked {
+  flex-direction: column;
+  gap: 1px;
+}
+.stats-grid .stats-stacked dd {
+  text-align: left;
+}
+.stats-grid dt,
+.stats-model-cards dt {
+  color: var(--muted);
+}
+.stats-grid dd,
+.stats-model-cards dd {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.stats-grid dd.added {
+  color: var(--success);
+}
+.stats-grid dd.removed {
+  color: var(--danger);
+}
 .stats-table small {
   color: var(--muted);
   font-size: 12px;
@@ -94,16 +140,43 @@
   font-size: 12px;
   line-height: 1.6;
 }
-@media (max-width: 520px) {
+@media (max-width: 720px) {
   .stats-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  /* On a phone the table keeps what fits: cached tokens are left out. */
-  .stats-table .cached {
+}
+/* Phones: models as cards instead of the table. */
+.stats-model-cards {
+  display: none;
+  gap: 8px;
+}
+.stats-model-cards > section {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+}
+.stats-model-cards h4 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 550;
+}
+.stats-model-cards dl {
+  padding-top: 8px;
+  border-top: 1px solid var(--line-subtle);
+}
+@media (max-width: 520px) {
+  .stats-table-wrap {
     display: none;
   }
-  .stats-table th,
-  .stats-table td {
-    padding: 8px;
+  .stats-model-cards {
+    display: grid;
+  }
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .stats-grid > section {
+    padding: 12px;
   }
 }

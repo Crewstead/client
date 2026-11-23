@@ -12,7 +12,7 @@ export const skillsClient: ClientModule = {
       load: () => import('./SkillsSettings.svelte'),
     },
   ],
-  panels: [{ slot: 'chat-panel', order: 10, load: () => import('./PanelSkills.svelte') }],
+  panels: [{ slot: 'chat-header', order: 10, load: () => import('./HeaderSkills.svelte') }],
   mentions: async () =>
     usableSkills((await skills.list()).skills).map((skill) => ({
       name: skill.name,

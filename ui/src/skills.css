@@ -88,33 +88,6 @@
   font-size: var(--text-sm);
 }
 
-/* Adding skills to a chat: a plain dialog like the others, a search field, then a list to pick from. */
-.add-skill-dialog {
-  flex-direction: column;
-  width: min(520px, calc(100vw - 32px));
-  max-height: min(620px, calc(100dvh - 48px));
-  padding: 0;
-  overflow: hidden;
-}
-.add-skill-dialog[open] {
-  display: flex;
-}
-.add-skill-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 20px 16px 12px 20px;
-}
-.add-skill-header > div {
-  flex: 1;
-  min-width: 0;
-}
-.add-skill-header .dialog-title {
-  margin-top: 0;
-}
-.add-skill-header .dialog-description {
-  margin-bottom: 0;
-}
 .skill-search {
   display: flex;
   align-items: center;
@@ -141,11 +114,6 @@
 }
 .skill-search input::-webkit-search-cancel-button {
   display: none;
-}
-.skill-search-count {
-  flex-shrink: 0;
-  color: var(--faint);
-  font-size: var(--text-xs);
 }
 .skill-results {
   flex: 1;
@@ -192,57 +160,44 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.skill-added {
-  display: inline-flex;
-  flex-shrink: 0;
+/* The chat header's skills: one row per skill, its switch on the right. */
+.skill-toggle {
+  display: flex;
   align-items: center;
+  gap: 10px;
+  min-height: 38px;
+  padding: 6px 10px;
+  border-radius: 7px;
+  color: var(--text);
+  cursor: pointer;
+}
+.skill-toggle:hover {
+  background: var(--surface-hover);
+}
+.skill-toggle > svg {
+  flex: none;
+  color: var(--muted);
+}
+.skill-toggle-text {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  font-size: var(--text-sm);
+}
+.skill-toggle-text > span {
+  overflow: hidden;
+  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  font-size: 12.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.skill-toggle-text small {
   color: var(--faint);
   font-size: var(--text-xs);
 }
-/* Add and remove: one icon button, quiet until the row is chosen. */
-.skill-toggle {
-  flex-shrink: 0;
-  color: var(--muted);
+.skill-toggle:has(input:disabled) {
+  cursor: default;
 }
-/* An added skill shows a tick; pointing at it (or focusing it) offers to remove it. */
-.skill-on {
-  color: var(--text);
-}
-.skill-on .when-hover,
-.skill-on:hover .when-idle,
-.skill-on:focus-visible .when-idle {
-  display: none;
-}
-.skill-on:hover .when-hover,
-.skill-on:focus-visible .when-hover {
-  display: inline;
-}
-.skill-result.active .skill-toggle {
-  color: var(--text);
-  background: var(--surface);
-}
-.skill-none {
-  display: grid;
-  justify-items: center;
-  gap: 6px;
-  padding: 36px 16px;
-  color: var(--muted);
-  font-size: var(--text-sm);
-  text-align: center;
-}
-.skill-none strong {
-  color: var(--text);
-  font-weight: 500;
-}
-.add-skill-footer {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 10px 16px 10px 20px;
-  color: var(--muted);
-  font-size: var(--text-xs);
-  border-top: 1px solid var(--line-subtle);
-}
-.add-skill-footer > span:first-child {
-  flex: 1;
+.skill-toggle .switch {
+  flex: none;
 }

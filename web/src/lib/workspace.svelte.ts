@@ -103,23 +103,35 @@ export class Workspace {
     },
   ) {
     const context = this.context;
-    const updated = await request<Session>(scoped(`/sessions/${id}`, context), {
-      method: 'PATCH',
-      body: JSON.stringify(patch),
+    // Shown at once (pinning, archiving, renaming), put back if the hub refuses.
+    const before = this.sessions;
+    const shown = (fields: Partial<ChatSummary>) =>
+      (this.sessions = this.sessions.map((session) =>
+        session.id === id ? { ...session, ...fields } : session,
+      ));
+    shown({
+      ...(patch.pinned !== undefined ? { pinned: patch.pinned } : {}),
+      ...(patch.archived !== undefined ? { archived: patch.archived } : {}),
+      ...(patch.title ? { title: patch.title } : {}),
     });
+    let updated: Omit<Session, 'items'>;
+    try {
+      updated = await request<Omit<Session, 'items'>>(scoped(`/sessions/${id}`, context), {
+        method: 'PATCH',
+        body: JSON.stringify(patch),
+      });
+    } catch (error) {
+      if (context === this.context) this.sessions = before;
+      throw error;
+    }
     if (context !== this.context) return;
-    this.sessions = this.sessions.map((session) =>
-      session.id === id
-        ? {
-            ...session,
-            pinned: updated.pinned,
-            archived: updated.archived,
-            title: updated.title,
-            modelId: updated.modelId,
-            ...(updated.approvalMode ? { approvalMode: updated.approvalMode } : {}),
-          }
-        : session,
-    );
+    shown({
+      pinned: updated.pinned,
+      archived: updated.archived,
+      title: updated.title,
+      modelId: updated.modelId,
+      ...(updated.approvalMode ? { approvalMode: updated.approvalMode } : {}),
+    });
     // New chats start with the model and approval mode set last.
     if (this.catalog)
       this.catalog.preferences = {
@@ -195,7 +207,7 @@ export class Workspace {
 
   async move(id: string, projectId: string | null) {
     const context = this.context;
-    const moved = await request<Session>(scoped(`/sessions/${id}/move`, context), {
+    const moved = await request<Omit<Session, 'items'>>(scoped(`/sessions/${id}/move`, context), {
       method: 'POST',
       body: JSON.stringify({ projectId }),
     });

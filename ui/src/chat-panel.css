@@ -113,40 +113,6 @@
   padding: 0;
   list-style: none;
 }
-.panel-skill {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 30px;
-  font-size: var(--text-sm);
-}
-.panel-skill-text {
-  display: grid;
-  flex: 1;
-  min-width: 0;
-}
-.panel-skill-text small {
-  color: var(--muted);
-  font-size: var(--text-xs);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-/* The scrollbar's room is kept even when the list fits, so rows never shift as it comes and goes;
-   that room sits in the panel's right padding, so the rows line up with the rest of the panel. */
-.panel-skill-list {
-  max-height: 232px;
-  margin: 0 -10px 0 -4px;
-  padding: 0 0 0 4px;
-  scrollbar-gutter: stable;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}
-.panel-skill .icon-button {
-  width: 26px;
-  height: 26px;
-  flex-shrink: 0;
-}
 .panel-actions {
   display: flex;
   align-items: center;

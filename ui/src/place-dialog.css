@@ -1,5 +1,5 @@
 /* Choosing where a chat works: a search field over the cloud and every computer's projects. */
-.place-dialog {
+.dialog-content.place-dialog {
   top: 12vh;
   transform: translateX(-50%);
   width: min(560px, calc(100vw - 32px));
@@ -98,7 +98,7 @@
 }
 /* Phones: a sheet from the bottom, the field above the list. */
 @media (max-width: 560px) {
-  .place-dialog {
+  .dialog-content.place-dialog {
     top: auto;
     bottom: 0;
     width: 100%;

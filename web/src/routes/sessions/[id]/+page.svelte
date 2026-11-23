@@ -34,6 +34,7 @@
   import { livePlan } from '#lib/components/timeline-entries.ts';
   import { ChatTerminals, provideTerminals } from '#lib/terminals/terminals.svelte.ts';
   import TerminalDrawer from '#lib/terminals/TerminalDrawer.svelte';
+  import ModuleSlot from '#lib/modules/ModuleSlot.svelte';
   import { ChatPictures, providePictures } from '#lib/markdown/pictures.ts';
   import '@crewstead/ui/conversation.css';
   import '@crewstead/ui/tools.css';
@@ -269,6 +270,7 @@
           {models}
           loadAll={() => conversation.loadEarlier()}
         />
+        <span class="header-tools"><ModuleSlot slot="chat-header" props={{ session }} /></span>
         <button
           class="icon-button"
           aria-label="Export as Markdown"

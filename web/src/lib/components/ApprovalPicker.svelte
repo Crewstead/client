@@ -52,8 +52,9 @@
       failed(cause instanceof Error ? cause.message : 'Could not change approvals');
     }
   }
+  /** Auto-review keeps the menu open in a chat, so its reviewer can be picked next. */
   function choose(value: ApprovalMode) {
-    close(true);
+    if (!(chat && value === 'auto')) close(true);
     if (value !== mode) void save({ approvalMode: value });
   }
   function review(modelId: string | null) {
@@ -123,7 +124,7 @@
             />{/if}</button
         >
         <hr />
-        <div class="option-list">
+        <div class="reviewer-models">
           {#each models as model (model.id)}
             <button
               type="button"

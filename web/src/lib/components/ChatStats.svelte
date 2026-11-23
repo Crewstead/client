@@ -4,7 +4,7 @@
   import type { Model, Session } from '@crewstead/core/protocol';
   import { request, scoped } from '#lib/api.ts';
   import { useWorkspace } from '#lib/workspace.svelte.ts';
-  import { chatStats, compact, plural } from './chat-stats.ts';
+  import { chatStats, compact } from './chat-stats.ts';
   import ContextBreakdown from './ContextBreakdown.svelte';
   import '@crewstead/ui/dialogs.css';
   import '@crewstead/ui/stats.css';
@@ -28,10 +28,17 @@
   const contextWindow = $derived(
     models.find((model) => model.id === session.modelId)?.contextTokens,
   );
+  const count = (value: number) => value.toLocaleString();
+  /** "Nov 23, 6:34 AM"; the year too when it is not this one. */
+  const started = (iso: string) =>
+    new Date(iso).toLocaleString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      ...(new Date(iso).getFullYear() !== new Date().getFullYear() ? { year: 'numeric' } : {}),
+      hour: 'numeric',
+      minute: '2-digit',
+    });
   const usd = (value: number) => (value < 0.01 ? '<$0.01' : `$${value.toFixed(2)}`);
-  const date = (iso: string) =>
-    new Date(iso).toLocaleDateString(undefined, { dateStyle: 'medium' });
-  const time = (iso: string) => new Date(iso).toLocaleTimeString(undefined, { timeStyle: 'short' });
   // The cost is read with the chat and again whenever a reply ends, not on opening: read then, it
   // arrived after the dialog showed and added its column under the reader's eyes.
   let costOf = '';
@@ -55,6 +62,13 @@
   }
 </script>
 
+{#snippet line(name: string, value: string, tone?: 'added' | 'removed')}
+  <div>
+    <dt>{name}</dt>
+    <dd class={tone}>{value}</dd>
+  </div>
+{/snippet}
+
 <!-- Opened from the context meter in the prompt box. -->
 <dialog
   {@attach closeOutside}
@@ -73,53 +87,46 @@
       used={session.contextUsed}
       window={contextWindow ?? 128_000}
     />{/if}
-  <dl class="stats-grid">
-    <div>
-      <dt>Messages</dt>
-      <dd>
-        {stats.messages}
-        <small>{stats.replies === 1 ? '1 reply' : `${stats.replies} replies`}</small>
-      </dd>
-    </div>
-    <div>
-      <dt>Tool calls</dt>
-      <dd>
-        {stats.tools.total}
-        {#if stats.tools.total}<small
-            >{[
-              plural(stats.tools.reads, 'read'),
-              plural(stats.tools.changes, 'change'),
-              plural(stats.tools.commands, 'command'),
-            ].join(', ')}</small
-          >{/if}
-      </dd>
-    </div>
-    <div>
-      <dt>Files changed</dt>
-      <dd>
-        {stats.files.count}
-        {#if stats.files.count}<small class="diff-count"
-            ><ins>+{stats.files.added}</ins> <del>−{stats.files.removed}</del></small
-          >{/if}
-      </dd>
-    </div>
-    <div>
-      <dt>Approvals</dt>
-      <dd>
-        {stats.approvals.asked} asked
-        <small
-          >{stats.approvals.reviewed} reviewed, {stats.approvals.automatic} automatic{stats.tools
-            .declined
-            ? `, ${stats.tools.declined} declined`
-            : ''}</small
-        >
-      </dd>
-    </div>
-    <div>
-      <dt>Started</dt>
-      <dd>{date(session.createdAt)} <small>{time(session.createdAt)}</small></dd>
-    </div>
-  </dl>
+  <!-- Four cards: a total each, and what it is made of, one figure a line. -->
+  <div class="stats-grid">
+    <section aria-label="Messages">
+      <h3>Messages</h3>
+      <p class="stats-value">{count(stats.messages)}</p>
+      <dl>
+        {@render line('Replies', count(stats.replies))}
+        <div class="stats-stacked">
+          <dt>Started</dt>
+          <dd>{started(session.createdAt)}</dd>
+        </div>
+      </dl>
+    </section>
+    <section aria-label="Tool calls">
+      <h3>Tool calls</h3>
+      <p class="stats-value">{count(stats.tools.total)}</p>
+      <dl>
+        {@render line('Reads', count(stats.tools.reads))}
+        {@render line('Changes', count(stats.tools.changes))}
+        {@render line('Commands', count(stats.tools.commands))}
+      </dl>
+    </section>
+    <section aria-label="Files changed">
+      <h3>Files changed</h3>
+      <p class="stats-value">{count(stats.files.count)}</p>
+      <dl>
+        {@render line('Lines added', `+${count(stats.files.added)}`, 'added')}
+        {@render line('Lines removed', `−${count(stats.files.removed)}`, 'removed')}
+      </dl>
+    </section>
+    <section aria-label="Approvals">
+      <h3>Approvals</h3>
+      <p class="stats-value">{count(stats.approvals.asked)} <span>asked you</span></p>
+      <dl>
+        {@render line('Reviewed', count(stats.approvals.reviewed))}
+        {@render line('Automatic', count(stats.approvals.automatic))}
+        {#if stats.tools.declined}{@render line('Declined', count(stats.tools.declined))}{/if}
+      </dl>
+    </section>
+  </div>
 
   <h3 class="stats-section">Tokens by model</h3>
   {#if stats.models.length}
@@ -129,7 +136,7 @@
           <tr
             ><th>Model</th><th>Requests</th><th>Sent</th><th class="cached">Cached</th><th
               >Received</th
-            >{#if cost?.usd}<th>Cost</th>{/if}</tr
+            >{#if cost}<th>Cost</th>{/if}</tr
           >
         </thead>
         <tbody>
@@ -144,8 +151,7 @@
               <td>{compact(model.input)}</td>
               <td class="cached">{compact(model.cached)}</td>
               <td>{compact(model.output)}</td>
-              {#if cost?.usd}<td>{cost.byModel[model.id] ? usd(cost.byModel[model.id]!) : '—'}</td
-                >{/if}
+              {#if cost}<td>{cost.byModel[model.id] ? usd(cost.byModel[model.id]!) : '—'}</td>{/if}
             </tr>
           {/each}
         </tbody>
@@ -153,14 +159,37 @@
             <tr>
               <td>Total</td><td>{stats.total.requests}</td><td>{compact(stats.total.input)}</td><td
                 class="cached">{compact(stats.total.cached)}</td
-              ><td>{compact(stats.total.output)}</td>{#if cost?.usd}<td>{usd(cost.usd)}</td>{/if}
+              ><td>{compact(stats.total.output)}</td>{#if cost}<td
+                  >{cost.usd ? usd(cost.usd) : '—'}</td
+                >{/if}
             </tr>
           </tfoot>{/if}
       </table>
     </div>
+    <!-- On a phone, each model is a card of its own: a table that narrow squeezes its names. -->
+    <div class="stats-model-cards">
+      {#each stats.models as model (model.id)}
+        <section aria-label={label(model.id)}>
+          <h4>{label(model.id)}</h4>
+          <dl>
+            {@render line(
+              'Requests',
+              `${count(model.requests)}${model.reviews || model.summaries ? ` +${count(model.reviews + model.summaries)}` : ''}`,
+            )}
+            {@render line('Sent', compact(model.input))}
+            {@render line('Cached', compact(model.cached))}
+            {@render line('Received', compact(model.output))}
+            {#if cost}{@render line(
+                'Cost',
+                cost.byModel[model.id] ? usd(cost.byModel[model.id]!) : '—',
+              )}{/if}
+          </dl>
+        </section>
+      {/each}
+    </div>
     <p class="stats-note">
       “+” counts automatic reviews and summaries. Sent includes cached tokens.
-      {#if cost?.usd}Cost covers provider keys billed per token{cost.estimated
+      {#if cost}Cost covers provider keys billed per token{cost.estimated
           ? '; some requests are counted at their reserved maximum'
           : ''}; plans such as Claude Code cost nothing here.{/if}
     </p>

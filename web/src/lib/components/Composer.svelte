@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ArrowUp, ListEnd, Mic, Paperclip, Square } from '@lucide/svelte';
+  import { ArrowUp, ListEnd, MicOff, Paperclip, Square } from '@lucide/svelte';
   import { onMount } from 'svelte';
   import type { Snippet } from 'svelte';
   import ApprovalPicker from './ApprovalPicker.svelte';
@@ -334,9 +334,9 @@
           <button
             type="button"
             class="icon-button composer-mic"
-            aria-label="Voice input (coming soon)"
-            title="Voice input (coming soon)"
-            aria-disabled="true"><Mic size={16} /></button
+            aria-label="Voice input is not available yet"
+            title="Voice input is not available yet"
+            aria-disabled="true"><MicOff size={16} /></button
           >
           {#if busy && queue && ready}<button
               class="send-button"
