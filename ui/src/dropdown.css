@@ -1,0 +1,171 @@
+/*
+ * Dropdowns (Dropdown.svelte): one panel and one kind of item for every menu and picker. Each
+ * dropdown keeps its own trigger look (a field, a prompt-box picker, "…"); what opens is drawn here.
+ */
+.dropdown {
+  position: relative;
+}
+.dropdown > summary {
+  list-style: none;
+  cursor: pointer;
+}
+.dropdown > summary::-webkit-details-marker {
+  display: none;
+}
+.dropdown > summary[aria-disabled='true'] {
+  cursor: default;
+  opacity: 0.5;
+}
+/* Every menu's look; the menus opened as popovers (account, workspace) wear it too. */
+.dropdown-panel,
+.menu-surface {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-raised);
+  color: var(--text);
+  box-shadow: 0 8px 24px #0004;
+}
+.dropdown-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 30;
+  /* As wide as its items (not squeezed to its trigger's width), within the window. */
+  width: max-content;
+  min-width: 200px;
+  max-width: min(360px, calc(100vw - 24px));
+}
+.dropdown-panel.end {
+  right: 0;
+  left: auto;
+}
+/* Opening upward: asked for (the prompt box's pickers), or for lack of room below (keep-in-view.ts). */
+.dropdown-panel.up,
+.dropdown-panel.opens-up {
+  top: auto;
+  bottom: calc(100% + 6px);
+}
+.dropdown-panel.opens-down {
+  top: calc(100% + 6px);
+  bottom: auto;
+}
+/* Filling its field's width (form pickers), the list scrolling when long. */
+.dropdown.wide,
+.dropdown.wide > summary {
+  width: 100%;
+}
+.dropdown.wide > .dropdown-panel {
+  right: 0;
+  width: 100%;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+/* An item: an icon, its name (a note under it), and a tick or a value at the end. */
+.menu-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 36px;
+  margin: 0;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: var(--text-sm);
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+.menu-item:hover:not(:disabled, .unavailable),
+.menu-item.current,
+.menu-item:focus-visible,
+.menu-item:has(:focus-visible) {
+  background: var(--surface-hover);
+  outline: none;
+}
+.menu-item:disabled,
+.menu-item.unavailable {
+  color: var(--muted);
+  cursor: default;
+}
+.menu-item.danger {
+  color: var(--danger);
+}
+.menu-item > svg {
+  flex: none;
+  color: var(--muted);
+}
+.menu-text {
+  display: grid;
+  flex: 1;
+  gap: 1px;
+  min-width: 0;
+}
+.menu-text > :first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.menu-item small {
+  color: var(--muted);
+  font-size: var(--text-xs);
+  white-space: normal;
+}
+/* What the item leads to, at its end (e.g. "Same as chat ›"). */
+.menu-value {
+  flex: none;
+  max-width: 50%;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: var(--text-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.menu-item > svg.menu-check {
+  margin-left: auto;
+  color: var(--text);
+}
+/* A choice made with a hidden radio (forms keep their radio semantics). */
+.menu-item input[type='radio'] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+}
+.menu-separator {
+  margin: 4px 2px;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+.menu-group {
+  margin: 0;
+  padding: 8px 10px 4px;
+  color: var(--faint);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+.dropdown-panel fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+/* A card that clips its corners lets an open dropdown reach past its edge. */
+.provider-groups:has(.dropdown[open]),
+.settings-card:has(.dropdown[open]) {
+  overflow: visible;
+}

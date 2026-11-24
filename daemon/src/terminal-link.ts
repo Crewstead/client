@@ -184,7 +184,8 @@ function shellLaunch(
   }
   const project = openProject(host.home, command.projectId);
   if (!project.rules.commands) throw new Error('Commands are turned off for this project.');
-  if (!host.sandbox) throw new Error('Commands cannot run on this computer (no sandbox).');
+  // No sandbox here: the owner's own shell in the project (it is the owner typing).
+  if (!host.sandbox) return { file: shell, argv: [], cwd: project.path, env: ownerEnv(true) };
   const argv = sandboxArguments(project.path, project.rules.network, host.hidden, {
     terminal: true,
     git: !!project.rules.git,

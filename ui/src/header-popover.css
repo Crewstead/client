@@ -10,14 +10,12 @@
   content: '';
   width: 1px;
   height: 18px;
-  margin-left: 8px;
+  /* 8px from the last tool and from export. */
+  margin-left: 6px;
   background: var(--line);
 }
 .conversation-heading > .header-tools:has(button) {
   margin-right: -8px;
-}
-.header-popover {
-  position: relative;
 }
 .icon-button.header-tool {
   width: auto;
@@ -27,30 +25,24 @@
   font-size: var(--text-sm);
   font-variant-numeric: tabular-nums;
 }
-.icon-button.header-tool.active {
+.header-popover[open] > .icon-button.header-tool {
   background: var(--surface-hover);
   color: var(--text);
 }
-.header-popover-panel {
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
-  z-index: 30;
+/* The panel (dropdown.css), laid out as a small window: search, a scrolled body, a footer. */
+.dropdown-panel.header-popover-panel {
   display: flex;
   flex-direction: column;
   width: 320px;
+  max-width: calc(100vw - 24px);
   max-height: min(70vh, 520px);
+  padding: 0;
   overflow: hidden;
-  border: 1px solid var(--line);
   border-radius: 12px;
-  background: var(--surface-raised);
   box-shadow: 0 12px 32px #0006;
 }
-.header-popover-panel.wide {
+.dropdown-panel.header-popover-panel.wide {
   width: 440px;
-}
-.header-popover-panel .task-list {
-  padding: 2px 6px 2px 10px;
 }
 .header-popover-panel .popover-body {
   flex: 1;
@@ -76,15 +68,6 @@
   color: var(--text);
   font: inherit;
   outline: none;
-}
-.header-popover-panel .popover-group {
-  margin: 0;
-  padding: 8px 10px 4px;
-  color: var(--faint);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
 }
 .header-popover-panel .popover-empty {
   margin: 0;
@@ -125,7 +108,7 @@
   .header-tool .header-tool-value {
     display: none;
   }
-  .header-popover-panel {
+  .dropdown-panel.header-popover-panel {
     position: fixed;
     top: 60px;
     right: 8px;

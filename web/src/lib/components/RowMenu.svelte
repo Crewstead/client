@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Check, Ellipsis } from '@lucide/svelte';
-  import { keepInView } from '#lib/keep-in-view.ts';
+  import Dropdown from './Dropdown.svelte';
   import '@crewstead/ui/row-menu.css';
   import RowMenuSheet from './RowMenuSheet.svelte';
 
@@ -30,14 +30,13 @@
   } = $props();
   /** Touch screens get the items as a sheet from the bottom instead. */
   let sheet = $state(false);
-  let details = $state<HTMLDetailsElement>();
+  let open = $state(false);
   /** The label of the destructive item asking again. */
   let confirming = $state<string>();
-  function close() {
-    if (details) details.open = false;
-    confirming = undefined;
-  }
-  function choose(item: MenuItem) {
+  $effect(() => {
+    if (!open) confirming = undefined;
+  });
+  function choose(item: MenuItem, close: () => void) {
     if (item.confirm && confirming !== item.label) {
       confirming = item.label;
       return;
@@ -47,46 +46,39 @@
   }
 </script>
 
-<svelte:window
-  onpointerdown={(event) => {
-    if (event.target instanceof Node && !details?.contains(event.target)) close();
-  }}
-  onkeydown={(event) => {
-    if (event.key === 'Escape') close();
-  }}
-/>
 <!-- A row's settings, folded behind "…" instead of a row of switches. -->
-<details class="row-menu" bind:this={details} use:keepInView>
-  <summary
-    class="icon-button"
-    aria-label={label}
-    title={label}
-    aria-disabled={disabled}
-    onclick={(event) => {
-      if (disabled) event.preventDefault();
-      else if (matchMedia('(hover: none)').matches) {
-        event.preventDefault();
-        sheet = true;
-      }
-    }}><Ellipsis size={16} /></summary
-  >
-  <div class="row-menu-items" role="menu">
+<Dropdown
+  class="row-menu"
+  triggerClass="icon-button"
+  align="end"
+  role="menu"
+  {label}
+  {disabled}
+  bind:open
+  pressed={() => {
+    if (!matchMedia('(hover: none)').matches) return false;
+    sheet = true;
+    return true;
+  }}
+>
+  {#snippet trigger()}<Ellipsis size={16} />{/snippet}
+  {#snippet children(close)}
     {#each items as item (item.label)}
       <button
+        class="menu-item"
         role={item.checked === undefined ? 'menuitem' : 'menuitemcheckbox'}
         aria-checked={item.checked}
         class:danger={!!item.confirm}
         disabled={item.disabled}
         title={item.hint}
-        onclick={() => choose(item)}
+        onclick={() => choose(item, close)}
+        ><span class="menu-text"
+          ><span>{confirming === item.label ? item.confirm : item.label}</span>{#if item.hint}<small
+              >{item.hint}</small
+            >{/if}</span
+        >{#if item.checked}<Check class="menu-check" size={14} />{/if}</button
       >
-        <span>
-          {confirming === item.label ? item.confirm : item.label}
-          {#if item.hint}<small>{item.hint}</small>{/if}
-        </span>
-        {#if item.checked}<Check size={14} />{/if}
-      </button>
     {/each}
-  </div>
-</details>
+  {/snippet}
+</Dropdown>
 {#if sheet}<RowMenuSheet title={title ?? label} {items} close={() => (sheet = false)} />{/if}

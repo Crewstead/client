@@ -16,77 +16,15 @@
 .model-picker summary:hover {
   color: var(--text);
 }
-.model-options {
-  position: absolute;
-  bottom: calc(100% + 10px);
-  left: 0;
-  z-index: 10;
-  margin: 0;
-  padding: 5px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: var(--surface-raised);
-  min-width: 180px;
-  max-width: calc(100vw - 24px);
-  box-shadow: 0 8px 24px #0003;
-}
-.model-options label {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-height: 36px;
-  padding: 8px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  color: var(--text);
-  white-space: nowrap;
-}
-.model-options label:hover,
-.model-options label:focus-within {
-  background: var(--surface-hover);
-}
-.model-options input {
-  position: absolute;
-  opacity: 0;
-  width: 1px;
-  height: 1px;
-  min-height: 0;
-  padding: 0;
-}
-.model-options label:has(:focus-visible) {
-  outline: 2px solid var(--muted);
-  outline-offset: -2px;
-}
-.model-options svg {
-  margin-left: auto;
-  /* Keeps its size beside a hint that wraps. */
-  flex-shrink: 0;
-}
 .model-label {
   display: inline-block;
   padding: 6px 4px;
 }
-.effort-option {
-  white-space: normal;
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-.effort-option small {
-  color: var(--muted);
-  font-size: var(--text-xs);
-}
-.approval-picker[data-mode='auto'] summary {
+.approval-picker.mode-auto > summary {
   color: var(--text);
 }
-.approval-picker[data-mode='all'] summary {
+.approval-picker.mode-all > summary {
   color: var(--warning);
-}
-.model-options fieldset {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  min-width: 0;
 }
 /* In Settings: a bordered button that opens its options below, aligned to its right edge. */
 .choice-picker summary {
@@ -103,73 +41,17 @@
   opacity: 0.6;
   cursor: default;
 }
-.choice-picker .model-options {
-  top: calc(100% + 6px);
-  right: 0;
-  bottom: auto;
-  left: auto;
+.choice-picker > .dropdown-panel {
   min-width: 240px;
 }
-.choice-picker label.unavailable {
-  opacity: 0.55;
-  cursor: default;
+/* The approval menu (dropdown.css): wide enough for the reviewer's name; its model list scrolls. */
+.approval-picker > .dropdown-panel {
+  min-width: 220px;
 }
-/* The approval menu: modes with their icons, and under Auto-review the reviewer's models. */
-.approval-options {
-  min-width: 210px;
-}
-.approval-options button {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  min-height: 34px;
-  padding: 7px 10px;
-  border: 0;
-  border-radius: 6px;
-  background: none;
-  color: var(--text);
-  font: inherit;
-  font-size: var(--text-sm);
-  text-align: left;
-  white-space: nowrap;
-  cursor: pointer;
-}
-.approval-options button:hover,
-.approval-options button:focus-visible {
-  background: var(--surface-hover);
-  outline: none;
-}
-.approval-options button > svg {
-  flex-shrink: 0;
-  margin-left: 0;
+.approval-picker .reviewer-back {
   color: var(--muted);
 }
-.approval-options button > .option-check,
-.approval-options button > .option-more {
-  margin-left: auto;
-  color: var(--text);
-}
-.approval-options button > small {
-  margin-left: auto;
-  overflow: hidden;
-  color: var(--muted);
-  font-size: var(--text-xs);
-  text-overflow: ellipsis;
-}
-.approval-options button > small + .option-more {
-  margin-left: 0;
-  color: var(--muted);
-}
-.approval-options .option-back {
-  color: var(--muted);
-}
-.approval-options hr {
-  margin: 4px 2px;
-  border: 0;
-  border-top: 1px solid var(--line);
-}
-.approval-options .reviewer-models {
+.approval-picker .reviewer-models {
   max-height: 260px;
   overflow-y: auto;
 }

@@ -58,9 +58,9 @@
 
 {#snippet row(entry: (typeof rows)[number])}
   {@const locked = !entry.added && entry.held.length > 0}
-  <label class="skill-toggle" title={entry.skill.description}>
+  <label class="menu-item skill-toggle" title={entry.skill.description}>
     <Sparkles size={14} />
-    <span class="skill-toggle-text"
+    <span class="menu-text"
       ><span>{entry.skill.name}</span>{#if entry.held.length}<small>{entry.held.join(' · ')}</small
         >{/if}</span
     >
@@ -81,8 +81,9 @@
 {#if chatSkills.available.length}
   <HeaderPopover
     bind:open
-    label="Skills in this chat"
-    title={count ? `Skills in this chat: ${count}` : 'Skills in this chat'}
+    label={count ? `Skills, ${count} on` : 'Skills'}
+    heading="Skills in this chat"
+    title={count ? `Skills in this chat: ${count} on` : 'Skills in this chat'}
   >
     {#snippet button()}<Sparkles size={17} />{#if count}<span class="header-tool-value"
           >{count}</span
@@ -93,9 +94,9 @@
         <input aria-label="Find a skill" placeholder="Find a skill" autofocus bind:value={query} />
       </div>{/if}
     <div class="popover-body">
-      {#if shown.some((entry) => entry.on)}<p class="popover-group">On in this chat</p>{/if}
+      {#if shown.some((entry) => entry.on)}<p class="menu-group">On in this chat</p>{/if}
       {#each shown.filter((entry) => entry.on) as entry (entry.skill.id)}{@render row(entry)}{/each}
-      {#if shown.some((entry) => !entry.on)}<p class="popover-group">Off</p>{/if}
+      {#if shown.some((entry) => !entry.on)}<p class="menu-group">Off</p>{/if}
       {#each shown.filter((entry) => !entry.on) as entry (entry.skill.id)}{@render row(
           entry,
         )}{/each}

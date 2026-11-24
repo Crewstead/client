@@ -4,6 +4,7 @@
   import { Check, ChevronsUpDown, Layers, Plus } from '@lucide/svelte';
   import { useWorkspace } from '#lib/workspace.svelte.ts';
   import { activeModules } from '#lib/modules/registry.ts';
+  import '@crewstead/ui/dropdown.css';
   import '@crewstead/ui/workspace-menu.css';
   let { close }: { close: () => void } = $props();
   const workspace = useWorkspace();
@@ -59,7 +60,7 @@
   bind:this={menu}
   popover="auto"
   {id}
-  class="workspace-popover"
+  class="workspace-popover menu-surface"
   style:left={`${placement.left}px`}
   style:top={`${placement.top}px`}
   style:width={`${placement.width}px`}
@@ -67,10 +68,10 @@
   aria-label="Workspaces"
   ontoggle={() => (expanded = !!menu?.matches(':popover-open'))}
 >
-  <p class="workspace-heading">Workspaces</p>
+  <p class="menu-group">Workspaces</p>
   {#each contexts as context (context.id)}
     <button
-      class="workspace-option"
+      class="menu-item"
       aria-current={context.id === workspace.context ? 'true' : undefined}
       onclick={() => choose(context.id)}
       onpointerenter={() => workspace.warm(context.id)}
@@ -84,13 +85,13 @@
         ><span>{context.kind === 'personal' ? 'Personal' : context.label}</span
         >{#if context.role}<small>{context.role}</small>{/if}</span
       >
-      {#if context.id === workspace.context}<Check size={14} />{/if}
+      {#if context.id === workspace.context}<Check class="menu-check" size={14} />{/if}
     </button>
   {/each}
-  {#if actions.length}<div class="workspace-divider"></div>{/if}
+  {#if actions.length}<hr class="menu-separator" />{/if}
   {#each actions as action (action.href)}
     <a
-      class="workspace-option"
+      class="menu-item"
       href={resolve(action.href as '/')}
       onclick={() => {
         menu?.hidePopover();

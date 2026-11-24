@@ -139,7 +139,9 @@ function status(home: string, { browserInstalled }: BrowserModule) {
             : 'stopped (crewstead logs shows why; crewstead restart)'
     }`,
   );
-  log(`  Sandbox:   ${sandboxAvailable() ? 'bubblewrap, commands allowed' : 'none, no commands'}`);
+  log(
+    `  Sandbox:   ${sandboxAvailable() ? 'bubblewrap' : 'none: commands run as you, each one approved (install bubblewrap to isolate them)'}`,
+  );
   log(
     `  Browser:   ${browserInstalled() ? "Chromium (headless; the app's own browser when run by the app)" : 'not installed (crewstead install-browser)'}`,
   );

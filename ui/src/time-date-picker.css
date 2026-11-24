@@ -1,0 +1,87 @@
+/* Time and date pickers (Dropdown.svelte panels): columns of times, or a month's days. */
+.option-picker.wide > .time-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  min-width: 180px;
+  max-height: 260px;
+  overflow: hidden;
+}
+.time-column {
+  display: grid;
+  align-content: start;
+  gap: 1px;
+  max-height: 248px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.time-column button,
+.date-grid button {
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.time-column button {
+  padding: 7px 10px;
+  text-align: left;
+}
+.time-column button:hover,
+.date-grid button:hover:not(:disabled) {
+  background: var(--surface-hover);
+}
+.time-column button[aria-selected='true'],
+.date-grid button[aria-pressed='true'] {
+  background: var(--text);
+  color: var(--bg);
+}
+/* A month needs its room: wider than the field it opens from, kept on the screen. */
+.option-picker.wide > .date-calendar {
+  width: 280px;
+  max-width: calc(100vw - 32px);
+  max-height: none;
+  padding: 8px;
+  overflow: visible;
+}
+.date-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+.date-head .icon-button {
+  width: 28px;
+  height: 28px;
+}
+.date-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+.date-name {
+  padding: 4px 0;
+  color: var(--faint);
+  font-size: 11px;
+  text-align: center;
+}
+.date-grid button {
+  height: 32px;
+}
+.date-grid button.outside:not(:disabled) {
+  color: var(--muted);
+  opacity: 0.6;
+}
+.date-grid button.today:not([aria-pressed='true']) {
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+.date-grid button:disabled {
+  color: var(--faint);
+  opacity: 0.4;
+  cursor: default;
+}

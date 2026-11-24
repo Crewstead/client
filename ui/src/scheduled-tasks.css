@@ -144,12 +144,10 @@
   }
 }
 
+/* Its pickers open past its edge rather than inside a scrolled dialog. */
 .task-dialog {
   width: min(520px, calc(100vw - 32px));
-}
-.task-dialog select {
-  width: 100%;
-  color: var(--text);
+  overflow: visible;
 }
 .task-when {
   display: grid;

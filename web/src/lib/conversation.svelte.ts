@@ -23,6 +23,8 @@ export class Conversation {
   session = $state<Session | null>(null);
   /** How many messages came before the loaded ones; they load on scrolling up or for the panel. */
   earlier = $state(0);
+  /** What modules added to the chat as it opened (e.g. its next scheduled run). */
+  extras = $state<Record<string, unknown>>({});
   connected = $state(false);
   error = $state('');
   sending = $state(false);
@@ -42,6 +44,7 @@ export class Conversation {
     // replaces the one on screen with the loading circle at once, so a switch never waits.
     const seen = keptChat(id, context);
     this.session = seen?.session ?? null;
+    this.extras = seen?.extras ?? {};
     if (seen) {
       this.earlier = seen.earlier;
       this.cursor = seen.cursor;
@@ -55,6 +58,7 @@ export class Conversation {
       this.session = snapshot.session;
       this.earlier = snapshot.earlier;
       this.cursor = snapshot.cursor;
+      this.extras = snapshot.extras ?? {};
       this.context = context;
       this.connect(id, context, generation, snapshot.cursor);
     } catch (error) {
@@ -380,6 +384,7 @@ export class Conversation {
           session: $state.snapshot(this.session),
           earlier: this.earlier,
           cursor: this.cursor,
+          extras: $state.snapshot(this.extras),
         });
     });
     this.generation++;

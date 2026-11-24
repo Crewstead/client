@@ -1,5 +1,8 @@
 <script lang="ts">
   import { closeOutside } from '#lib/close-outside.ts';
+  import OptionPicker from '#lib/components/OptionPicker.svelte';
+  import TimePicker from '#lib/components/TimePicker.svelte';
+  import DatePicker from '#lib/components/DatePicker.svelte';
   import type { ScheduledTask, TaskSchedule } from '@crewstead/core/protocol';
   import { browserZone, tasks } from './api.ts';
   import '@crewstead/ui/dialogs.css';
@@ -43,6 +46,22 @@
     };
   };
   let form = $state(initial());
+  const repeats: Array<{ value: Repeat; label: string }> = [
+    { value: 'once', label: 'Once' },
+    { value: 'daily', label: 'Every day' },
+    { value: 'weekdays', label: 'Every weekday' },
+    { value: 'weekly', label: 'Weekly' },
+    { value: 'monthly', label: 'Monthly' },
+    { value: 'hours', label: 'Every few hours' },
+  ];
+  const monthDays = Array.from({ length: 31 }, (_, i) => ({
+    value: String(i + 1),
+    label: i + 1 > 28 ? `${i + 1} (or the month’s last day)` : String(i + 1),
+  }));
+  const everyHours = Array.from({ length: 24 }, (_, i) => ({
+    value: String(i + 1),
+    label: i ? `${i + 1} hours` : 'Hour',
+  }));
   let busy = $state(false);
   let error = $state('');
   let saved = false;
@@ -118,36 +137,51 @@
         disabled={busy}></textarea>
     </label>
     <div class="task-when">
-      <label class="skill-field"
-        >Repeat
-        <select bind:value={form.repeat} disabled={busy}>
-          <option value="once">Once</option>
-          <option value="daily">Every day</option>
-          <option value="weekdays">Every weekday</option>
-          <option value="weekly">Weekly</option>
-          <option value="monthly">Monthly</option>
-          <option value="hours">Every few hours</option>
-        </select>
-      </label>
+      <div class="skill-field">
+        <span>Repeat</span>
+        <OptionPicker
+          wide
+          label="Repeat"
+          options={repeats}
+          disabled={busy}
+          bind:value={form.repeat}
+        />
+      </div>
       {#if form.repeat === 'once'}
-        <label class="skill-field"
-          >Date <input type="date" bind:value={form.date} required min={today} disabled={busy} />
-        </label>
+        <div class="skill-field">
+          <span>Date</span>
+          <DatePicker label="Date" min={today} disabled={busy} bind:value={form.date} />
+        </div>
       {:else if form.repeat === 'monthly'}
-        <label class="skill-field"
-          >Day
-          <input type="number" bind:value={form.day} min="1" max="31" required disabled={busy} />
-        </label>
+        <div class="skill-field">
+          <span>Day</span>
+          <OptionPicker
+            wide
+            label="Day of the month"
+            options={monthDays}
+            disabled={busy}
+            value={String(form.day)}
+            onchange={(day) => (form.day = Number(day))}
+          />
+        </div>
       {:else if form.repeat === 'hours'}
-        <label class="skill-field"
-          >Every (hours)
-          <input type="number" bind:value={form.every} min="1" max="24" required disabled={busy} />
-        </label>
+        <div class="skill-field">
+          <span>Every</span>
+          <OptionPicker
+            wide
+            label="Every"
+            options={everyHours}
+            disabled={busy}
+            value={String(form.every)}
+            onchange={(hours) => (form.every = Number(hours))}
+          />
+        </div>
       {/if}
       {#if form.repeat !== 'hours'}
-        <label class="skill-field"
-          >Time <input type="time" bind:value={form.time} required disabled={busy} />
-        </label>
+        <div class="skill-field">
+          <span>Time</span>
+          <TimePicker label="Time" disabled={busy} bind:value={form.time} />
+        </div>
       {/if}
     </div>
     {#if form.repeat === 'weekly'}

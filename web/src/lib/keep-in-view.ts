@@ -2,14 +2,22 @@
 const GAP = 12;
 
 /**
- * Shifts a picker's menu sideways when it opens so it never runs past the window edge, which would
- * otherwise add scrollbars. Attach to the `<details>` element; the menu is its `.model-options`.
+ * Keeps a dropdown's panel in the window when it opens: shifted sideways rather than past an edge
+ * (which would add scrollbars), and turned the other way (`opens-up`, `opens-down`) when it runs out of
+ * room where it opens and there is more on the other side. Attach to the `<details>` element.
  */
-export function keepInView(details: HTMLDetailsElement) {
+export function keepInView(details: HTMLDetailsElement, selector = '.dropdown-panel') {
   const place = () => {
-    const menu = details.querySelector<HTMLElement>('.model-options');
+    const menu = details.querySelector<HTMLElement>(selector);
     if (!menu || !details.open) return;
     menu.style.translate = '';
+    menu.classList.remove('opens-up', 'opens-down');
+    const trigger = details.getBoundingClientRect();
+    const room = { above: trigger.top, below: window.innerHeight - trigger.bottom };
+    const fitted = menu.getBoundingClientRect();
+    if (fitted.bottom > window.innerHeight - GAP && room.above > room.below)
+      menu.classList.add('opens-up');
+    else if (fitted.top < GAP && room.below > room.above) menu.classList.add('opens-down');
     const box = menu.getBoundingClientRect();
     const overRight = box.right - (window.innerWidth - GAP);
     const shift =

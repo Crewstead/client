@@ -191,7 +191,7 @@
           project.name,
           project.kind === 'computer'
             ? 'Anywhere, as you; changes ask first'
-            : `${project.path}${project.sandbox ? '' : ' · no commands'}`,
+            : `${project.path}${project.sandbox ? '' : ' · no sandbox'}`,
           project.kind === 'computer' ? 'computer' : 'project',
         )}
       {/each}

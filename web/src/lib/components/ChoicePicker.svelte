@@ -1,6 +1,6 @@
 <script lang="ts" generics="T extends string">
   import { Check, ChevronDown } from '@lucide/svelte';
-  import { keepInView } from '#lib/keep-in-view.ts';
+  import Dropdown from './Dropdown.svelte';
   import '@crewstead/ui/model-picker.css';
   let {
     label,
@@ -17,51 +17,36 @@
     choose: (value: T) => void;
   } = $props();
   const id = $props.id();
-  let details = $state<HTMLDetailsElement>();
-  let trigger = $state<HTMLElement>();
   const current = $derived(choices.find((choice) => choice.value === value));
-  function close(focus = false) {
-    if (!details?.open) return;
-    details.open = false;
-    if (focus) trigger?.focus();
-  }
 </script>
 
-<svelte:window
-  onpointerdown={(event) => {
-    if (event.target instanceof Node && !details?.contains(event.target)) close();
-  }}
-  onkeydown={(event) => {
-    if (event.key === 'Escape') close(true);
-  }}
-/>
-<!-- A choice in Settings, drawn like the prompt box's pickers: opens below, notes under each option. -->
-<details class="model-picker choice-picker" bind:this={details} use:keepInView>
-  <summary
-    bind:this={trigger}
-    aria-label={`${label}: ${current?.label ?? ''}`}
-    aria-disabled={disabled}
-    onclick={(event) => disabled && event.preventDefault()}
-    >{current?.label}<ChevronDown size={13} /></summary
-  >
-  <fieldset class="model-options">
-    <legend class="sr-only">{label}</legend>
-    {#each choices as choice (choice.value)}
-      <label class:unavailable={choice.disabled}
-        ><input
-          type="radio"
-          name={id}
-          checked={choice.value === value}
-          disabled={choice.disabled}
-          onchange={() => {
-            close(true);
-            choose(choice.value);
-          }}
-        />
-        <span class="effort-option"
-          ><span>{choice.label}</span>{#if choice.note}<small>{choice.note}</small>{/if}</span
-        >{#if choice.value === value}<Check size={14} />{/if}
-      </label>
-    {/each}
-  </fieldset>
-</details>
+<!-- A choice in Settings: a bordered button opening its options below, a note under each. -->
+<Dropdown
+  class="model-picker choice-picker"
+  align="end"
+  label={`${label}: ${current?.label ?? ''}`}
+  {disabled}
+>
+  {#snippet trigger()}{current?.label}<ChevronDown size={13} />{/snippet}
+  {#snippet children(close)}
+    <fieldset>
+      <legend class="sr-only">{label}</legend>
+      {#each choices as choice (choice.value)}
+        <label class="menu-item" class:unavailable={choice.disabled}
+          ><input
+            type="radio"
+            name={id}
+            checked={choice.value === value}
+            disabled={choice.disabled}
+            onchange={() => {
+              close(true);
+              choose(choice.value);
+            }}
+          /><span class="menu-text"
+            ><span>{choice.label}</span>{#if choice.note}<small>{choice.note}</small>{/if}</span
+          >{#if choice.value === value}<Check class="menu-check" size={14} />{/if}</label
+        >
+      {/each}
+    </fieldset>
+  {/snippet}
+</Dropdown>

@@ -67,7 +67,7 @@
 <SettingsHeading page title="Skills">
   Instructions for particular kinds of work, which models load when a task needs them. Mention one
   as
-  <code>@name</code> in a message, or keep it on for a chat from the prompt box.
+  <code>@name</code> in a message, or keep it on for a chat from its header.
 </SettingsHeading>
 {#if error}<p class="error-banner" role="alert">{error}</p>{/if}
 {#each sections as section (section.scope)}

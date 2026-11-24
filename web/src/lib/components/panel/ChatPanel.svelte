@@ -73,7 +73,7 @@
         ].filter(Boolean)
       : project
         ? [
-            project.sandbox && project.rules.commands ? 'commands' : '',
+            project.rules.commands ? (project.sandbox ? 'commands' : 'commands (no sandbox)') : '',
             project.browser && project.rules.browser ? 'browser' : '',
             project.rules.network ? 'network' : '',
           ].filter(Boolean)

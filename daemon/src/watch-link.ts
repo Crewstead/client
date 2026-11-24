@@ -78,7 +78,17 @@ function launch(host: ToolHost, command: WatchCommand, terminal: boolean) {
   if (!project.rules.commands) throw new Error('Commands are turned off for this project.');
   if (command.network && !project.rules.network)
     throw new Error('Network access is turned off for this project.');
-  if (!host.sandbox) throw new Error('Commands cannot run on this computer (no sandbox).');
+  // No sandbox here: as the owner, and only when the owner approved it.
+  if (!host.sandbox) {
+    if (command.approval !== 'owner')
+      throw new Error('Without a sandbox, only the owner can allow a command.');
+    return {
+      ...ownerShell(command.command),
+      cwd: project.path,
+      env: ownerEnv(terminal),
+      group: process.platform !== 'win32',
+    };
+  }
   const argv = [
     ...sandboxArguments(project.path, !!command.network, host.hidden, {
       terminal,

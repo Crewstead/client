@@ -119,7 +119,8 @@
               </li>
             {/each}
             {#if machine.projects.length && !machine.sandbox}<li class="provider-empty">
-                Commands are off here: install bubblewrap (bwrap) to run them in a sandbox.
+                No sandbox here: commands run as you, each one approved. Install bubblewrap (bwrap)
+                to isolate them.
               </li>{/if}
             {#if machine.projects.length && machine.online && !machine.browser}<li
                 class="provider-empty"

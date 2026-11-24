@@ -82,7 +82,7 @@ export async function runComputerTool(
         return listFiles('/', withPath, (folder) => !!protectedPlace(folder, home));
       if (name === 'read_file') return readProjectFile('/', withPath);
       if (name === 'show_picture') return showPicture('/', withPath);
-      return searchProject('/', withPath, signal, host.ripgrep, PROTECTED_HOME_ENTRIES);
+      return searchProject('/', withPath, signal, PROTECTED_HOME_ENTRIES);
   }
 }
 
@@ -128,6 +128,23 @@ async function computerCommand(
     const hidden = computerHidden(host);
     return runCommand(cwd, { ...args, network: false }, signal, { ...host, hidden }, onOutput);
   }
+  return ownerCommand(host, cwd, args, signal, { onOutput, askPassword });
+}
+
+/**
+ * A command the owner approved, run as the owner in `cwd` with the owner's access and network: in a
+ * whole-computer chat, or in a project on a computer without a sandbox.
+ */
+export async function ownerCommand(
+  host: ToolHost,
+  cwd: string,
+  args: ProjectToolArguments<'run_command'>,
+  signal: AbortSignal,
+  {
+    onOutput,
+    askPassword,
+  }: { onOutput?: ((output: string) => void) | undefined; askPassword?: AskPassword | undefined },
+) {
   const shell = ownerShell(args.command);
   const env = ownerEnv();
   // sudo asks the owner in the app; the model only sees that it asked.

@@ -80,9 +80,13 @@ export const getSession = (id: string, context: ContextId) =>
   request<{ session: Session; cursor: number }>(scoped(`/sessions/${id}`, context));
 /** A chat with only its latest `limit` messages, and how many came before them. */
 export const getLatest = (id: string, context: ContextId, limit: number) =>
-  request<{ session: Session; cursor: number; earlier: number }>(
-    `${scoped(`/sessions/${id}`, context)}&limit=${limit}`,
-  );
+  request<{
+    session: Session;
+    cursor: number;
+    earlier: number;
+    /** What modules add to the chat as it opens, each under its own key (e.g. `scheduled`). */
+    extras?: Record<string, unknown>;
+  }>(`${scoped(`/sessions/${id}`, context)}&limit=${limit}`);
 /** Up to `limit` messages (all when absent) before the message `before`, and how many remain. */
 export const getEarlier = (id: string, context: ContextId, before: string, limit?: number) =>
   request<{ items: TimelineItem[]; branches: Record<string, ChatBranch>; earlier: number }>(

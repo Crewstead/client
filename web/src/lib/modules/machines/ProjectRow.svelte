@@ -30,7 +30,7 @@
   }
   const setRule = (rule: keyof ProjectRules, value: boolean) =>
     act(() => computerProjects.update(machineId, project.id, { rules: { [rule]: value } }));
-  const commands = $derived(sandbox && project.rules.commands);
+  const commands = $derived(project.rules.commands);
   const browsing = $derived(browser && project.rules.browser);
   const network = $derived(project.rules.network && (commands || browsing));
   const git = $derived(commands && !!project.rules.git);
@@ -40,26 +40,27 @@
       .filter(Boolean)
       .join(', '),
   );
+  // Without a sandbox on that computer (no bubblewrap) commands run as the owner, each one approved.
   const items = $derived<MenuItem[]>([
-    ...(sandbox
-      ? [
-          {
-            label: 'Commands',
-            checked: project.rules.commands,
-            hint: 'In the sandbox, each one approved or reviewed',
-            run: () => setRule('commands', !project.rules.commands),
-          },
-          {
-            label: 'Git',
-            checked: git,
-            disabled: !commands,
-            hint: commands
-              ? 'Commands may commit and branch; hooks and Git config stay read-only'
-              : 'Turn on commands first',
-            run: () => setRule('git', !project.rules.git),
-          },
-        ]
-      : []),
+    {
+      label: 'Commands',
+      checked: project.rules.commands,
+      hint: sandbox
+        ? 'In the sandbox, each one approved or reviewed'
+        : 'No sandbox: as you, each approved by you',
+      run: () => setRule('commands', !project.rules.commands),
+    },
+    {
+      label: 'Git',
+      checked: git,
+      disabled: !commands,
+      hint: !commands
+        ? 'Turn on commands first'
+        : sandbox
+          ? 'Commands may commit and branch; hooks and Git config stay read-only'
+          : 'Commands may commit and branch',
+      run: () => setRule('git', !project.rules.git),
+    },
     ...(browser
       ? [
           {
@@ -69,20 +70,16 @@
           },
         ]
       : []),
-    ...(sandbox || browser
-      ? [
-          {
-            label: 'Network',
-            checked: network,
-            disabled: !(commands || browsing),
-            hint:
-              commands || browsing
-                ? 'Reach other computers; without it only localhost'
-                : 'Turn on commands or the browser first',
-            run: () => setRule('network', !project.rules.network),
-          },
-        ]
-      : []),
+    {
+      label: 'Network',
+      checked: network,
+      disabled: !(commands || browsing),
+      hint:
+        commands || browsing
+          ? 'Reach other computers; without it only localhost'
+          : 'Turn on commands or the browser first',
+      run: () => setRule('network', !project.rules.network),
+    },
     {
       label: 'Remove project',
       confirm: 'Remove? Its files stay',

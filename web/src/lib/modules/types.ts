@@ -20,8 +20,11 @@ export interface SlotProps {
   tools: Record<string, never>;
   /** A chat's side panel, above the core sections (e.g. the skills in use). */
   'chat-panel': { session: Session };
-  /** A chat's header, before its own buttons: one compact button each (skills, scheduled tasks). */
-  'chat-header': { session: Session };
+  /**
+   * A chat's header, before its own buttons: one compact button each (skills, scheduled tasks).
+   * `extras`: what the modules' server parts added to the chat as it opened, by key.
+   */
+  'chat-header': { session: Session; extras: Record<string, unknown> };
   /** The plans page (/plans): a project's plans, or one plan when `plan` names its folder. */
   'plan-page': { project: string; plan?: string };
 }

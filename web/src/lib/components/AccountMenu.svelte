@@ -5,6 +5,7 @@
   import { useAuthentication } from '#lib/auth/auth.svelte.ts';
   import SavedAccounts from '#lib/auth/SavedAccounts.svelte';
   import SignOutDialog from './SignOutDialog.svelte';
+  import '@crewstead/ui/dropdown.css';
   import '@crewstead/ui/account-menu.css';
   let { close }: { close: () => void } = $props();
   const auth = useAuthentication();
@@ -74,7 +75,7 @@
   bind:this={menu}
   popover="auto"
   {id}
-  class="account-popover"
+  class="account-popover menu-surface"
   style:left={`${placement.left}px`}
   style:bottom={`${placement.bottom}px`}
   style:width={`${placement.width}px`}
@@ -100,22 +101,21 @@
       void auth.chooseAccount(account);
     }}
   />
-  <div class="account-menu-divider"></div>
+  <hr class="menu-separator" />
   <button
-    class="account-menu-action"
+    class="menu-item"
     onclick={() => {
       settings();
       auth.openAccount();
     }}><Plus size={16} />Add account</button
   >
-  <a class="account-menu-action" href={resolve('/usage')} onclick={settings}
-    ><ChartColumn size={16} />Usage</a
+  <a class="menu-item" href={resolve('/usage')} onclick={settings}><ChartColumn size={16} />Usage</a
   >
-  <a class="account-menu-action" href={resolve('/settings')} onclick={settings}
+  <a class="menu-item" href={resolve('/settings')} onclick={settings}
     ><Settings2 size={16} />Settings</a
   >
   <button
-    class="account-menu-action"
+    class="menu-item"
     onclick={() => {
       menu?.hidePopover();
       asking = true;

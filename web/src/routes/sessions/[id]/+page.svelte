@@ -270,7 +270,9 @@
           {models}
           loadAll={() => conversation.loadEarlier()}
         />
-        <span class="header-tools"><ModuleSlot slot="chat-header" props={{ session }} /></span>
+        <span class="header-tools"
+          ><ModuleSlot slot="chat-header" props={{ session, extras: conversation.extras }} /></span
+        >
         <button
           class="icon-button"
           aria-label="Export as Markdown"

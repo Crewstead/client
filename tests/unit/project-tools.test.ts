@@ -120,10 +120,24 @@ describe('file tools', () => {
     );
   });
 
-  it('searches with ripgrep', async () => {
-    const { output } = await searchProject(root, { pattern: 'const [ab]' }, signal);
-    expect(output.split('\n').sort()).toEqual([
+  it('searches without any program on the computer', async () => {
+    await writeFile(join(root, 'node_modules/pkg/index.js'), 'const a = 1;\n');
+    await writeFile(join(root, 'src/notes.md'), 'CONST A in prose\n');
+    const search = (args: {
+      pattern: string;
+      glob?: string;
+      path?: string;
+      ignore_case?: boolean;
+    }) => searchProject(root, args, signal).then(({ output }) => output.split('\n').sort());
+    // Dependencies and Git metadata are left out; paths are the project's.
+    expect(await search({ pattern: 'const [ab]' })).toEqual([
       'src/app.ts:1:const a = 1;',
+      'src/app.ts:2:const b = 3;',
+    ]);
+    expect(await search({ pattern: 'const a', ignore_case: true, glob: '*.md' })).toEqual([
+      'src/notes.md:1:CONST A in prose',
+    ]);
+    expect(await search({ pattern: 'b = 3', path: 'src/app.ts' })).toEqual([
       'src/app.ts:2:const b = 3;',
     ]);
     expect((await searchProject(root, { pattern: 'zzz' }, signal)).output).toBe('No matches.');

@@ -35,7 +35,7 @@ export function launcher() {
 }
 
 /**
- * The user service. It keeps the PATH of the install, so it finds `claude`, `bwrap` and `rg` the way
+ * The user service. It keeps the PATH of the install, so it finds `claude` and `bwrap` the way
  * the terminal did, and it is not restarted when the hub removed this computer.
  */
 export function unit(command: string, home: string, path = process.env.PATH ?? '') {

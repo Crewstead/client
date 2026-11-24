@@ -17,6 +17,10 @@
   padding: 16px 28px;
   min-height: 64px;
 }
+/* The header's buttons sit 2px apart, as close as the module tools beside them (header-popover.css). */
+.conversation-heading > .icon-button + .icon-button {
+  margin-left: -14px;
+}
 .conversation-heading > div {
   flex: 1;
   min-width: 0;

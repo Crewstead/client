@@ -21,11 +21,11 @@ import {
   writeProjectFile,
 } from './files.ts';
 import { searchProject } from './search.ts';
+import { ownerCommand } from './computer.ts';
 
 export interface ToolHost extends SandboxOptions {
   /** The daemon's settings folder, which lists the registered projects. */
   home: string;
-  ripgrep?: string;
   /** Commands can run in a sandbox here. */
   sandbox?: boolean;
   /** Headless browsers for the browser tools; without one they are refused. */
@@ -122,19 +122,25 @@ export async function runProjectTool(
         else if (command.name === 'show_picture')
           outcome = await showPicture(root, args as ProjectToolArguments<'show_picture'>);
         else if (command.name === 'search_files')
-          outcome = await searchProject(
-            root,
-            args as ProjectToolArguments<'search_files'>,
-            signal,
-            host.ripgrep,
-          );
-        else
+          outcome = await searchProject(root, args as ProjectToolArguments<'search_files'>, signal);
+        else if (host.sandbox)
           outcome = await runCommand(
             root,
             args as ProjectToolArguments<'run_command'>,
             signal,
             { ...host, git: !!project.rules.git },
             onOutput,
+          );
+        // No sandbox here: as the owner, and only what the owner approved, each time.
+        else if (command.approval !== 'owner')
+          throw new Error('Without a sandbox, only the owner can allow a command.');
+        else
+          outcome = await ownerCommand(
+            host,
+            root,
+            args as ProjectToolArguments<'run_command'>,
+            signal,
+            { onOutput, askPassword },
           );
     }
     return result(outcome.output, false, outcome.diff, outcome.image);

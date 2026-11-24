@@ -65,10 +65,10 @@
   /* Let the provider list hang over the dialog edge instead of scrolling the whole dialog. */
   overflow: visible;
 }
-.wide-dialog .option-picker.wide .option-list {
+.wide-dialog .option-picker.wide > .dropdown-panel {
   max-height: min(460px, 60dvh);
 }
-.wide-dialog .option-list label {
+.wide-dialog .option-picker .menu-item {
   padding: 6px 10px;
 }
 .dialog-fields {
@@ -108,10 +108,6 @@
   background: var(--surface-hover);
 }
 .choose-row input {
-  width: 16px;
-  height: 16px;
-  min-height: 16px;
-  accent-color: var(--accent);
   flex-shrink: 0;
 }
 .choose-prices {

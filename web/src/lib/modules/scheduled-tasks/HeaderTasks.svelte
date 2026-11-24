@@ -6,13 +6,16 @@
   import { tasks } from './api.ts';
   import TaskDialog from './TaskDialog.svelte';
   import TaskList from './TaskList.svelte';
-  let { session }: { session: Session } = $props();
-  let list = $state<ScheduledTask[]>([]);
+  let { session, extras }: { session: Session; extras: Record<string, unknown> } = $props();
+  /** The chat's tasks, once read; until then the soonest run came with the chat itself. */
+  let list = $state<ScheduledTask[]>();
   let error = $state('');
   let open = $state(false);
   let editing = $state<{ task?: ScheduledTask }>();
   async function load() {
-    list = await tasks.list(session.id).catch(() => list);
+    const chat = session.id;
+    const read = await tasks.list(chat).catch(() => undefined);
+    if (read && chat === session.id) list = read;
   }
   // The models' tasks use this browser's time zone too.
   $effect(() => void tasks.saveZone());
@@ -23,18 +26,39 @@
       .map((item) => `${item.id}:${item.status}`)
       .join(),
   );
+  // Another chat starts from what came with it, until its own tasks are read.
+  let shownFor = '';
   $effect(() => {
-    void session.id;
+    if (shownFor !== session.id) list = undefined;
+    shownFor = session.id;
     void calls;
     void load();
   });
   /** The soonest run of the chat's tasks that are on. */
   const next = $derived(
     list
-      .filter((task) => task.enabled && task.nextRunAt)
-      .map((task) => task.nextRunAt!)
-      .sort()[0],
+      ? list
+          .filter((task) => task.enabled && task.nextRunAt)
+          .map((task) => task.nextRunAt!)
+          .sort()[0]
+      : (extras.scheduled as { next?: string } | undefined)?.next,
   );
+  // Once that run is due, the tasks are read again for the one after it (a run that posts nothing
+  // leaves no trace in the chat to prompt that). A time already past is tried again every 30s.
+  let tick = $state(0);
+  $effect(() => {
+    void tick;
+    if (!next) return;
+    const due = Date.parse(next) - Date.now();
+    const timer = setTimeout(
+      () => {
+        tick++;
+        void load();
+      },
+      due > 0 ? Math.min(due + 2_000, 86_400_000) : 30_000,
+    );
+    return () => clearTimeout(timer);
+  });
   /** Today, just the time; another day, its weekday too (its date when more than a week away). */
   function when(iso: string) {
     const at = new Date(iso);
@@ -56,14 +80,15 @@
 <HeaderPopover
   bind:open
   wide
-  label="Scheduled tasks"
+  label={next ? `Scheduled, next ${when(next)}` : 'Scheduled'}
+  heading="Scheduled tasks"
   title={next ? `Scheduled tasks · next ${when(next)}` : 'Scheduled tasks'}
 >
   {#snippet button()}<CalendarClock size={17} />{#if next}<span class="header-tool-value"
         >{when(next)}</span
       >{/if}{/snippet}
   <div class="popover-body">
-    {#if list.length}
+    {#if list?.length}
       <TaskList
         {list}
         edit={(task) => {

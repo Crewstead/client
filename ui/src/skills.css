@@ -160,40 +160,10 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-/* The chat header's skills: one row per skill, its switch on the right. */
-.skill-toggle {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 38px;
-  padding: 6px 10px;
-  border-radius: 7px;
-  color: var(--text);
-  cursor: pointer;
-}
-.skill-toggle:hover {
-  background: var(--surface-hover);
-}
-.skill-toggle > svg {
-  flex: none;
-  color: var(--muted);
-}
-.skill-toggle-text {
-  display: grid;
-  flex: 1;
-  min-width: 0;
-  font-size: var(--text-sm);
-}
-.skill-toggle-text > span {
-  overflow: hidden;
+/* The chat header's skills: menu items (dropdown.css) with the name in code type and a switch. */
+.skill-toggle .menu-text > :first-child {
   font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
   font-size: 12.5px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.skill-toggle-text small {
-  color: var(--faint);
-  font-size: var(--text-xs);
 }
 .skill-toggle:has(input:disabled) {
   cursor: default;

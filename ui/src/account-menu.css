@@ -41,19 +41,13 @@
   color: var(--muted);
   flex-shrink: 0;
 }
+/* Opened as a popover (over the sidebar's edge); its look is dropdown.css .menu-surface. */
 .account-popover {
-  overflow-y: auto;
   position: fixed;
   top: auto;
   right: auto;
-  margin: 0;
   max-width: calc(100vw - 16px);
-  padding: 5px;
-  background: #25272f;
-  color: var(--text);
-  border: 1px solid #3b3e49;
-  border-radius: 11px;
-  box-shadow: 0 12px 32px #0006;
+  overflow-y: auto;
 }
 .account-popover-identity {
   display: flex;
@@ -87,31 +81,6 @@
 .account-popover-identity > svg {
   color: var(--muted);
   flex-shrink: 0;
-}
-.account-menu-divider {
-  height: 1px;
-  background: var(--line);
-  margin: 4px;
-}
-.account-menu-action {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  min-height: 36px;
-  padding: 8px 10px;
-  border-radius: 6px;
-  font-size: var(--text-sm);
-  line-height: 20px;
-  color: var(--text);
-  text-align: left;
-}
-.account-menu-action > svg {
-  color: var(--muted);
-  flex-shrink: 0;
-}
-.account-menu-action:hover {
-  background: #ffffff08;
 }
 .account-menu-error {
   font-size: var(--text-xs);

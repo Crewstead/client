@@ -72,10 +72,10 @@
   .card-footer .option-picker {
     flex: 1 1 120px;
   }
-  .card-footer .option-picker summary {
+  .card-footer .option-picker > summary {
     width: 100%;
   }
-  .card-footer .option-list {
+  .card-footer .option-picker .dropdown-panel {
     left: 0;
     right: auto;
   }
