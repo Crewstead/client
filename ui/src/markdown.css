@@ -106,6 +106,26 @@
   font-size: 13px;
   line-height: 1.55;
 }
+/* Code colours (Shiki's CSS-variable theme): quiet hues from the chart palette. */
+.md-code {
+  --code-foreground: var(--text);
+  --code-background: transparent;
+  --code-token-keyword: #b4a9f0;
+  --code-token-function: #7fb6ec;
+  --code-token-string: #86c9a4;
+  --code-token-string-expression: #86c9a4;
+  --code-token-constant: #e3a07a;
+  --code-token-parameter: #dcc98a;
+  --code-token-comment: var(--faint);
+  --code-token-punctuation: var(--muted);
+  --code-token-link: #7fb6ec;
+}
+.md-code .italic {
+  font-style: italic;
+}
+.md-code .bold {
+  font-weight: 600;
+}
 /* A table keeps its words whole and scrolls sideways, even in text that wraps anywhere. */
 .md-table {
   overflow-x: auto;
@@ -184,4 +204,25 @@
   width: 100%;
   border: 0;
   background: transparent;
+}
+/* LaTeX: a formula on its own line centres and scrolls sideways when wide. */
+.md-math {
+  display: block;
+  margin: 0 0 var(--space-3);
+  padding: 2px 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  text-align: center;
+}
+.md-math .katex-display {
+  margin: 0;
+}
+.md-math .katex,
+.md-math-inline .katex {
+  font-size: 1.08em;
+}
+.md-math-source {
+  display: block;
+  white-space: pre-wrap;
+  text-align: left;
 }

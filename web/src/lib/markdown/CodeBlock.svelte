@@ -2,6 +2,7 @@
   import { Check, Code, Copy, Eye, Play } from '@lucide/svelte';
   import { copyText } from '#lib/clipboard.ts';
   import { useTerminals } from '#lib/terminals/terminals.svelte.ts';
+  import { highlight, type CodeLine } from './highlight.ts';
   import LiveHtml from './LiveHtml.svelte';
   import MermaidDiagram from './MermaidDiagram.svelte';
   let {
@@ -16,6 +17,19 @@
   const runnable = $derived(!!terminals?.typing && SHELLS.has(kind) && !!text.trim());
   // A diagram or a page shows once its block is complete (not while it streams in).
   const shown = $derived((kind === 'mermaid' || kind === 'html') && closed && !!text.trim());
+  /** The newest coloured text; while a reply streams, the rest after it shows plain until coloured. */
+  let coloured = $state<{ text: string; lines: CodeLine[] }>();
+  const rest = $derived(
+    coloured && text.startsWith(coloured.text) ? text.slice(coloured.text.length) : undefined,
+  );
+  $effect(() => {
+    const source = text;
+    let current = true;
+    void highlight(source, kind).then((lines) => {
+      if (current && lines) coloured = { text: source, lines };
+    });
+    return () => (current = false);
+  });
   let asCode = $state(false);
   let copied = $state(false);
   let running = $state(false);
@@ -62,5 +76,12 @@
       >
         <MermaidDiagram {text} />
       </div>{/if}
+  {:else if coloured && rest !== undefined}<pre><code
+        >{#each coloured.lines as line, index (index)}{#each line as token, at (at)}<span
+              style:color={token.color}
+              class:italic={!!((token.fontStyle ?? 0) & 1)}
+              class:bold={!!((token.fontStyle ?? 0) & 2)}>{token.content}</span
+            >{/each}{/each}{rest}</code
+      ></pre>
   {:else}<pre><code>{text}</code></pre>{/if}
 </figure>

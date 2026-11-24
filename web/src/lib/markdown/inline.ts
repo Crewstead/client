@@ -6,7 +6,17 @@ export type Inline =
   | { type: 'strong' | 'em' | 'del'; children: Inline[] }
   | { type: 'link'; href: string; children: Inline[] }
   /** `![caption](src)`: a picture in the chat, or a file on the chat's computer. */
-  | { type: 'image'; src: string; alt: string };
+  | { type: 'image'; src: string; alt: string }
+  /** LaTeX: `$…$` or `\(…\)` in the line; `$$…$$` or `\[…\]` on a line of its own. */
+  | { type: 'math'; tex: string; display: boolean };
+
+/** `$5 and $10` stays text: a formula's `$` hugs it, and a closing `$` is not before a digit. */
+const formulas: Array<[RegExp, boolean]> = [
+  [/^\$\$([^$]+?)\$\$/, true],
+  [/^\\\[([\s\S]+?)\\\]/, true],
+  [/^\\\(([\s\S]+?)\\\)/, false],
+  [/^\$(?!\s)([^$\n]*?[^\s\\])\$(?!\d)/, false],
+];
 
 /** Only these link targets are kept; anything else (javascript:, data:, …) stays plain text. */
 export function safeHref(raw: string) {
@@ -37,7 +47,19 @@ export function parseInline(source: string): Inline[] {
   let i = 0;
   while (i < source.length) {
     const rest = source.slice(i);
-    if (rest[0] === '\\' && /^\\[\\`*_~[\]()#>!|-]/.test(rest)) {
+    const formula =
+      (rest[0] === '$' || rest[0] === '\\') &&
+      formulas
+        .map(([pattern, display]) => [pattern.exec(rest), display] as const)
+        .find(([match]) => match);
+    if (formula && !(rest[0] === '$' && /\w$/.test(text))) {
+      const [match, display] = formula;
+      flush();
+      out.push({ type: 'math', tex: match![1]!, display });
+      i += match![0].length;
+      continue;
+    }
+    if (rest[0] === '\\' && /^\\[\\`*_~[\]()#>!|$-]/.test(rest)) {
       text += rest[1];
       i += 2;
       continue;

@@ -86,4 +86,19 @@ describe('Markdown blocks', () => {
     // A pipe in an ordinary sentence stays text.
     expect(parseBlocks('a | b\nmore text').map((block) => block.type)).toEqual(['paragraph']);
   });
+  it('reads LaTeX formulas but leaves prices and unclosed dollars as text', () => {
+    expect(parseInline('Let $x^2$ and \\(y\\), cost $5 and $10, US$3, \\$4')).toEqual([
+      { type: 'text', text: 'Let ' },
+      { type: 'math', tex: 'x^2', display: false },
+      { type: 'text', text: ' and ' },
+      { type: 'math', tex: 'y', display: false },
+      { type: 'text', text: ', cost $5 and $10, US$3, $4' },
+    ]);
+    expect(parseBlocks('$$\na + b\n$$\n\\[ c \\]\n```math\nd\n```\n$$ e')).toEqual([
+      { type: 'math', tex: '\na + b\n', closed: true },
+      { type: 'math', tex: ' c ', closed: true },
+      { type: 'math', tex: 'd', closed: true },
+      { type: 'math', tex: ' e', closed: false },
+    ]);
+  });
 });

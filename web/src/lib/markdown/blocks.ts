@@ -9,12 +9,15 @@ export type Block =
   | { type: 'list'; ordered: boolean; start: number; items: Block[][] }
   | { type: 'quote'; blocks: Block[] }
   | { type: 'table'; align: Align[]; head: Inline[][]; rows: Inline[][][] }
-  | { type: 'rule' };
+  | { type: 'rule' }
+  /** A LaTeX formula on its own lines: `$$ … $$`, `\[ … \]` or a ```math fence. */
+  | { type: 'math'; tex: string; closed: boolean };
 
 const fence = /^ {0,3}(`{3,}|~{3,})\s*([\w+#.-]*)/;
 const heading = /^ {0,3}(#{1,6})\s+(.*?)\s*#*\s*$/;
 const rule = /^ {0,3}([-*_])(\s*\1){2,}\s*$/;
 const bullet = /^(\s*)([-*+]|\d{1,9}[.)])\s+(.*)$/;
+const mathOpen = /^ {0,3}(\$\$|\\\[)(.*)$/;
 const divider = /^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?\s*$/;
 
 const cells = (line: string) =>
@@ -28,6 +31,7 @@ const startsTable = (lines: string[], i: number) =>
   lines[i]!.includes('|') && divider.test(lines[i + 1] ?? '');
 const startsBlock = (line: string) =>
   fence.test(line) ||
+  mathOpen.test(line) ||
   heading.test(line) ||
   rule.test(line) ||
   /^\s*>/.test(line) ||
@@ -54,7 +58,27 @@ export function parseBlocks(source: string): Block[] {
       while (i < lines.length && !lines[i]!.trim().startsWith(open[1]!)) body.push(lines[i++]!);
       const closed = i < lines.length;
       i++;
-      blocks.push({ type: 'code', language: open[2] ?? '', text: body.join('\n'), closed });
+      const text = body.join('\n');
+      blocks.push(
+        open[2] === 'math'
+          ? { type: 'math', tex: text, closed }
+          : { type: 'code', language: open[2] ?? '', text, closed },
+      );
+      continue;
+    }
+    const math = mathOpen.exec(line);
+    if (math) {
+      const end = math[1] === '$$' ? '$$' : '\\]';
+      const body: string[] = [];
+      let rest = math[2]!;
+      i++;
+      while (!rest.includes(end) && i < lines.length) {
+        body.push(rest);
+        rest = lines[i++]!;
+      }
+      const closed = rest.includes(end);
+      body.push(closed ? rest.slice(0, rest.indexOf(end)) : rest);
+      blocks.push({ type: 'math', tex: body.join('\n'), closed });
       continue;
     }
     const title = heading.exec(line);

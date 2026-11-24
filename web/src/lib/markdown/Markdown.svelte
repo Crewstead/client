@@ -2,6 +2,7 @@
   import { parseBlocks, type Block } from './blocks.ts';
   import CodeBlock from './CodeBlock.svelte';
   import Inline from './Inline.svelte';
+  import MathTex from './MathTex.svelte';
   import Self from './Markdown.svelte';
   import { providePictureOwner } from './pictures.ts';
   import '@crewstead/ui/markdown.css';
@@ -58,5 +59,6 @@
         </tbody>
       </table>
     </div>
+  {:else if block.type === 'math'}<MathTex tex={block.tex} display closed={block.closed} />
   {:else if block.type === 'rule'}<hr />{/if}
 {/each}
