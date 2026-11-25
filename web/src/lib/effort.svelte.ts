@@ -20,7 +20,7 @@ function saved(): EffortChoice {
   }
 }
 
-/** The effort chosen in the composer, remembered on this device and used for every chat. */
+/** The effort picked last on this device, which new chats start with; each chat keeps its own. */
 class EffortSetting {
   value = $state<EffortChoice>(saved());
   set(next: EffortChoice) {

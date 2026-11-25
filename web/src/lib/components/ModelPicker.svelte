@@ -1,7 +1,7 @@
 <script lang="ts">
   import { ChevronDown } from '@lucide/svelte';
   import type { Model } from '@crewstead/core/protocol';
-  import { effortSetting, efforts } from '#lib/effort.svelte.ts';
+  import { efforts, type EffortChoice } from '#lib/effort.svelte.ts';
   import ModelDialog from './ModelDialog.svelte';
   import '@crewstead/ui/model-picker.css';
   import '@crewstead/ui/place-dialog.css';
@@ -10,18 +10,21 @@
     value = $bindable(),
     disabled = false,
     effort = false,
+    effortChoice = $bindable('auto'),
   }: {
     models: Model[];
     value: string;
     disabled?: boolean;
     /** The chosen model accepts an effort setting; the dialog offers it below the models. */
     effort?: boolean;
+    /** The effort picked: the chat's own, or for a new chat the one picked last. */
+    effortChoice?: EffortChoice;
   } = $props();
   const label = $derived(models.find((model) => model.id === value)?.label);
-  const effortLabel = $derived(efforts.find((option) => option.value === effortSetting.value)!);
+  const effortLabel = $derived(efforts.find((option) => option.value === effortChoice)!);
   // Like Claude desktop, a non-default effort shows next to the model's name.
   const summary = $derived(
-    effort && effortSetting.value !== 'auto' ? `${label} · ${effortLabel.label}` : label,
+    effort && effortChoice !== 'auto' ? `${label} · ${effortLabel.label}` : label,
   );
   let open = $state(false);
   let trigger = $state<HTMLButtonElement>();
@@ -45,7 +48,9 @@
     {models}
     {value}
     {effort}
+    {effortChoice}
     choose={(id) => (value = id)}
+    chooseEffort={(choice) => (effortChoice = choice)}
     close={() => {
       open = false;
       trigger?.focus();

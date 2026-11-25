@@ -2,7 +2,7 @@
   import { closeOutside } from '#lib/close-outside.ts';
   import { Search } from '@lucide/svelte';
   import type { Model } from '@crewstead/core/protocol';
-  import { effortSetting, efforts } from '#lib/effort.svelte.ts';
+  import { efforts, type EffortChoice } from '#lib/effort.svelte.ts';
   import '@crewstead/ui/dialogs.css';
   import '@crewstead/ui/search.css';
   import '@crewstead/ui/place-dialog.css';
@@ -12,14 +12,18 @@
     models,
     value,
     effort,
+    effortChoice,
     choose,
+    chooseEffort,
     close,
   }: {
     models: Model[];
     value: string;
     /** The chosen model accepts an effort setting: the dialog offers it below the models. */
     effort: boolean;
+    effortChoice: EffortChoice;
     choose: (id: string) => void;
+    chooseEffort: (choice: EffortChoice) => void;
     close: () => void;
   } = $props();
   let dialog: HTMLDialogElement;
@@ -120,8 +124,8 @@
       {#each efforts as option (option.value)}
         <button
           type="button"
-          aria-pressed={effortSetting.value === option.value}
-          onclick={() => effortSetting.set(option.value)}>{option.label}</button
+          aria-pressed={effortChoice === option.value}
+          onclick={() => chooseEffort(option.value)}>{option.label}</button
         >
       {/each}
     </div>

@@ -2,7 +2,6 @@ import { untrack } from 'svelte';
 import { apiUrl, withAccount } from './auth/connection.ts';
 import type {
   ContextId,
-  Effort,
   ItemDelta,
   Session,
   StreamEvent,
@@ -16,8 +15,8 @@ import { LATEST, forgetChat, keepChat, keptChat } from './recent-chats.ts';
 
 const RETRY_MAX_MS = 30_000;
 
-/** The model, effort and project picked in the prompt box, sent when they change. */
-type SendChoices = { effort?: Effort; modelId?: string; projectId?: string };
+/** The model and project picked in the prompt box, sent when they change; the chat keeps its effort. */
+type SendChoices = { modelId?: string; projectId?: string };
 
 export class Conversation {
   session = $state<Session | null>(null);
@@ -312,10 +311,9 @@ export class Conversation {
     }
   }
 
-  private choices({ effort, modelId, projectId }: SendChoices) {
+  private choices({ modelId, projectId }: SendChoices) {
     const session = this.session!;
     return {
-      ...(effort ? { effort } : {}),
       ...(modelId && modelId !== session.modelId ? { modelId } : {}),
       ...(projectId !== undefined && projectId !== (session.projectId ?? '')
         ? { projectId: projectId || null }

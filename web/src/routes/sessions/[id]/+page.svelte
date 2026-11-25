@@ -25,7 +25,6 @@
   import ChatStats from '#lib/components/ChatStats.svelte';
   import type { Command } from '#lib/commands.ts';
   import { goto } from '$app/navigation';
-  import { effortSetting } from '#lib/effort.svelte.ts';
   import ChatPanel from '#lib/components/panel/ChatPanel.svelte';
   import { chatPanel } from '#lib/chat-panel.svelte.ts';
   import type { ChatActions } from '#lib/components/versions/chat-actions.ts';
@@ -109,10 +108,8 @@
     },
     { name: 'new', run: () => goto(resolve('/new')) },
   ];
-  // Retrying, editing and forking from the timeline go with the model and place picked below.
-  /** What the prompt box has chosen, sent with a message. */
+  /** The model and place picked below, for messages, retries and edits alike. */
   const choices = () => ({
-    ...(model?.effort ? { effort: effortSetting.forRequest() } : {}),
     modelId: chosen,
     projectId: project,
   });
@@ -364,6 +361,9 @@
                 {models}
                 bind:value={() => chosen, pickModel}
                 effort={!!model?.effort}
+                bind:effortChoice={
+                  () => session.effort ?? 'auto', (to) => workspace.pickEffort(session.id, to)
+                }
                 disabled={conversation.sending}
               />{:else}<span>Unavailable model</span>{/if}
           {/snippet}

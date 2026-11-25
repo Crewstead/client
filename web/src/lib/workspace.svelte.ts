@@ -1,9 +1,10 @@
 import { getContext } from 'svelte';
-import type { ApprovalMode, ContextId, Session } from '@crewstead/core/protocol';
+import type { ApprovalMode, ContextId, Effort, Session } from '@crewstead/core/protocol';
 import { SvelteMap } from 'svelte/reactivity';
 import { request, scoped, type Catalog, type ChatSummary } from './api';
 import type { ListView } from './components/list-view.ts';
 import { newReply, notifier } from './notifications.svelte.ts';
+import { effortSetting, type EffortChoice } from './effort.svelte.ts';
 
 /** A chat whose reply is still going (working, or waiting for the owner). */
 export const busy = (status: Session['status']) =>
@@ -96,10 +97,18 @@ export class Workspace {
     if (this.catalog) this.catalog.preferences = result;
   }
 
+  /** A chat's effort from its next reply on; new chats start with the one picked last. */
+  pickEffort(id: string, choice: EffortChoice) {
+    effortSetting.set(choice);
+    const effort = choice === 'auto' ? null : choice;
+    void this.setPreferences(id, { effort }).catch(() => {});
+  }
+
   async setPreferences(
     id: string,
     patch: Partial<Pick<Session, 'pinned' | 'archived' | 'title' | 'modelId' | 'approvalMode'>> & {
       reviewModelId?: string | null;
+      effort?: Effort | null;
     },
   ) {
     const context = this.context;

@@ -116,6 +116,7 @@
           models={workspace.catalog?.models ?? []}
           bind:value={model}
           effort={!!selected?.effort}
+          bind:effortChoice={() => effortSetting.value, (choice) => effortSetting.set(choice)}
           disabled={sending || !!pending}
         />
       {/snippet}
