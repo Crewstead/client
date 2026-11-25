@@ -10,7 +10,7 @@ import type {
   ToolProgress,
 } from '@crewstead/core/protocol';
 import { getEarlier, getLatest, request, scoped } from './api';
-import { addUsage } from '@crewstead/core/protocol';
+import { applyChatUpdate } from '@crewstead/core/protocol';
 import { newId } from './ids.ts';
 import { LATEST, forgetChat, keepChat, keptChat } from './recent-chats.ts';
 
@@ -146,41 +146,9 @@ export class Conversation {
       const update = JSON.parse(event.data) as StreamEvent;
       if (update.cursor <= this.cursor) return;
       this.cursor = update.cursor;
-      if (update.event.type === 'session.status') this.session.status = update.event.status;
-      else if (update.event.type === 'session.preferences') {
-        this.session.pinned = update.event.pinned;
-        this.session.archived = update.event.archived;
-        if (update.event.title) this.session.title = update.event.title;
-        if (update.event.named) this.session.named = true;
-      } else if (update.event.type === 'session.model') this.session.modelId = update.event.modelId;
-      else if (update.event.type === 'session.approvals')
-        this.session.approvalMode = update.event.mode;
-      else if (update.event.type === 'session.reviewer')
-        this.session.reviewModelId = update.event.modelId;
-      else if (update.event.type === 'session.context') {
-        this.session.contextUsed = update.event.tokens;
-        this.session.contextParts = update.event.parts;
-      } else if (update.event.type === 'session.usage')
-        this.session.usage = addUsage(
-          this.session.usage,
-          update.event.modelId ?? this.session.modelId,
-          update.event.usage,
-          update.event.purpose,
-        );
-      else if (update.event.type === 'session.project') {
-        if (update.event.projectId) {
-          this.session.projectId = update.event.projectId;
-          if (update.event.name) this.session.projectName = update.event.name;
-        } else {
-          delete this.session.projectId;
-          delete this.session.projectName;
-        }
-      } else if (update.event.type === 'session.queue') this.session.queued = update.event.queued;
-      else if (update.event.type === 'session.items') {
-        this.session.items = update.event.items;
-        this.session.branches = update.event.branches;
-        this.earlier = 0;
-      } else this.upsert(update.event.item);
+      applyChatUpdate(this.session, update.event, (item) => this.upsert(item));
+      // The whole chat came: every message of it is here now.
+      if (update.event.type === 'session.items') this.earlier = 0;
     });
   }
 
