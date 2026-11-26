@@ -22,8 +22,9 @@
   const rest = $derived(
     coloured && text.startsWith(coloured.text) ? text.slice(coloured.text.length) : undefined,
   );
+  // The text itself, not the parsed block it came in: coloured again only when it changed.
+  const source = $derived(text);
   $effect(() => {
-    const source = text;
     let current = true;
     void highlight(source, kind).then((lines) => {
       if (current && lines) coloured = { text: source, lines };

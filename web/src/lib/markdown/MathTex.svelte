@@ -7,10 +7,12 @@
     closed = true,
   }: { tex: string; display?: boolean; closed?: boolean } = $props();
   let html = $state<string>();
+  // The formula itself, not the parsed block it came in: drawn again only when it changed.
+  const source = $derived(tex.trim());
+  const complete = $derived(closed);
   $effect(() => {
-    const source = tex.trim();
     let current = true;
-    if (closed && source)
+    if (complete && source)
       void renderMath(source, display).then((markup) => {
         if (current) html = markup;
       });

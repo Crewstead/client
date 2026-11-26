@@ -21,6 +21,8 @@
   const workspace = useWorkspace();
   const id = $props.id();
   let dialog = $state<HTMLDialogElement>();
+  // Counted only while shown: counting goes over the whole chat, which changes as a reply streams.
+  let shown = $state(false);
   let cost = $state<{ usd: number; estimated: boolean; byModel: Record<string, number> }>();
   const stats = $derived(chatStats(session));
   const label = (modelId: string) =>
@@ -57,6 +59,7 @@
   });
   /** Opened from the context meter in the prompt box. */
   export function open() {
+    shown = true;
     dialog?.showModal();
     void loadAll?.();
   }
@@ -73,6 +76,7 @@
 <dialog
   {@attach closeOutside}
   bind:this={dialog}
+  onclose={() => (shown = false)}
   class="dialog-content stats-dialog"
   aria-labelledby={`${id}-title`}
 >
@@ -82,6 +86,10 @@
       ><X size={16} /></button
     >
   </header>
+  {#if shown}{@render body()}{/if}
+</dialog>
+
+{#snippet body()}
   {#if session.contextUsed}<ContextBreakdown
       parts={session.contextParts}
       used={session.contextUsed}
@@ -196,4 +204,4 @@
   {:else}<p class="stats-note">
       No token counts yet. They are recorded from now on for every reply.
     </p>{/if}
-</dialog>
+{/snippet}

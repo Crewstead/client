@@ -11,6 +11,7 @@ import type {
 import { getEarlier, getLatest, request, scoped } from './api';
 import { applyChatUpdate } from '@crewstead/core/protocol';
 import { newId } from './ids.ts';
+import { StreamedText } from './streamed-text.ts';
 import { LATEST, forgetChat, keepChat, keptChat } from './recent-chats.ts';
 
 const RETRY_MAX_MS = 30_000;
@@ -34,6 +35,7 @@ export class Conversation {
   private cursor = 0;
   private context?: ContextId;
   private loading?: Promise<void>;
+  private streamed = new StreamedText(() => this.session?.items);
 
   async open(id: string, context: ContextId) {
     this.close();
@@ -98,6 +100,7 @@ export class Conversation {
     };
     source.addEventListener('deleted', () => {
       if (!current()) return;
+      this.streamed.drop();
       this.session = null;
       this.close();
       forgetChat(id, context);
@@ -110,24 +113,19 @@ export class Conversation {
         cursor: number;
         earlier?: number;
       };
+      this.streamed.drop();
       this.session = snapshot.session;
       this.earlier = snapshot.earlier ?? 0;
       this.cursor = snapshot.cursor;
     });
     // On a resumed stream: the reply still being written, with its text so far.
     source.addEventListener('live', (event) => {
-      if (current() && this.session) this.upsert(JSON.parse(event.data) as TimelineItem);
+      if (!current() || !this.session) return;
+      this.streamed.show();
+      this.upsert(JSON.parse(event.data) as TimelineItem);
     });
     source.addEventListener('delta', (event) => {
-      if (!current() || !this.session) return;
-      const delta = JSON.parse(event.data) as ItemDelta;
-      const item = this.session.items.find((candidate) => candidate.id === delta.itemId);
-      // A gap (missed fragment) is skipped; the next saved update carries the full text.
-      if (!item) return;
-      if (delta.field === 'reasoning') {
-        if ((item.reasoning ?? '').length === delta.offset)
-          item.reasoning = (item.reasoning ?? '') + delta.text;
-      } else if (item.text.length === delta.offset) item.text += delta.text;
+      if (current() && this.session) this.streamed.add(JSON.parse(event.data) as ItemDelta);
     });
     // A running command's output so far; the saved result replaces it when it ends.
     source.addEventListener('progress', (event) => {
@@ -145,6 +143,7 @@ export class Conversation {
       const update = JSON.parse(event.data) as StreamEvent;
       if (update.cursor <= this.cursor) return;
       this.cursor = update.cursor;
+      this.streamed.show();
       applyChatUpdate(this.session, update.event, (item) => this.upsert(item));
       // The whole chat came: every message of it is here now.
       if (update.event.type === 'session.items') this.earlier = 0;
@@ -342,6 +341,7 @@ export class Conversation {
   }
 
   close() {
+    this.streamed.show();
     // The chat as it is now, for going back to it. Untracked: a page opening chats from an effect
     // must not rerun it on every change to the chat.
     untrack(() => {

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { tick } from 'svelte';
+  import { onDestroy, tick } from 'svelte';
   import { resolve } from '$app/paths';
   import {
     ArrowDown,
@@ -124,9 +124,26 @@
     return found;
   });
   const lastTurn = $derived(items.at(-1)?.id);
+  // Follows the newest message until the owner moves up at all. Moving down to the bottom follows it
+  // again: within about a line, as a streaming reply grows past where the scroll landed.
   let nearBottom = $state(true);
+  let lastTop = 0;
+  let touchY = 0;
   function scroll() {
-    nearBottom = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight < 90;
+    const at = viewport.scrollTop;
+    const gap = viewport.scrollHeight - at - viewport.clientHeight;
+    if (gap < 2 || (at > lastTop && gap < 48)) nearBottom = true;
+    else if (at < lastTop) nearBottom = false;
+    lastTop = at;
+  }
+  // The wheel and a finger let go before the next streamed text can pull the view back down.
+  function wheel(event: WheelEvent) {
+    if (event.deltaY < 0) nearBottom = false;
+  }
+  function touch(event: TouchEvent) {
+    const y = event.touches[0]?.clientY ?? touchY;
+    if (event.type === 'touchmove' && y > touchY) nearBottom = false;
+    touchY = y;
   }
   function bottom() {
     viewport.scrollTop = viewport.scrollHeight;
@@ -153,17 +170,26 @@
     const tail = items.at(-1)?.text;
     // Also when the reply ends: what it ended with may grow then (its questions open).
     void running;
-    if ((length || tail) && nearBottom && viewport)
-      queueMicrotask(() => {
-        viewport.scrollTop = viewport.scrollHeight;
-      });
+    if ((length || tail) && nearBottom && viewport) follow();
   });
+  // Once a frame at most: reading the chat's height makes the browser lay all of it out again.
+  let following = 0;
+  function follow() {
+    following ||= requestAnimationFrame(() => {
+      following = 0;
+      if (nearBottom && viewport) viewport.scrollTop = viewport.scrollHeight;
+    });
+  }
+  onDestroy(() => cancelAnimationFrame(following));
 </script>
 
 <div
   class="timeline"
   bind:this={viewport}
   onscroll={scroll}
+  onwheel={wheel}
+  ontouchstart={touch}
+  ontouchmove={touch}
   role="log"
   aria-label="Chat history"
   aria-live="polite"
