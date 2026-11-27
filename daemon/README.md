@@ -27,8 +27,10 @@ crewstead logs | restart | uninstall
 crewstead run                              # run in a terminal instead of the background
 ```
 
-In project chats, commands run only inside bubblewrap (`bwrap`); see `src/tools/command.ts` for exactly what is
-visible and writable. Whole-computer chats (`src/tools/computer.ts`) run approved commands as you, in
+In project chats, commands run inside bubblewrap (`bwrap`) on Linux; see `src/tools/command.ts` for exactly
+what is visible and writable. On Windows they run through `crewstead-sandbox.exe` (`../sandbox-windows`,
+`src/tools/sandbox-windows.ts`): writes only in the project, and with `crewstead sandbox setup` as a hidden
+sandbox user without your files or (unless asked) the network. Without either, you approve each one. Whole-computer chats (`src/tools/computer.ts`) run approved commands as you, in
 bash, in their own work folder; unapproved ones run only in that sandbox. Private places (keys, sign-ins,
 browser profiles, the hub's data) are opened only with your own approval of that call. The browser tools drive a headless Chromium (its own sandbox, a fresh profile per
 chat, no downloads; only localhost unless the project allows network) and can take screenshots, which the

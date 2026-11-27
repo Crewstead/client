@@ -28,7 +28,7 @@ import {
   uninstall,
 } from './service.ts';
 import { Askpass } from './tools/askpass.ts';
-import { sandboxAvailable } from './tools/command.ts';
+import { commandSandbox, sandboxCommand, sandboxLine } from './command-sandbox.ts';
 
 const HELP = `Crewstead on this computer
 
@@ -43,6 +43,8 @@ const HELP = `Crewstead on this computer
                                     computer commands|browser on|off narrows it
   crewstead terminal on|off         Let you open shells here from Crewstead (in projects, and
                                     on the whole computer when that is on)
+  crewstead sandbox setup|remove    On Windows: run commands as a hidden sandbox user (asks for
+                                    an administrator once), or remove it again
   crewstead install-browser         Download the headless browser again (install does it once)
   crewstead logs                    Follow the background service's log
   crewstead restart                 Restart the background service
@@ -105,6 +107,8 @@ async function main([command = 'status', ...args]: string[]) {
       return log(`Whole-computer chats: ${computerCommand(home, args)}`);
     case 'terminal':
       return log(`Terminals from Crewstead: ${terminalCommand(home, args)}`);
+    case 'sandbox':
+      return log(await sandboxCommand(home, args));
     case 'remove':
     case 'remove-project':
       return log(
@@ -139,9 +143,7 @@ function status(home: string, { browserInstalled }: BrowserModule) {
             : 'stopped (crewstead logs shows why; crewstead restart)'
     }`,
   );
-  log(
-    `  Sandbox:   ${sandboxAvailable() ? 'bubblewrap' : 'none: commands run as you, each one approved (install bubblewrap to isolate them)'}`,
-  );
+  log(`  Sandbox:   ${sandboxLine(home)}`);
   log(
     `  Browser:   ${browserInstalled() ? "Chromium (headless; the app's own browser when run by the app)" : 'not installed (crewstead install-browser)'}`,
   );
@@ -214,7 +216,7 @@ async function run(home: string) {
       log: (line) => log(`[crewstead] ${line}`),
       tools: {
         home,
-        sandbox: sandboxAvailable(),
+        ...commandSandbox(home),
         hidden: [home, hubDataFolder()],
         browser,
         ...(askpass ? { askpass } : {}),

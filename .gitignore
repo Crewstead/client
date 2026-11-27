@@ -9,3 +9,6 @@ test-results/
 !.env.example
 .claude/
 *.tsbuildinfo
+
+# The Windows sandbox, built by cargo.
+sandbox-windows/target/

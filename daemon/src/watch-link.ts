@@ -8,6 +8,8 @@ import {
 import { computerSettings } from './computer.ts';
 import { openProject } from './projects.ts';
 import { sandboxArguments } from './tools/command.ts';
+import { gitIdentity } from './tools/git-metadata.ts';
+import { windowsLaunch, type WindowsPlace } from './tools/sandbox-windows.ts';
 import { chatFolder, computerHidden, ownerEnv, ownerShell } from './tools/computer.ts';
 import type { ToolHost } from './tools/run.ts';
 import { plainLines, type terminalLink } from './terminal-link.ts';
@@ -71,6 +73,8 @@ function launch(host: ToolHost, command: WatchCommand, terminal: boolean) {
         group: process.platform !== 'win32',
       };
     if (!host.sandbox) throw new Error('This command needs the owner’s approval.');
+    if (host.windows)
+      return windowsWatch(host, { root: cwd, network: false, terminal }, command.command);
     const argv = [...sandboxArguments(cwd, false, computerHidden(host), { terminal }), '--'];
     return { file: host.bwrap ?? 'bwrap', argv: [...argv, '/bin/sh', '-c', command.command] };
   }
@@ -89,6 +93,15 @@ function launch(host: ToolHost, command: WatchCommand, terminal: boolean) {
       group: process.platform !== 'win32',
     };
   }
+  if (host.windows) {
+    const git = !!project.rules.git;
+    const place = { root: project.path, network: !!command.network, terminal, git };
+    return windowsWatch(
+      host,
+      { ...place, env: git ? gitIdentity(project.path) : {} },
+      command.command,
+    );
+  }
   const argv = [
     ...sandboxArguments(project.path, !!command.network, host.hidden, {
       terminal,
@@ -97,6 +110,12 @@ function launch(host: ToolHost, command: WatchCommand, terminal: boolean) {
     '--',
   ];
   return { file: host.bwrap ?? 'bwrap', argv: [...argv, '/bin/sh', '-c', command.command] };
+}
+
+/** A watched command in the Windows sandbox (sandbox-windows.ts). */
+function windowsWatch(host: ToolHost, place: WindowsPlace, command: string) {
+  const how = windowsLaunch(host.home, host.windows!, place, command);
+  return { file: how.file, argv: how.argv, cwd: place.root, env: how.env, group: false };
 }
 
 function start(

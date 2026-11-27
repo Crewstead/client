@@ -107,7 +107,8 @@
   line-height: 1.55;
 }
 /* Code colours (Shiki's CSS-variable theme): quiet hues from the chart palette. */
-.md-code {
+.md-code,
+.walk-code {
   --code-foreground: var(--text);
   --code-background: transparent;
   --code-token-keyword: #b4a9f0;

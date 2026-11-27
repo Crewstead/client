@@ -1,8 +1,10 @@
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, statSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
+import { gitIdentity, gitMetadata } from './git-metadata.ts';
 import { runProcess } from './process.ts';
+import { windowsLaunch, type WindowsSandbox } from './sandbox-windows.ts';
 import { PRIVATE_HOME_ENTRIES, type ProjectToolArguments } from '@crewstead/core/protocol';
 
 /** True when bubblewrap can start a sandbox here; commands never run without one. */
@@ -20,6 +22,9 @@ export interface SandboxOptions {
   hidden?: string[];
   /** The project allows Git: commands may commit (gitMetadata). */
   git?: boolean;
+  /** On Windows: which sandbox commands get (sandbox-windows.ts), and the service's settings folder. */
+  windows?: WindowsSandbox;
+  home?: string;
 }
 
 /** How a sandbox differs for one use. */
@@ -87,68 +92,21 @@ export async function runCommand(
   /** Called with all output so far whenever more arrives. */
   onOutput?: (output: string) => void,
 ) {
+  const seconds = args.timeout_seconds ?? 120;
+  if (options.windows && options.home) {
+    const place = { root, network: !!args.network, git: !!options.git };
+    const env = options.git ? gitIdentity(root) : {};
+    const how = windowsLaunch(options.home, options.windows, { ...place, env }, args.command);
+    return runProcess(how.file, how.argv, { env: how.env, windowsHide: true }, seconds, signal, {
+      onOutput,
+      missing: 'Commands need crewstead-sandbox.exe on this computer; none were run.',
+    });
+  }
   const mode = { git: !!options.git };
   const argv = [...sandboxArguments(root, !!args.network, options.hidden, mode), '--'];
   argv.push('/bin/sh', '-c', args.command);
-  return runProcess(options.bwrap ?? 'bwrap', argv, {}, args.timeout_seconds ?? 120, signal, {
+  return runProcess(options.bwrap ?? 'bwrap', argv, {}, seconds, signal, {
     onOutput,
     missing: 'Commands need bubblewrap (bwrap) on this computer; none were run.',
   });
-}
-
-/** Where Git keeps what it runs or obeys: hooks, and config that can name programs to run. */
-const GIT_RUNS = ['hooks', 'config', 'config.worktree'];
-
-/**
- * Git metadata in the sandbox. Read-only by default. With Git allowed, commits, branches and the
- * index may change, but hooks and config stay as the owner left them, in the repository and in its
- * submodules and worktrees: a hook or `core.fsmonitor` a chat wrote would otherwise run, outside the
- * sandbox, the next time the owner used Git. A `.git` file (a worktree elsewhere) stays read-only.
- */
-export function gitMetadata(root: string, writable: boolean) {
-  const git = join(root, '.git');
-  if (!existsSync(git)) return [];
-  if (!writable || !statSync(git).isDirectory()) return ['--ro-bind', git, git];
-  const args: string[] = [];
-  for (const folder of [
-    git,
-    ...gitFolders(join(git, 'modules'), 3),
-    ...gitFolders(join(git, 'worktrees'), 1),
-  ])
-    for (const entry of GIT_RUNS) {
-      const path = join(folder, entry);
-      // A missing one is held empty, so a chat cannot put one there.
-      if (entry === 'hooks' && !existsSync(path)) mkdirSync(path);
-      args.push('--ro-bind', existsSync(path) ? path : '/dev/null', path);
-    }
-  return args;
-}
-
-/** Git folders (those with a HEAD) under `folder`, up to `depth` levels down. */
-function gitFolders(folder: string, depth: number): string[] {
-  if (depth === 0 || !existsSync(folder)) return [];
-  return readdirSync(folder, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory() && !entry.isSymbolicLink())
-    .flatMap((entry) => {
-      const path = join(folder, entry.name);
-      return existsSync(join(path, 'HEAD')) ? [path] : gitFolders(path, depth - 1);
-    });
-}
-
-/**
- * The owner's Git name and email as Git sees them here, for commits in the sandbox: where they live
- * in a hidden folder (~/.config/git), Git there could not find them.
- */
-function gitIdentity(root: string): Record<string, string> {
-  const read = (key: string) =>
-    spawnSync('git', ['-C', root, 'config', '--get', key], {
-      encoding: 'utf8',
-      timeout: 5_000,
-    }).stdout?.trim() ?? '';
-  const name = read('user.name');
-  const email = read('user.email');
-  return {
-    ...(name ? { GIT_AUTHOR_NAME: name, GIT_COMMITTER_NAME: name } : {}),
-    ...(email ? { GIT_AUTHOR_EMAIL: email, GIT_COMMITTER_EMAIL: email } : {}),
-  };
 }

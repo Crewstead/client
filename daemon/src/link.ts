@@ -144,6 +144,8 @@ async function linkOnce(options: LinkOptions, connected: () => void) {
     claudeCode: await claudeHello(),
     projects: listProjects(options.tools.home),
     sandbox: options.tools.sandbox,
+    // Without its sandbox users, Windows keeps commands from writing outside the project only.
+    sandboxKind: options.tools.windows === 'restricted' ? 'writes' : 'full',
     folders: listFolders(options.tools.home),
     browser: !!options.tools.browser,
     computer: computerHello(options.tools.home, !!options.tools.browser),

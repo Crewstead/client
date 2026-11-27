@@ -38,6 +38,21 @@ const core = createRequire(resolve(root, '../daemon/package.json')).resolve(
   '@crewstead/core/adapter-claude-code',
 );
 copyFileSync(resolve(dirname(core), 'mcp-bridge.mjs'), resolve(out, 'daemon/mcp-bridge.mjs'));
+// On Windows, the command sandbox (../sandbox-windows, Rust), beside the bundle where the service
+// looks for it. Without it there, commands on Windows run only as the owner, each one approved.
+if (process.platform === 'win32') {
+  const crate = resolve(root, '../sandbox-windows');
+  const cargo = spawnSync('cargo', ['build', '--release', '--locked'], {
+    cwd: crate,
+    stdio: 'inherit',
+  });
+  if (cargo.status !== 0)
+    throw new Error('The Windows sandbox (crewstead-sandbox.exe) did not build.');
+  copyFileSync(
+    resolve(crate, 'target/release/crewstead-sandbox.exe'),
+    resolve(out, 'daemon/crewstead-sandbox.exe'),
+  );
+}
 // The interface, built fresh from this checkout's web app (never an older build left in web/build).
 const web = resolve(root, '../web');
 const vite = spawnSync(process.execPath, [resolve(web, 'node_modules/vite/bin/vite.js'), 'build'], {

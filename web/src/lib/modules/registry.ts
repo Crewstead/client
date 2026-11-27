@@ -10,6 +10,7 @@ import { serverBrowserClient } from './server-browser/module.ts';
 import { scheduledTasksClient } from './scheduled-tasks/module.ts';
 import { mcpServersClient } from './mcp-servers/module.ts';
 import { planningClient } from './planning/module.ts';
+import { walkthroughsClient } from './walkthroughs/module.ts';
 import type { ClientModule, ConnectOption, Mention, SlotName } from './types.ts';
 
 /** Composition root for client modules. Removing one means deleting its folder and its line here. */
@@ -25,6 +26,7 @@ const clientModules: ClientModule[] = [
   webSearchClient,
   scheduledTasksClient,
   mcpServersClient,
+  walkthroughsClient,
 ];
 
 /**

@@ -23,8 +23,12 @@ On first start it asks for your hub's address, then you sign in. It then asks on
 use this computer; yes registers it with the hub as you and runs the computer service in the
 background, nothing to copy or install. Closing the window keeps it in the tray, and it starts with the
 computer (the tray menu turns that off, allows folders for projects and switches whole-computer chats).
-Project commands need bubblewrap, so on Windows and macOS chats use Claude Code there but run no
-project commands yet. It does not update itself yet: install a newer release over it.
+Project commands run in a sandbox: bubblewrap on Linux; on Windows `crewstead-sandbox.exe`
+(`sandbox-windows/`, as Codex does it), which keeps them from writing outside the project, and after
+the tray's "Isolate commands in a sandbox…" (Windows asks for an administrator once) runs them as a
+hidden user that cannot read your files and has no network unless a command asks for it. On macOS,
+and wherever no sandbox works, you approve each command yourself. It does not update itself yet:
+install a newer release over it.
 
 ```bash
 pnpm --filter @crewstead/desktop start   # run it from this checkout

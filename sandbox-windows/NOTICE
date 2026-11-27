@@ -1,0 +1,8 @@
+crewstead-sandbox
+Copyright 2026 Crewstead
+
+Parts of this program are adapted from OpenAI Codex (codex-rs/windows-sandbox-rs),
+https://github.com/openai/codex, licensed under the Apache License, Version 2.0, and changed for
+Crewstead: the restricted token (src/token.rs), the access-control entries (src/acl.rs), the private
+desktop (src/desktop.rs) and the way the process is started (src/spawn.rs). Codex's own NOTICE:
+Copyright 2025 OpenAI.

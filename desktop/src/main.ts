@@ -1,4 +1,4 @@
-import { app, dialog, ipcMain, type BrowserWindow, type Rectangle } from 'electron';
+import { app, dialog, ipcMain, Notification, type BrowserWindow, type Rectangle } from 'electron';
 import { join } from 'node:path';
 import { computerSettings } from '../../daemon/src/computer.ts';
 import { machineHome, readConfig } from '../../daemon/src/config.ts';
@@ -290,6 +290,16 @@ void app.whenReady().then(() => {
     useComputer: () => void offerComputer(true),
     wholeComputer: (on) =>
       void computer.command(['computer', on ? 'on' : 'off']).then(refreshTray, refreshTray),
+    // Windows asks for an administrator; the service then restarts to run commands as that user.
+    sandbox: () =>
+      void computer.command(['sandbox', 'setup']).then(
+        () => {
+          computer.restart();
+          new Notification({ title: 'Crewstead', body: 'Commands now run in a sandbox.' }).show();
+        },
+        (error: Error) =>
+          new Notification({ title: 'Crewstead', body: error.message.slice(0, 200) }).show(),
+      ),
     autostart: (on) => {
       writeSettings({ autostart: on });
       setAutostart(on);

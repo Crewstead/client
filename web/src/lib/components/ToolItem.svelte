@@ -1,6 +1,14 @@
 <script lang="ts">
   import '@crewstead/ui/tool-file.css';
-  import { Check, ChevronRight, X, ShieldCheck, ShieldX, ShieldQuestion } from '@lucide/svelte';
+  import {
+    Check,
+    ChevronRight,
+    X,
+    ShieldAlert,
+    ShieldCheck,
+    ShieldX,
+    ShieldQuestion,
+  } from '@lucide/svelte';
   import type { TimelineItem } from '@crewstead/core/protocol';
   import DiffView from './DiffView.svelte';
   import SudoPassword from './SudoPassword.svelte';
@@ -50,7 +58,11 @@
     note
       ? 'Writes one file · can’t run commands'
       : meta.kind === 'command'
-        ? `Runs in the project sandbox · ${network ? 'network on' : 'no network'}`
+        ? item.isolation === 'none'
+          ? `Runs as you, with your full access${item.ownerOnly ? ' · only you can allow it' : ''}`
+          : item.isolation === 'writes'
+            ? 'Can read your files and reach the network'
+            : `Runs in the project sandbox · ${network ? 'network on' : 'no network'}`
         : meta.kind === 'change'
           ? 'Changes files in this project'
           : meta.kind === 'browser'
@@ -135,11 +147,16 @@
           />{/if}<span>{reviewText}</span>
       </p>{/if}
     {#if asking}<div class="approval-footer">
-        <span><ShieldCheck size={14} /> {footer}</span>
+        <span
+          >{#if item.isolation}<ShieldAlert size={14} />{:else}<ShieldCheck size={14} />{/if}
+          {footer}</span
+        >
         <div>
-          <button class="link-button" disabled={busy} onclick={() => answer('approve-all')}
-            >Approve all from now on</button
-          ><button class="button subtle" disabled={busy} onclick={() => answer('reject')}
+          {#if !item.ownerOnly}<button
+              class="link-button"
+              disabled={busy}
+              onclick={() => answer('approve-all')}>Approve all from now on</button
+            >{/if}<button class="button subtle" disabled={busy} onclick={() => answer('reject')}
             ><X size={14} /> Decline</button
           ><button class="button primary small" disabled={busy} onclick={() => answer('approve')}
             ><Check size={14} /> {approveLabel}</button

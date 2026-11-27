@@ -24,6 +24,7 @@ export const toolKinds: Record<string, ToolKind> = {
   web_tabs: 'read',
   web_switch_tab: 'read',
   use_skill: 'read',
+  walkthrough_guide: 'read',
   web_search: 'read',
   web_fetch: 'read',
   chat_search: 'read',

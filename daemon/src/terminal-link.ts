@@ -8,6 +8,8 @@ import {
 import { computerSettings, terminalsOn } from './computer.ts';
 import { openProject } from './projects.ts';
 import { sandboxArguments } from './tools/command.ts';
+import { gitIdentity } from './tools/git-metadata.ts';
+import { windowsLaunch } from './tools/sandbox-windows.ts';
 import { chatFolder, ownerEnv, SHELL } from './tools/computer.ts';
 import type { ToolHost } from './tools/run.ts';
 
@@ -186,6 +188,15 @@ function shellLaunch(
   if (!project.rules.commands) throw new Error('Commands are turned off for this project.');
   // No sandbox here: the owner's own shell in the project (it is the owner typing).
   if (!host.sandbox) return { file: shell, argv: [], cwd: project.path, env: ownerEnv(true) };
+  if (host.windows) {
+    const git = !!project.rules.git;
+    const place = { root: project.path, network: project.rules.network, terminal: true, git };
+    const how = windowsLaunch(host.home, host.windows, {
+      ...place,
+      env: git ? gitIdentity(project.path) : {},
+    });
+    return { file: how.file, argv: how.argv, cwd: project.path, env: how.env };
+  }
   const argv = sandboxArguments(project.path, project.rules.network, host.hidden, {
     terminal: true,
     git: !!project.rules.git,

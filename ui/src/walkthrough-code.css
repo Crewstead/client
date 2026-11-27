@@ -1,0 +1,148 @@
+/* A walkthrough's code panel: the file tabs, the lines, and the notes under them. */
+.walk-panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.walk-tabs {
+  display: flex;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--line);
+}
+.walk-tab {
+  display: flex;
+  flex: none;
+  align-items: baseline;
+  gap: 8px;
+  padding: 8px 14px;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+}
+.walk-tab b {
+  font: 500 13px var(--walk-mono);
+}
+.walk-tab small {
+  font-size: var(--text-xs);
+}
+.walk-tab.on {
+  border-bottom-color: var(--walk-mark);
+  color: var(--text);
+}
+/* The diagram has no room beside the code on a phone; this opens it. */
+.walk-tab.scheme {
+  margin-left: auto;
+  color: var(--walk-mark);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+.walk-code {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  container-type: inline-size;
+  font: 13px/1.65 var(--walk-mono);
+  font-variant-ligatures: none;
+}
+.walk-lines {
+  width: max-content;
+  min-width: 100%;
+  padding-block: 10px 40px;
+}
+.walk-lines .ln {
+  display: flex;
+  min-height: 1.65em;
+  padding-right: 16px;
+  white-space: pre;
+}
+.walk-lines .no {
+  flex: none;
+  width: 5.5ch;
+  padding: 0 1.5ch 0 1ch;
+  color: var(--faint);
+  text-align: right;
+  user-select: none;
+}
+/* Whatever changes colour between steps does it gradually; rows open and close from the script. */
+.walk-lines .ln,
+.walk-lines .ln span span {
+  transition:
+    background-color 0.24s ease,
+    box-shadow 0.24s ease,
+    color 0.24s ease;
+}
+.walk-lines .ln.new {
+  background: color-mix(in srgb, var(--success) 12%, transparent);
+  box-shadow: inset 3px 0 var(--success);
+}
+.walk-lines .ln.gone {
+  background: color-mix(in srgb, var(--danger) 13%, transparent);
+  color: var(--danger);
+  text-decoration: line-through;
+}
+/* A replaced line is one colour, whatever its parts were. */
+.walk-lines .ln.gone span span {
+  color: inherit !important;
+}
+/* A note stays in view while the code under it scrolls sideways. */
+.walk-bubble {
+  position: sticky;
+  left: 10px;
+  width: calc(100cqw - 20px);
+  max-width: 64ch;
+  margin: 9px 0 12px 10px;
+  padding: 9px 12px;
+  border: 1px solid var(--walk-mark-line);
+  border-radius: var(--radius);
+  background: var(--walk-mark-soft);
+  color: var(--text);
+  font: var(--text-base) / 1.5 inherit;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  white-space: normal;
+}
+.walk-bubble::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 22px;
+  width: 10px;
+  height: 10px;
+  border: solid var(--walk-mark-line);
+  border-width: 1px 0 0 1px;
+  background: var(--walk-mark-soft);
+  rotate: 45deg;
+}
+.walk-bubble code {
+  background: var(--surface);
+}
+/* On a phone the step's lead sits in the code, above its new lines. */
+.walk-lead-in {
+  position: sticky;
+  left: 0;
+  width: 100cqw;
+  margin-block: 2px 4px;
+  padding: 9px 12px;
+  border-block: 1px solid var(--line);
+  background: var(--surface-raised);
+  color: var(--text);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: var(--text-base);
+  line-height: 1.5;
+  white-space: normal;
+}
+@media (min-width: 900px) {
+  .walk-lead-in,
+  .walk-tab.scheme {
+    display: none;
+  }
+}
+@media (max-width: 420px) {
+  .walk-tab small {
+    display: none;
+  }
+}

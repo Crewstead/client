@@ -60,6 +60,8 @@ const shown: Record<string, { title: string; icon: typeof Wrench }> = {
   web_tabs: { title: 'Server browser tabs', icon: Rows3 },
   web_switch_tab: { title: 'Switch tab (server)', icon: ArrowRightLeft },
   use_skill: { title: 'Use skill', icon: Sparkles },
+  walkthrough_guide: { title: 'Read the walkthrough guide', icon: BookOpenText },
+  walkthrough_show: { title: 'Walkthrough', icon: BookOpenText },
   web_search: { title: 'Web search', icon: Search },
   web_fetch: { title: 'Read page', icon: BookOpenText },
   chat_search: { title: 'Search this chat', icon: TextSearch },

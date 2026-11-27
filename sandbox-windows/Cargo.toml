@@ -1,0 +1,36 @@
+[package]
+name = "crewstead-sandbox"
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+description = "Runs one command for Crewstead's computer service in a Windows sandbox."
+publish = false
+
+[[bin]]
+name = "crewstead-sandbox"
+path = "src/main.rs"
+
+[target.'cfg(windows)'.dependencies.windows-sys]
+version = "0.61.2"
+features = [
+  "Win32_Foundation",
+  "Win32_Graphics_Gdi",
+  "Win32_NetworkManagement_NetManagement",
+  "Win32_Security_Cryptography",
+  "Win32_System_Environment",
+  "Win32_System_Pipes",
+  "Win32_Security",
+  "Win32_Security_Authorization",
+  "Win32_Storage_FileSystem",
+  "Win32_System_Console",
+  "Win32_System_Diagnostics_Debug",
+  "Win32_System_JobObjects",
+  "Win32_System_StationsAndDesktops",
+  "Win32_System_Threading",
+]
+
+[profile.release]
+opt-level = "s"
+lto = true
+strip = true
+panic = "abort"

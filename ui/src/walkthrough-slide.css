@@ -1,0 +1,133 @@
+/* A walkthrough's slides and step texts: headings, prose, tables, terms, the first screen. */
+.walk-eyebrow {
+  margin: 0 0 4px;
+  color: var(--walk-mark);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.walk-eyebrow span {
+  color: var(--muted);
+  font: 500 12px var(--walk-mono);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.walk-viewer h1,
+.walk-viewer h2 {
+  margin: 0 0 8px;
+  font-weight: 650;
+  line-height: 1.15;
+  text-wrap: balance;
+}
+.walk-viewer h1 {
+  font-size: 28px;
+}
+.walk-viewer h2 {
+  font-size: 20px;
+}
+.walk-viewer h3 {
+  margin: 0 0 6px;
+  font-size: var(--text-reading);
+  font-weight: 600;
+}
+.walk-lead {
+  margin: 0;
+  color: var(--muted);
+}
+.walk-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 16px;
+  line-height: 1.6;
+}
+.walk-body > :not(.walk-cols) {
+  max-width: 68ch;
+}
+.walk-body p {
+  margin: 0;
+}
+.walk-body ul,
+.walk-body ol {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding-left: 1.3em;
+}
+.walk-cols {
+  display: grid;
+  align-items: start;
+  gap: 20px 32px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+.walk-wide {
+  overflow-x: auto;
+}
+.walk-wide table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-reading);
+}
+.walk-wide th,
+.walk-wide td {
+  padding: 7px 10px 7px 0;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+.walk-wide th {
+  color: var(--muted);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.walk-wide td:first-child {
+  white-space: nowrap;
+}
+/* A word the reader can open for a short explanation. */
+.walk-term {
+  display: inline;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  cursor: help;
+  text-decoration: underline dotted var(--walk-mark) 1.5px;
+  text-underline-offset: 3px;
+}
+.walk-term:hover {
+  color: var(--walk-mark);
+}
+.walk-known {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.walk-known legend {
+  padding: 0 6px;
+  font-size: var(--text-base);
+  font-weight: 600;
+}
+.walk-check {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: var(--text-reading);
+  cursor: pointer;
+}
+.walk-check input {
+  flex: none;
+  translate: 0 2px;
+}
+.walk-hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
+}

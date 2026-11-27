@@ -101,8 +101,8 @@ jobs:
           echo "systems=$systems" >> "$GITHUB_OUTPUT"
 
   # The computer service's Windows-specific parts (the Claude Code tool bridge's named pipe, which
-  # folders may be projects), on a real Windows machine. A release tests them in its Windows build
-  # instead, so it does not pay for a second Windows machine.
+  # folders may be projects, the command sandbox), on a real Windows machine. A release tests them
+  # in its Windows build instead, so it does not pay for a second Windows machine.
   windows:
     needs: tagged
     if: >-
@@ -126,7 +126,11 @@ jobs:
           node-version: 24.16.0
       - run: corepack enable
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec vitest run tests/unit/tool-bridge.test.ts
+      # The command sandbox, which the sandbox test runs for real (users and firewall rules included:
+      # GitHub's Windows machines run as an administrator).
+      - run: cargo build --release --locked
+        working-directory: sandbox-windows
+      - run: pnpm exec vitest run tests/unit/tool-bridge.test.ts tests/unit/sandbox-windows.test.ts
 
   # A version tag also builds the desktop app on each system and adds its installers to the release.
   desktop:
@@ -161,7 +165,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Windows-specific parts
         if: runner.os == 'Windows'
-        run: pnpm exec vitest run tests/unit/tool-bridge.test.ts
+        run: |
+          cargo build --release --locked --manifest-path sandbox-windows/Cargo.toml
+          pnpm exec vitest run tests/unit/tool-bridge.test.ts tests/unit/sandbox-windows.test.ts
       - name: Version from the tag
         shell: bash
         working-directory: desktop

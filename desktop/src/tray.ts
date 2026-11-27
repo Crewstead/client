@@ -12,6 +12,8 @@ export interface TrayActions {
   show(): void;
   useComputer(): void;
   wholeComputer(on: boolean): void;
+  /** Windows: run commands as a hidden sandbox user (asks for an administrator once). */
+  sandbox(): void;
   autostart(on: boolean): void;
   checkUpdates(): void;
   changeHub(): void;
@@ -40,6 +42,9 @@ export function createTray(icon: string, actions: TrayActions) {
               checked: whole,
               click: (item) => actions.wholeComputer(item.checked),
             },
+            ...(process.platform === 'win32'
+              ? [{ label: 'Isolate commands in a sandbox…', click: actions.sandbox }]
+              : []),
           ];
     tray.setContextMenu(
       Menu.buildFromTemplate([
