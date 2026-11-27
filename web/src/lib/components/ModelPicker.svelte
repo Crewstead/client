@@ -30,10 +30,12 @@
   let trigger = $state<HTMLButtonElement>();
 </script>
 
-{#if (models.length > 1 || effort) && !disabled}
+<!-- While a message sends it stays as it is, only not clickable, so nothing in the box jumps. -->
+{#if models.length > 1 || effort}
   <button
     type="button"
     bind:this={trigger}
+    {disabled}
     class="place-trigger model-picker"
     aria-haspopup="dialog"
     aria-label="Choose model"

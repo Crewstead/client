@@ -90,8 +90,13 @@
   font: inherit;
   cursor: pointer;
 }
-.place-trigger:hover {
+.place-trigger:hover:enabled {
   color: var(--text);
+}
+/* While a message sends: looks the same, only does nothing. */
+.place-trigger:disabled {
+  opacity: 1;
+  cursor: default;
 }
 .place-trigger.offline {
   color: var(--amber);

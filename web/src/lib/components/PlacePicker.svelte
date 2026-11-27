@@ -24,26 +24,24 @@
   let trigger = $state<HTMLButtonElement>();
 </script>
 
-<!-- Where the chat works: the cloud (the hub only), or a project on one of the owner's computers. -->
-{#if disabled}
-  <span class="model-label">{label}</span>
-{:else}
-  <button
-    type="button"
-    bind:this={trigger}
-    class="place-trigger project-picker"
-    class:offline={value && !chosen}
-    aria-haspopup="dialog"
-    aria-label={`Where: ${label}`}
-    title={`Where: ${label}`}
-    onclick={() => (open = true)}
-    >{#if !value}<Cloud size={13} />{:else if !chosen}<FolderX
-        size={13}
-      />{:else if chosen.kind === 'computer'}<Monitor size={13} />{:else}<Folder
-        size={13}
-      />{/if}<span class="picker-label">{label}</span><ChevronDown size={12} /></button
-  >
-{/if}
+<!-- Where the chat works: the cloud (the hub only), or a project on one of the owner's computers.
+     While a message sends it stays as it is, only not clickable, so nothing in the box jumps. -->
+<button
+  type="button"
+  bind:this={trigger}
+  {disabled}
+  class="place-trigger project-picker"
+  class:offline={value && !chosen}
+  aria-haspopup="dialog"
+  aria-label={`Where: ${label}`}
+  title={`Where: ${label}`}
+  onclick={() => (open = true)}
+  >{#if !value}<Cloud size={13} />{:else if !chosen}<FolderX
+      size={13}
+    />{:else if chosen.kind === 'computer'}<Monitor size={13} />{:else}<Folder
+      size={13}
+    />{/if}<span class="picker-label">{label}</span><ChevronDown size={12} /></button
+>
 {#if open}<PlaceDialog
     {projects}
     {value}
