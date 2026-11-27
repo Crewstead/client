@@ -25,6 +25,10 @@ export interface SandboxOptions {
   /** On Windows: which sandbox commands get (sandbox-windows.ts), and the service's settings folder. */
   windows?: WindowsSandbox;
   home?: string;
+  /** A whole-computer chat's command: `hidden` alone says what to hide (computerHidden). */
+  computer?: boolean;
+  /** Where the command starts, when not in the writable folder (a whole-computer chat's home). */
+  start?: string;
 }
 
 /** How a sandbox differs for one use. */
@@ -37,18 +41,25 @@ export interface SandboxMode {
   terminal?: boolean;
   /** Git metadata is writable, apart from what runs programs (gitMetadata). */
   git?: boolean;
+  /**
+   * A whole-computer chat: only `hidden` is hidden (its private places), not all of a project's, so
+   * settings such as ~/.config/fish stay readable.
+   */
+  computer?: boolean;
+  /** Where the command starts, when not in the writable folder. */
+  start?: string;
 }
 
 /**
  * The bubblewrap arguments: the whole system read-only, the project folder writable, its Git metadata
- * read-only unless the project allows Git, private home folders (sign-ins, keys) replaced by empty ones, private /tmp and /run, its
- * own process space, and no network unless asked.
+ * read-only unless the project allows Git, private home folders (sign-ins, keys) replaced by empty
+ * ones, private /tmp and /run, its own process space, and no network unless asked.
  */
 export function sandboxArguments(
   root: string,
   network: boolean,
   hidden: string[] = [],
-  { terminal = false, git = false }: SandboxMode = {},
+  { terminal = false, git = false, computer = false, start }: SandboxMode = {},
 ) {
   const args = ['--ro-bind', '/', '/', '--dev', '/dev', '--proc', '/proc', '--tmpfs', '/tmp'];
   // /run holds sockets (session and system D-Bus, Docker, systemd) that could start programs outside
@@ -56,7 +67,8 @@ export function sandboxArguments(
   args.push('--tmpfs', '/run');
   if (network && existsSync('/run/systemd/resolve'))
     args.push('--ro-bind', '/run/systemd/resolve', '/run/systemd/resolve');
-  for (const path of [...PRIVATE_HOME_ENTRIES.map((entry) => join(homedir(), entry)), ...hidden]) {
+  const private_ = computer ? [] : PRIVATE_HOME_ENTRIES.map((entry) => join(homedir(), entry));
+  for (const path of [...private_, ...hidden]) {
     if (!existsSync(path)) continue;
     if (statSync(path).isDirectory()) args.push('--tmpfs', path);
     else args.push('--ro-bind', '/dev/null', path);
@@ -64,7 +76,7 @@ export function sandboxArguments(
   args.push('--bind', root, root, ...gitMetadata(root, git));
   args.push('--unshare-pid', '--unshare-ipc', '--unshare-uts', '--unshare-cgroup-try');
   if (!network) args.push('--unshare-net');
-  args.push('--die-with-parent', ...(terminal ? [] : ['--new-session']), '--chdir', root);
+  args.push('--die-with-parent', ...(terminal ? [] : ['--new-session']), '--chdir', start ?? root);
   args.push('--clearenv');
   const env: Record<string, string> = {
     PATH: process.env.PATH ?? '/usr/local/bin:/usr/bin:/bin',
@@ -102,7 +114,11 @@ export async function runCommand(
       missing: 'Commands need crewstead-sandbox.exe on this computer; none were run.',
     });
   }
-  const mode = { git: !!options.git };
+  const mode = {
+    git: !!options.git,
+    computer: !!options.computer,
+    ...(options.start ? { start: options.start } : {}),
+  };
   const argv = [...sandboxArguments(root, !!args.network, options.hidden, mode), '--'];
   argv.push('/bin/sh', '-c', args.command);
   return runProcess(options.bwrap ?? 'bwrap', argv, {}, seconds, signal, {

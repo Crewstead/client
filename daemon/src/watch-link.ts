@@ -1,3 +1,4 @@
+import { homedir } from 'node:os';
 import { spawn, type ChildProcess } from 'node:child_process';
 import { createInterface } from 'node:readline';
 import {
@@ -63,11 +64,12 @@ function launch(host: ToolHost, command: WatchCommand, terminal: boolean) {
     const settings = computerSettings(host.home);
     if (!settings.enabled || !settings.commands)
       throw new Error('Commands are turned off for whole-computer chats.');
+    // Like a terminal, in the home folder; the sandbox writes only the chat's scratch folder.
     const cwd = chatFolder(host, command.session);
     if (command.approval)
       return {
         ...ownerShell(command.command),
-        cwd,
+        cwd: homedir(),
         env: ownerEnv(terminal),
         // Windows has no process groups (and a detached program there opens a console window).
         group: process.platform !== 'win32',
@@ -75,7 +77,14 @@ function launch(host: ToolHost, command: WatchCommand, terminal: boolean) {
     if (!host.sandbox) throw new Error('This command needs the owner’s approval.');
     if (host.windows)
       return windowsWatch(host, { root: cwd, network: false, terminal }, command.command);
-    const argv = [...sandboxArguments(cwd, false, computerHidden(host), { terminal }), '--'];
+    const argv = [
+      ...sandboxArguments(cwd, false, computerHidden(host), {
+        terminal,
+        computer: true,
+        start: homedir(),
+      }),
+      '--',
+    ];
     return { file: host.bwrap ?? 'bwrap', argv: [...argv, '/bin/sh', '-c', command.command] };
   }
   const project = openProject(host.home, command.projectId);

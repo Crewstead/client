@@ -107,9 +107,10 @@ const realHome = (home: string) => {
 };
 
 /**
- * A command in the chat's own work folder. Approved ones run as the owner, with the owner's access and
- * network; others (read-only commands the hub let through without asking) run in the sandbox, where
- * everything but the work folder is read-only, private places are hidden and the network is off.
+ * A whole-computer chat's command, from the home folder. Approved ones run as the owner, with the
+ * owner's access and network; others (read-only commands the hub let through without asking) run in
+ * the sandbox, where everything but the chat's scratch folder is read-only, private places are hidden
+ * and the network is off.
  */
 async function computerCommand(
   host: ToolHost,
@@ -122,13 +123,16 @@ async function computerCommand(
   }: { onOutput?: ((output: string) => void) | undefined; askPassword?: AskPassword | undefined },
 ) {
   if (command.preview) return { output: '' };
-  const cwd = chatFolder(host, command.session);
+  // Like a terminal, commands start in the owner's home folder. The sandbox writes only its scratch
+  // folder (in this service's settings), so it is never where the owner's things end up.
   if (!command.approval) {
     if (!host.sandbox) throw new Error('This command needs the owner’s approval.');
+    const scratch = chatFolder(host, command.session);
     const hidden = computerHidden(host);
-    return runCommand(cwd, { ...args, network: false }, signal, { ...host, hidden }, onOutput);
+    const sandbox = { ...host, hidden, computer: true, start: homedir() };
+    return runCommand(scratch, { ...args, network: false }, signal, sandbox, onOutput);
   }
-  return ownerCommand(host, cwd, args, signal, { onOutput, askPassword });
+  return ownerCommand(host, homedir(), args, signal, { onOutput, askPassword });
 }
 
 /**
@@ -168,7 +172,10 @@ export async function ownerCommand(
   }
 }
 
-/** A whole-computer chat's own work folder, where its commands start. */
+/**
+ * A whole-computer chat's scratch folder: the one folder its sandboxed commands may write (they start
+ * in the home folder). Windows' sandbox user cannot read the home folder, so they start here there.
+ */
 export function chatFolder(host: ToolHost, session: string | undefined) {
   if (!/^[0-9a-f-]{36}$/.test(session ?? ''))
     throw new Error('Commands need the chat they belong to.');

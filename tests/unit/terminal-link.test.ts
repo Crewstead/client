@@ -1,5 +1,5 @@
 import { mkdtemp, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { homedir, tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { MachineTerminalEvents, MachineWatchEvents } from '@crewstead/core/protocol';
@@ -87,7 +87,7 @@ describe.skipIf(!pty || !sandbox)('terminals on a computer', () => {
     await vi.waitFor(() => expect(endOf()).toBeDefined(), { timeout: 10_000 });
   });
 
-  it('opens a whole-computer shell only when that is on, as the owner in the chat’s folder', async () => {
+  it('opens a whole-computer shell only when that is on, as the owner in the home folder', async () => {
     changeTerminals(home, true, 'computer');
     const terminals = link();
     const session = '00000000-0000-4000-8000-000000000001';
@@ -113,12 +113,9 @@ describe.skipIf(!pty || !sandbox)('terminals on a computer', () => {
     vi.stubEnv('SHELL', '/bin/sh');
     whole();
     terminals.handle({ type: 'terminal_input', terminalId: 'tb1b2c3', data: 'echo where=$PWD\r' });
-    await vi.waitFor(
-      () => expect(printed()).toContain(`where=${join(home, 'work', 'chats', session)}`),
-      {
-        timeout: 10_000,
-      },
-    );
+    await vi.waitFor(() => expect(printed()).toContain(`where=${homedir()}`), {
+      timeout: 10_000,
+    });
     terminals.stop();
     vi.unstubAllEnvs();
   });

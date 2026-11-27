@@ -10,7 +10,7 @@ import { openProject } from './projects.ts';
 import { sandboxArguments } from './tools/command.ts';
 import { gitIdentity } from './tools/git-metadata.ts';
 import { windowsLaunch } from './tools/sandbox-windows.ts';
-import { chatFolder, ownerEnv, SHELL } from './tools/computer.ts';
+import { ownerEnv, SHELL } from './tools/computer.ts';
 import type { ToolHost } from './tools/run.ts';
 
 type Pty = import('node-pty').IPty;
@@ -181,8 +181,7 @@ function shellLaunch(
   if (command.projectId === COMPUTER_PLACE) {
     if (!computerSettings(host.home).enabled)
       throw new Error('Whole-computer chats are turned off on this computer.');
-    const cwd = command.session ? chatFolder(host, command.session) : homedir();
-    return { file: shell, argv: [], cwd, env: ownerEnv(true) };
+    return { file: shell, argv: [], cwd: homedir(), env: ownerEnv(true) };
   }
   const project = openProject(host.home, command.projectId);
   if (!project.rules.commands) throw new Error('Commands are turned off for this project.');

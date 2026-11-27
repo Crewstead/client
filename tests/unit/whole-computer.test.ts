@@ -32,7 +32,8 @@ describe('paths and private places', () => {
   });
   it('spots private places named in a command, not names that only look alike', () => {
     expect(mentionsProtected('cat ~/.ssh/id_rsa', '/home/a')).toBe(true);
-    expect(mentionsProtected('ls $HOME/.config', '/home/a')).toBe(true);
+    expect(mentionsProtected('ls $HOME/.config/gh', '/home/a')).toBe(true);
+    expect(mentionsProtected('ls $HOME/.config/fish', '/home/a')).toBe(false);
     expect(mentionsProtected('cat /home/a/.aws/credentials', '/home/a')).toBe(true);
     expect(mentionsProtected('npx vite build --config vite.config.ts', '/home/a')).toBe(false);
   });
@@ -110,7 +111,8 @@ describe('the computer enforces its own rules', () => {
       expect(existsSync(target)).toBe(false);
       const approved = await run('run_command', { command: `touch ${target} && pwd` }, 'auto');
       expect(approved.output).toContain('Exit code: 0');
-      expect(approved.output).toContain(join(machine, 'work', 'chats'));
+      // Like a terminal, from the home folder, not the service's hidden settings.
+      expect(approved.output.split('\n')).toContain(home);
       expect(existsSync(target)).toBe(true);
     },
   );
